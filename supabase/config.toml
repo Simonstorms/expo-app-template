@@ -1,0 +1,6 @@
+project_id = "quit-snus-template"
+
+[auth]
+enable_anonymous_sign_ins = true
+site_url = "quitsnusonboarding://"
+additional_redirect_urls = ["quitsnusonboarding://"]

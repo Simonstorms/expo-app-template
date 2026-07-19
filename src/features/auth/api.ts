@@ -1,0 +1,93 @@
+import type { Session } from '@supabase/supabase-js';
+import * as AppleAuthentication from 'expo-apple-authentication';
+import * as Crypto from 'expo-crypto';
+import * as Linking from 'expo-linking';
+import * as WebBrowser from 'expo-web-browser';
+
+import { hasSupabase } from '@/constants/config';
+import { supabase } from '@/lib/supabase';
+
+WebBrowser.maybeCompleteAuthSession();
+
+export async function signInWithApple(): Promise<void> {
+  if (!hasSupabase) return;
+  const rawNonce = Crypto.randomUUID();
+  const hashedNonce = await Crypto.digestStringAsync(
+    Crypto.CryptoDigestAlgorithm.SHA256,
+    rawNonce,
+  );
+  const credential = await AppleAuthentication.signInAsync({
+    requestedScopes: [
+      AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+      AppleAuthentication.AppleAuthenticationScope.EMAIL,
+    ],
+    nonce: hashedNonce,
+  });
+  if (!credential.identityToken) {
+    throw new Error('Apple sign-in did not return an identity token.');
+  }
+  const { error } = await supabase.auth.signInWithIdToken({
+    provider: 'apple',
+    token: credential.identityToken,
+    nonce: rawNonce,
+  });
+  if (error) throw error;
+}
+
+async function createSessionFromUrl(url: string): Promise<Session | null> {
+  const { queryParams } = Linking.parse(url);
+  const code = typeof queryParams?.code === 'string' ? queryParams.code : null;
+  if (code) {
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+    if (error) throw error;
+    return data.session;
+  }
+  const accessToken =
+    typeof queryParams?.access_token === 'string' ? queryParams.access_token : null;
+  const refreshToken =
+    typeof queryParams?.refresh_token === 'string' ? queryParams.refresh_token : null;
+  if (accessToken && refreshToken) {
+    const { data, error } = await supabase.auth.setSession({
+      access_token: accessToken,
+      refresh_token: refreshToken,
+    });
+    if (error) throw error;
+    return data.session;
+  }
+  return null;
+}
+
+export async function signInWithGoogle(): Promise<void> {
+  if (!hasSupabase) return;
+  const redirectTo = Linking.createURL('/');
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo, skipBrowserRedirect: true },
+  });
+  if (error) throw error;
+  if (!data.url) return;
+  const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
+  if (result.type === 'success') {
+    await createSessionFromUrl(result.url);
+  }
+}
+
+export async function signInWithEmail(email: string): Promise<void> {
+  if (!hasSupabase) return;
+  const { error } = await supabase.auth.signInWithOtp({
+    email,
+    options: { emailRedirectTo: Linking.createURL('/') },
+  });
+  if (error) throw error;
+}
+
+export async function signInAsGuest(): Promise<void> {
+  if (!hasSupabase) return;
+  const { error } = await supabase.auth.signInAnonymously();
+  if (error) throw error;
+}
+
+export async function signOut(): Promise<void> {
+  if (!hasSupabase) return;
+  await supabase.auth.signOut();
+}
