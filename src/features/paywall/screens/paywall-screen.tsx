@@ -6,6 +6,7 @@ import Svg, { Circle } from 'react-native-svg';
 import { GlassSurface } from '@/components/ui/glass';
 import { Icon } from '@/components/ui/icon';
 import { OnboardingScaffold } from '@/features/onboarding/components/onboarding-scaffold';
+import { content } from '@/constants/content';
 import { colors, layout, withAlpha } from '@/constants/theme';
 import { useFlow } from '@/features/onboarding/hooks/use-flow';
 import { restorePurchases } from '../api';
@@ -30,7 +31,7 @@ export default function PaywallScreen() {
     <View>
       <View style={styles.paymentRow}>
         <Icon name="checkmark" size={17} weight="heavy" color={colors.ink} />
-        <Text style={styles.paymentText}>No Payment Due Now</Text>
+        <Text style={styles.paymentText}>{content.paywall.noPayment}</Text>
       </View>
       <View style={styles.continueWrap}>
         <Pressable onPress={flow.finish} style={({ pressed }) => ({ opacity: pressed ? 0.92 : 1 })}>
@@ -40,23 +41,23 @@ export default function PaywallScreen() {
             tintColor={colors.ink}
             fallbackColor={colors.ink}
             isInteractive>
-            <Text style={styles.continueLabel}>Continue</Text>
+            <Text style={styles.continueLabel}>{content.paywall.continue}</Text>
           </GlassSurface>
         </Pressable>
       </View>
-      <Text style={styles.priceCaption}>Just 29,99 € per year (2,49 €/mo)</Text>
+      <Text style={styles.priceCaption}>{content.paywall.priceCaption}</Text>
     </View>
   );
 
   return (
-    <OnboardingScaffold step="paywall" ctaTitle={null} footer={footer}>
+    <OnboardingScaffold flow={flow} ctaTitle={null} footer={footer}>
       <View style={styles.content}>
         <View style={styles.restoreRow}>
           <Pressable
             onPress={() => {
               void restorePurchases();
             }}>
-            <Text style={styles.restoreText}>Restore</Text>
+            <Text style={styles.restoreText}>{content.paywall.restore}</Text>
           </Pressable>
         </View>
         <Text
@@ -64,7 +65,7 @@ export default function PaywallScreen() {
           numberOfLines={2}
           adjustsFontSizeToFit
           minimumFontScale={0.9}>
-          Unlock Quit Snus to reach your goals faster.
+          {content.paywall.headline}
         </Text>
         <View style={styles.mockWrap}>
           <PhoneMockup />
@@ -102,11 +103,11 @@ function Dashboard() {
       />
       <View style={styles.dashHeader}>
         <Icon name="leaf.fill" size={16} weight="bold" color="#1F1B23" />
-        <Text style={styles.brandText}>Quit Snus</Text>
+        <Text style={styles.brandText}>{content.paywall.mock.wordmark}</Text>
       </View>
       <View style={styles.tabs}>
-        <Text style={styles.tabActive}>Today</Text>
-        <Text style={styles.tabInactive}>Yesterday</Text>
+        <Text style={styles.tabActive}>{content.paywall.mock.tabToday}</Text>
+        <Text style={styles.tabInactive}>{content.paywall.mock.tabYesterday}</Text>
       </View>
       <View style={styles.tabDot} />
       <GlassSurface style={styles.bigCard} radius={11} tintColor={withAlpha(colors.white, 0.85)}>
@@ -122,34 +123,34 @@ function Dashboard() {
           </MockRing>
         </View>
         <View style={styles.bigText}>
-          <Text style={styles.bigValue}>12</Text>
-          <Text style={styles.bigLabel}>Days snus-free</Text>
+          <Text style={styles.bigValue}>{content.paywall.mock.daysValue}</Text>
+          <Text style={styles.bigLabel}>{content.paywall.mock.daysLabel}</Text>
         </View>
       </GlassSurface>
       <View style={styles.miniRow}>
         <MiniStatCard
-          value="4"
-          label="Pouches left"
+          value={content.paywall.mock.unitsValue}
+          label={content.paywall.mock.unitsLabel}
           tint={mock.red}
           sweep={95 / 360}
           icon={<View style={styles.pouchIcon} />}
         />
         <MiniStatCard
-          value="45,00 €"
-          label="Saved"
+          value={content.paywall.mock.savedValue}
+          label={content.paywall.mock.savedLabel}
           tint={mock.orange}
           sweep={80 / 360}
-          icon={<Icon name="eurosign" size={9} weight="bold" color={mock.orange} />}
+          icon={<Icon name={content.paywall.mock.savedIcon} size={9} weight="bold" color={mock.orange} />}
         />
         <MiniStatCard
-          value="92%"
-          label="Health"
+          value={content.paywall.mock.healthValue}
+          label={content.paywall.mock.healthLabel}
           tint={mock.blue}
           sweep={115 / 360}
           icon={<Icon name="heart.fill" size={9} color={mock.blue} />}
         />
       </View>
-      <Text style={styles.recentText}>Recent check-ins</Text>
+      <Text style={styles.recentText}>{content.paywall.mock.recent}</Text>
       <GlassSurface style={styles.checkInRow} radius={10} tintColor={withAlpha(mock.rowFill, 0.9)}>
         <View style={styles.checkImage}>
           <LinearGradient
@@ -163,23 +164,23 @@ function Dashboard() {
         <View style={styles.checkBody}>
           <View style={styles.checkTitleRow}>
             <Text style={styles.checkTitle} numberOfLines={1}>
-              Craving resisted at work
+              {content.paywall.mock.checkinTitle}
             </Text>
             <View style={styles.flexFill} />
             <View style={styles.timePill}>
-              <Text style={styles.timeText}>14:10</Text>
+              <Text style={styles.timeText}>{content.paywall.mock.checkinTime}</Text>
             </View>
           </View>
           <View style={styles.gap8} />
           <View style={styles.checkStatRow}>
             <Icon name="flame.fill" size={9} color={colors.ink} />
-            <Text style={styles.checkStatText}>3 cravings resisted</Text>
+            <Text style={styles.checkStatText}>{content.paywall.mock.checkinStat}</Text>
           </View>
           <View style={styles.gap9} />
           <View style={styles.checkMiniRow}>
-            <MiniInline symbol="flame.fill" tint={mock.red} text="3 urges" />
-            <MiniInline symbol="clock.fill" tint={mock.orange} text="45 min" />
-            <MiniInline symbol="drop.fill" tint={mock.blue} text="0 used" />
+            <MiniInline symbol="flame.fill" tint={mock.red} text={content.paywall.mock.miniUrges} />
+            <MiniInline symbol="clock.fill" tint={mock.orange} text={content.paywall.mock.miniTime} />
+            <MiniInline symbol="drop.fill" tint={mock.blue} text={content.paywall.mock.miniUsed} />
           </View>
         </View>
       </GlassSurface>

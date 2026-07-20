@@ -12,10 +12,12 @@ import Animated, {
 import { GlassSurface } from '@/components/ui/glass';
 import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { colors, withAlpha } from '@/constants/theme';
+import { content } from '@/constants/content';
 import { useFlow } from '../hooks/use-flow';
 
 export default function NotificationsScreen() {
-  const { advance } = useFlow('notifications');
+  const flow = useFlow('notifications');
+  const { advance } = flow;
   const fingerRaised = useSharedValue(0);
 
   useEffect(() => {
@@ -38,10 +40,10 @@ export default function NotificationsScreen() {
   };
 
   return (
-    <OnboardingScaffold step="notifications" ctaTitle={null}>
+    <OnboardingScaffold flow={flow} ctaTitle={null}>
       <View style={styles.container}>
         <View style={styles.spacer} />
-        <Text style={styles.title}>{'Reach your goals with\nnotifications'}</Text>
+        <Text style={styles.title}>{content.notifications.title}</Text>
         <AlertCard onDismiss={advance} onAllow={requestPermission} />
         <Animated.Text style={[styles.finger, fingerStyle]}>{'👆'}</Animated.Text>
         <View style={styles.spacer} />
@@ -54,17 +56,17 @@ function AlertCard({ onDismiss, onAllow }: { onDismiss: () => void; onAllow: () 
   return (
     <GlassSurface radius={14} tintColor={withAlpha('#C6C6C6', 0.85)} isInteractive style={styles.card}>
       <View style={styles.promptTextWrap}>
-        <Text style={styles.promptText}>{'Quit Snus would like to send you\nNotifications'}</Text>
+        <Text style={styles.promptText}>{content.notifications.promptText}</Text>
       </View>
       <View style={styles.buttonsRow}>
         <View style={styles.dismissColumn}>
           <View style={styles.divider} />
           <Pressable style={styles.dismissButton} onPress={onDismiss}>
-            <Text style={styles.dismissLabel}>{'Don’t Allow'}</Text>
+            <Text style={styles.dismissLabel}>{content.notifications.dismiss}</Text>
           </Pressable>
         </View>
         <Pressable style={styles.allowButton} onPress={onAllow}>
-          <Text style={styles.allowLabel}>Allow</Text>
+          <Text style={styles.allowLabel}>{content.notifications.allow}</Text>
         </Pressable>
       </View>
     </GlassSurface>

@@ -11,6 +11,7 @@ import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { TitleBlock } from '@/components/ui/title-block';
 import { useOnboarding } from '../store';
 import { colors, layout, withAlpha } from '@/constants/theme';
+import { content } from '@/constants/content';
 import { useFlow } from '../hooks/use-flow';
 
 const HERO_WIDTH = 280;
@@ -73,7 +74,8 @@ function HeroBackground() {
 
 export default function SavingsPreviewScreen() {
   const set = useOnboarding((state) => state.set);
-  const { advance } = useFlow('savings-preview');
+  const flow = useFlow('savings-preview');
+  const { advance } = flow;
   const cardVisible = useSharedValue(0);
 
   useEffect(() => {
@@ -106,7 +108,7 @@ export default function SavingsPreviewScreen() {
   );
 
   return (
-    <OnboardingScaffold step="savings-preview" footer={footer}>
+    <OnboardingScaffold flow={flow} footer={footer}>
       <View style={styles.container}>
         <LinearGradient
           colors={fadeColors}
@@ -114,7 +116,7 @@ export default function SavingsPreviewScreen() {
           end={{ x: 0.5, y: 1 }}
           style={styles.bottomFade}
         />
-        <TitleBlock title="See the money you save every day?" />
+        <TitleBlock title={content.savingsPreview.title} />
         <View style={styles.heroPosition}>
           <View style={styles.heroCard}>
             <View style={styles.heroBackground}>
@@ -125,19 +127,19 @@ export default function SavingsPreviewScreen() {
                 style={styles.statCard}
                 radius={layout.cardRadius}
                 tintColor={withAlpha(colors.white, 0.85)}>
-                <Text style={styles.savedLabel}>Saved so far</Text>
+                <Text style={styles.savedLabel}>{content.savingsPreview.savedLabel}</Text>
                 <View style={styles.amountRow}>
                   <Icon name="banknote.fill" size={18} weight="semibold" color={colors.ink} style={styles.banknote} />
-                  <Text style={styles.amountText}>45,00 €</Text>
+                  <Text style={styles.amountText}>{content.savingsPreview.amount}</Text>
                 </View>
                 <View style={styles.todayRow}>
                   <View style={styles.euroBadge}>
-                    <Icon name="eurosign" size={12.5} weight="bold" color={colors.white} />
+                    <Icon name={content.savingsPreview.icon} size={12.5} weight="bold" color={colors.white} />
                   </View>
                   <View style={styles.todayColumn}>
-                    <Text style={styles.todayLabel}>Today</Text>
+                    <Text style={styles.todayLabel}>{content.savingsPreview.todayLabel}</Text>
                     <View style={styles.todayCapsule}>
-                      <Text style={styles.todayValue}>+4,50 €</Text>
+                      <Text style={styles.todayValue}>{content.savingsPreview.todayValue}</Text>
                     </View>
                   </View>
                 </View>

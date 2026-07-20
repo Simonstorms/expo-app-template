@@ -5,16 +5,17 @@ import { type LayoutChangeEvent, StyleSheet, Text, View } from 'react-native';
 import { GlassSurface } from '@/components/ui/glass';
 import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { colors, layout, withAlpha } from '@/constants/theme';
+import { content } from '@/constants/content';
 import { useFlow } from '../hooks/use-flow';
 
 const CARD_INK = '#1C1B22';
 const TRACK_COLOR = '#DDDDDD';
 const FILL_GRADIENT = ['#DC6A6C', '#9D8DB5', '#6F99DB'] as const;
-const BULLETS = ['Daily limit', 'Craving support', 'Money saved', 'Health score'];
 const PAUSE_THRESHOLDS = [23, 46, 68, 87];
 
 export default function GeneratingPlanScreen() {
-  const { advance } = useFlow('generating');
+  const flow = useFlow('generating');
+  const { advance } = flow;
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
@@ -53,16 +54,16 @@ export default function GeneratingPlanScreen() {
   }, [advance]);
 
   return (
-    <OnboardingScaffold step="generating" ctaTitle={null}>
+    <OnboardingScaffold flow={flow} ctaTitle={null}>
       <View style={styles.container}>
         <Text style={styles.percent}>{Math.floor(progress)}%</Text>
-        <Text style={styles.headline}>{"We're setting\neverything up for you"}</Text>
+        <Text style={styles.headline}>{content.generating.headline}</Text>
         <GradientBar progress={progress} />
-        <Text style={styles.caption}>Customizing your quit plan...</Text>
+        <Text style={styles.caption}>{content.generating.caption}</Text>
         <View style={styles.cardWrap}>
           <GlassSurface style={styles.card} radius={12.5} tintColor={withAlpha(colors.cardFill, 0.85)}>
-            <Text style={styles.cardTitle}>Daily recommendation for</Text>
-            {BULLETS.map((bullet) => (
+            <Text style={styles.cardTitle}>{content.generating.cardTitle}</Text>
+            {content.generating.bullets.map((bullet) => (
               <View key={bullet} style={styles.bulletRow}>
                 <View style={styles.dot} />
                 <Text style={styles.bulletText}>{bullet}</Text>

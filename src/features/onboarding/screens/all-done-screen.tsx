@@ -5,6 +5,8 @@ import { GradientRing } from '@/components/ui/gradient-ring';
 import { Icon } from '@/components/ui/icon';
 import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { colors } from '@/constants/theme';
+import { content } from '@/constants/content';
+import { useFlow } from '../hooks/use-flow';
 
 type SparkleMark = {
   id: number;
@@ -33,8 +35,9 @@ const SPARKLE_MARKS: SparkleMark[] = SPARKLE_POINTS.map(([x, y, rotation], index
 }));
 
 export default function AllDoneScreen() {
+  const flow = useFlow('all-done');
   return (
-    <OnboardingScaffold step="all-done" ctaTitle="Continue">
+    <OnboardingScaffold flow={flow} ctaTitle={content.common.continue}>
       <View style={styles.container}>
         <View style={styles.illustrationWrap}>
           <GradientRing diameter={235} ringWidth={33}>
@@ -71,9 +74,9 @@ export default function AllDoneScreen() {
             resizeMode="scaleAspectFit"
             style={styles.checkIcon}
           />
-          <Text style={styles.doneLabel}>All done!</Text>
+          <Text style={styles.doneLabel}>{content.allDone.doneLabel}</Text>
         </View>
-        <Text style={styles.title}>{'Time to generate\nyour custom plan!'}</Text>
+        <Text style={styles.title}>{content.allDone.title}</Text>
         <View style={styles.spacer} />
       </View>
     </OnboardingScaffold>

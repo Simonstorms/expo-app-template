@@ -1,19 +1,19 @@
 {
   "expo": {
-    "name": "Quit Snus",
-    "slug": "quit-snus-onboarding",
+    "name": "Expo App Template",
+    "slug": "expo-app-template",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "quitsnusonboarding",
+    "scheme": "expoapptemplate",
     "userInterfaceStyle": "light",
     "ios": {
       "icon": "./assets/expo.icon",
-      "bundleIdentifier": "com.example.quitsnus",
+      "bundleIdentifier": "com.example.expoapptemplate",
       "usesAppleSignIn": true
     },
     "android": {
-      "package": "com.example.quitsnus",
+      "package": "com.example.expoapptemplate",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -41,7 +41,8 @@
       "expo-secure-store",
       "expo-localization",
       "./plugins/with-inhibit-pod-warnings",
-      "./plugins/with-disable-script-sandboxing"
+      "./plugins/with-disable-script-sandboxing",
+      "./plugins/with-ios-scene-lifecycle"
     ],
     "experiments": {
       "typedRoutes": true,

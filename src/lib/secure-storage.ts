@@ -3,8 +3,10 @@ import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 
 const CHUNK_SIZE = 1800;
+const isServer = Platform.OS === 'web' && typeof window === 'undefined';
 
 async function removeItem(key: string): Promise<void> {
+  if (isServer) return;
   if (Platform.OS === 'web') {
     await AsyncStorage.removeItem(key);
     return;
@@ -22,6 +24,7 @@ async function removeItem(key: string): Promise<void> {
 }
 
 async function setItem(key: string, value: string): Promise<void> {
+  if (isServer) return;
   if (Platform.OS === 'web') {
     await AsyncStorage.setItem(key, value);
     return;
@@ -35,6 +38,7 @@ async function setItem(key: string, value: string): Promise<void> {
 }
 
 async function getItem(key: string): Promise<string | null> {
+  if (isServer) return null;
   if (Platform.OS === 'web') {
     return AsyncStorage.getItem(key);
   }

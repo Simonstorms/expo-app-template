@@ -15,6 +15,7 @@ import { Icon } from '@/components/ui/icon';
 import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { TitleBlock } from '@/components/ui/title-block';
 import { useOnboarding } from '../store';
+import { content } from '@/constants/content';
 import { colors, layout, text, withAlpha } from '@/constants/theme';
 import { useFlow } from '../hooks/use-flow';
 
@@ -41,7 +42,8 @@ function snappedValueForFraction(raw: number): number {
 export default function QuitPaceScreen() {
   const value = useOnboarding((state) => state.reducePerWeek);
   const set = useOnboarding((state) => state.set);
-  const { selectHaptic } = useFlow('pace');
+  const flow = useFlow('pace');
+  const { selectHaptic } = flow;
 
   const frac = useSharedValue(fractionForValue(value));
   const trackWidth = useSharedValue(0);
@@ -96,11 +98,11 @@ export default function QuitPaceScreen() {
   }));
 
   return (
-    <OnboardingScaffold step="pace" ctaTitle="Continue">
+    <OnboardingScaffold flow={flow} ctaTitle={content.common.continue}>
       <View style={styles.container}>
-        <TitleBlock title="How fast do you want to quit?" />
+        <TitleBlock title={content.pace.title} />
         <View style={styles.spacer} />
-        <Text style={styles.sectionLabel}>Reduce pouches per week</Text>
+        <Text style={styles.sectionLabel}>{content.pace.sectionLabel}</Text>
         <Text style={styles.bigNumber}>{value}</Text>
         <View style={styles.markerRow}>
           <Marker symbol="tortoise.fill" tint={colors.ctaFill} />
@@ -140,7 +142,7 @@ export default function QuitPaceScreen() {
               end={{ x: 1, y: 1 }}
               style={styles.pillGradient}
             />
-            <Text style={styles.pillText}>Recommended</Text>
+            <Text style={styles.pillText}>{content.pace.recommended}</Text>
           </GlassSurface>
         </Animated.View>
         <View style={styles.spacer} />

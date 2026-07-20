@@ -5,25 +5,26 @@ import { GlassGroup, GlassSurface } from '@/components/ui/glass';
 import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { TitleBlock } from '@/components/ui/title-block';
 import { useOnboarding } from '../store';
+import { content } from '@/constants/content';
 import { colors, layout, text, withAlpha } from '@/constants/theme';
-import { usageOptions } from '../types';
 import { useFlow } from '../hooks/use-flow';
 
 export default function UsageFrequencyScreen() {
   const usageLevel = useOnboarding((state) => state.usageLevel);
   const set = useOnboarding((state) => state.set);
-  const { selectAndAdvance } = useFlow('usage');
+  const flow = useFlow('usage');
+  const { selectAndAdvance } = flow;
 
   return (
-    <OnboardingScaffold step="usage" ctaTitle={null}>
+    <OnboardingScaffold flow={flow} ctaTitle={null}>
       <View style={styles.container}>
         <TitleBlock
-          title={'How many pouches\ndo you use per day?'}
-          subtitle={'This will be used to calibrate your\ncustom plan.'}
+          title={content.usage.title}
+          subtitle={content.usage.subtitle}
         />
         <View style={styles.topSpacer} />
         <GlassGroup spacing={22} style={styles.group}>
-          {usageOptions.map((option) => (
+          {content.usage.options.map((option) => (
             <UsageRow
               key={option.id}
               label={option.label}

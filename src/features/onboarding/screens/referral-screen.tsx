@@ -6,16 +6,19 @@ import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { TitleBlock } from '@/components/ui/title-block';
 import { useOnboarding } from '../store';
 import { colors, layout, withAlpha } from '@/constants/theme';
+import { content } from '@/constants/content';
+import { useFlow } from '../hooks/use-flow';
 
 export default function ReferralCodeScreen() {
   const referralCode = useOnboarding((state) => state.referralCode);
   const set = useOnboarding((state) => state.set);
   const inputRef = useRef<TextInput>(null);
+  const flow = useFlow('referral');
 
   return (
-    <OnboardingScaffold step="referral" ctaTitle="Continue">
+    <OnboardingScaffold flow={flow} ctaTitle={content.common.continue}>
       <View style={styles.container}>
-        <TitleBlock title="Enter referral code (optional)" subtitle="You can skip this step" />
+        <TitleBlock title={content.referral.title} subtitle={content.referral.subtitle} />
         <View style={styles.spacer} />
         <View style={styles.fieldWrap}>
           <GlassSurface radius={10} tintColor={withAlpha(colors.cardFill, 0.85)} style={styles.card}>
@@ -23,7 +26,7 @@ export default function ReferralCodeScreen() {
               ref={inputRef}
               value={referralCode}
               onChangeText={(value) => set('referralCode', value)}
-              placeholder="Referral Code"
+              placeholder={content.referral.placeholder}
               placeholderTextColor="#A2A1A6"
               autoCapitalize="characters"
               autoCorrect={false}
@@ -38,7 +41,7 @@ export default function ReferralCodeScreen() {
                 fallbackColor={referralCode.length === 0 ? '#C0BFC6' : colors.ctaFill}
                 isInteractive
                 style={styles.submitButton}>
-                <Text style={styles.submitLabel}>Submit</Text>
+                <Text style={styles.submitLabel}>{content.referral.submit}</Text>
               </GlassSurface>
             </Pressable>
           </GlassSurface>

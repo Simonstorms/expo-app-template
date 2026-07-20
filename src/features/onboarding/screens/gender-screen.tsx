@@ -5,25 +5,26 @@ import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { SelectionRow } from '@/components/ui/selection-row';
 import { TitleBlock } from '@/components/ui/title-block';
 import { useOnboarding } from '../store';
+import { content } from '@/constants/content';
 import { layout } from '@/constants/theme';
-import { genderOptions } from '../types';
 import { useFlow } from '../hooks/use-flow';
 
 export default function GenderScreen() {
   const gender = useOnboarding((state) => state.gender);
   const set = useOnboarding((state) => state.set);
-  const { selectAndAdvance } = useFlow('gender');
+  const flow = useFlow('gender');
+  const { selectAndAdvance } = flow;
 
   return (
-    <OnboardingScaffold step="gender" ctaTitle={null} showsLanguagePill>
+    <OnboardingScaffold flow={flow} ctaTitle={null} showsLanguagePill>
       <View style={styles.container}>
         <TitleBlock
-          title="Choose your Gender"
-          subtitle={'This will be used to calibrate your\ncustom plan.'}
+          title={content.gender.title}
+          subtitle={content.gender.subtitle}
         />
         <View style={styles.spacer} />
         <GlassGroup spacing={11} style={styles.group}>
-          {genderOptions.map((option) => (
+          {content.gender.options.map((option) => (
             <SelectionRow
               key={option.id}
               title={option.label}

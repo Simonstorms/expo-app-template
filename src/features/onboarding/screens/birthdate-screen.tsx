@@ -5,25 +5,15 @@ import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { TitleBlock } from '@/components/ui/title-block';
 import { useOnboarding } from '../store';
 import { colors, layout, text } from '@/constants/theme';
-
-const monthNames = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
-];
+import { content } from '@/constants/content';
+import { useFlow } from '../hooks/use-flow';
 
 type WheelItem = { label: string; value: number };
 
-const monthItems: WheelItem[] = monthNames.map((name, index) => ({ label: name, value: index + 1 }));
+const monthItems: WheelItem[] = content.birthdate.monthNames.map((name, index) => ({
+  label: name,
+  value: index + 1,
+}));
 
 const dayItems: WheelItem[] = Array.from({ length: 31 }, (_, index) => ({
   label: String(index + 1),
@@ -40,28 +30,29 @@ export default function BirthdateScreen() {
   const birthDay = useOnboarding((state) => state.birthDay);
   const birthYear = useOnboarding((state) => state.birthYear);
   const set = useOnboarding((state) => state.set);
+  const flow = useFlow('birthdate');
 
   return (
-    <OnboardingScaffold step="birthdate" ctaTitle="Continue">
+    <OnboardingScaffold flow={flow} ctaTitle={content.common.continue}>
       <View style={styles.container}>
-        <TitleBlock title="When were you born?" />
-        <Text style={styles.subtitle}>{'This will be used to calibrate your\ncustom plan.'}</Text>
+        <TitleBlock title={content.birthdate.title} />
+        <Text style={styles.subtitle}>{content.birthdate.subtitle}</Text>
         <View style={styles.spacer} />
         <View style={styles.wheels}>
           <WheelColumn
-            label="Month"
+            label={content.birthdate.columnMonth}
             items={monthItems}
             selectedValue={birthMonth}
             onValueChange={(value) => set('birthMonth', value)}
           />
           <WheelColumn
-            label="Day"
+            label={content.birthdate.columnDay}
             items={dayItems}
             selectedValue={birthDay}
             onValueChange={(value) => set('birthDay', value)}
           />
           <WheelColumn
-            label="Year"
+            label={content.birthdate.columnYear}
             items={yearItems}
             selectedValue={birthYear}
             onValueChange={(value) => set('birthYear', value)}
@@ -86,7 +77,6 @@ function WheelColumn({
 }) {
   return (
     <View style={styles.column}>
-      <View style={styles.highlight} pointerEvents="none" />
       <Picker
         accessibilityLabel={label}
         selectedValue={selectedValue}
@@ -124,15 +114,6 @@ const styles = StyleSheet.create({
     width: 91.7,
     height: 216,
     overflow: 'hidden',
-  },
-  highlight: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    top: 92,
-    height: 32,
-    borderRadius: 7,
-    backgroundColor: '#F5F5F5',
   },
   picker: {
     width: 91.7,

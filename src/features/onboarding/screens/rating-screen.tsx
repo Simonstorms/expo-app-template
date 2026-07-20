@@ -7,6 +7,7 @@ import { Icon } from '@/components/ui/icon';
 import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { PrimaryCTA } from '@/components/ui/primary-cta';
 import { TitleBlock } from '@/components/ui/title-block';
+import { content } from '@/constants/content';
 import { colors, layout, withAlpha } from '@/constants/theme';
 import { useFlow } from '../hooks/use-flow';
 
@@ -39,14 +40,15 @@ function InitialAvatar({
 }
 
 export default function RatingRequestScreen() {
-  const { advance } = useFlow('rating');
+  const flow = useFlow('rating');
+  const { advance } = flow;
   const insets = useSafeAreaInsets();
 
   return (
-    <OnboardingScaffold step="rating" ctaTitle={null}>
+    <OnboardingScaffold flow={flow} ctaTitle={null}>
       <View style={styles.container}>
         <View style={styles.column}>
-          <TitleBlock title="Give us a rating" />
+          <TitleBlock title={content.rating.title} />
           <View style={{ height: 18 }} />
           <GlassSurface
             radius={20}
@@ -56,16 +58,16 @@ export default function RatingRequestScreen() {
               <Icon name="laurel.leading" size={55} width={64} height={55} color={colors.orange} />
               <View style={styles.laurelCenter}>
                 <View style={styles.laurelScoreRow}>
-                  <Text style={styles.laurelScore}>4.8</Text>
+                  <Text style={styles.laurelScore}>{content.rating.laurelScore}</Text>
                   <StarRow size={18} spacing={4} />
                 </View>
-                <Text style={styles.laurelCaption}>1K+ App Ratings</Text>
+                <Text style={styles.laurelCaption}>{content.rating.laurelCaption}</Text>
               </View>
               <Icon name="laurel.trailing" size={55} width={64} height={55} color={colors.orange} />
             </View>
           </GlassSurface>
           <View style={{ height: 45 }} />
-          <Text style={styles.madeFor}>{'Quit Snus was made for\npeople like you'}</Text>
+          <Text style={styles.madeFor}>{content.rating.madeFor}</Text>
           <View style={{ height: 24 }} />
           <View style={styles.avatarTrio}>
             <InitialAvatar letter="J" fill="#7C8B6F" />
@@ -73,7 +75,7 @@ export default function RatingRequestScreen() {
             <InitialAvatar letter="M" fill="#8B6F7C" style={styles.avatarOverlap} />
           </View>
           <View style={{ height: 12 }} />
-          <Text style={styles.usersCount}>10K+ Quit Snus Users</Text>
+          <Text style={styles.usersCount}>{content.rating.usersCount}</Text>
           <View style={{ height: 40 }} />
           <GlassSurface
             radius={20}
@@ -81,16 +83,13 @@ export default function RatingRequestScreen() {
             style={styles.testimonialCard}>
             <View style={styles.testimonialTop}>
               <View style={styles.testimonialAvatar}>
-                <Text style={styles.testimonialAvatarLetter}>J</Text>
+                <Text style={styles.testimonialAvatarLetter}>{content.rating.testimonialName.charAt(0)}</Text>
               </View>
-              <Text style={styles.testimonialName}>Jonas K.</Text>
+              <Text style={styles.testimonialName}>{content.rating.testimonialName}</Text>
               <View style={styles.flexSpacer} />
               <StarRow size={13} spacing={6} />
             </View>
-            <Text style={styles.testimonialQuote}>
-              Two weeks in and I barely think about snus anymore. The daily plan kept me honest the
-              whole way.
-            </Text>
+            <Text style={styles.testimonialQuote}>{content.rating.testimonialQuote}</Text>
           </GlassSurface>
           <View style={{ height: 12 }} />
           <View style={styles.peekCard} />
@@ -105,7 +104,7 @@ export default function RatingRequestScreen() {
           <View style={styles.scrimSolid} />
         </View>
         <View style={[styles.ctaWrap, { paddingBottom: insets.bottom + 16 }]}>
-          <PrimaryCTA title="Continue" onPress={advance} />
+          <PrimaryCTA title={content.common.continue} onPress={advance} />
         </View>
       </View>
     </OnboardingScaffold>

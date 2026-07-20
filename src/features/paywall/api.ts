@@ -1,8 +1,9 @@
 import Purchases from 'react-native-purchases';
 
-import { hasRevenueCat } from '@/constants/config';
+import { config, hasRevenueCat } from '@/constants/config';
 
-export async function restorePurchases(): Promise<void> {
-  if (!hasRevenueCat) return;
-  await Purchases.restorePurchases();
+export async function restorePurchases(): Promise<boolean> {
+  if (!hasRevenueCat) return false;
+  const info = await Purchases.restorePurchases();
+  return typeof info.entitlements.active[config.revenueCatEntitlement] !== 'undefined';
 }

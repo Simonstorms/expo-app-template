@@ -5,6 +5,7 @@ import { GlassSurface } from '@/components/ui/glass';
 import { LanguagePill } from '../components/header';
 import { Icon } from '@/components/ui/icon';
 import { OnboardingScaffold } from '../components/onboarding-scaffold';
+import { content } from '@/constants/content';
 import { colors, layout } from '@/constants/theme';
 import { useFlow } from '../hooks/use-flow';
 
@@ -18,16 +19,17 @@ const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
 const RING_PROGRESS = 0.7;
 
 export default function WelcomeScreen() {
-  const { advance, goTo } = useFlow('welcome');
+  const flow = useFlow('welcome');
+  const { advance, goTo } = flow;
 
   return (
-    <OnboardingScaffold step="welcome" ctaTitle={null}>
+    <OnboardingScaffold flow={flow} ctaTitle={null}>
       <View style={styles.root}>
         <View style={styles.column}>
           <View style={{ height: 36 }} />
           <PhoneMockup />
           <View style={{ height: 50 }} />
-          <Text style={styles.title}>{'Quitting snus\nmade easy'}</Text>
+          <Text style={styles.title}>{content.welcome.tagline}</Text>
           <View style={{ height: 11 }} />
           <Pressable style={styles.getStartedWrap} onPress={advance}>
             <GlassSurface
@@ -36,14 +38,14 @@ export default function WelcomeScreen() {
               fallbackColor={colors.ink}
               isInteractive
               style={styles.getStarted}>
-              <Text style={styles.getStartedLabel}>Get Started</Text>
+              <Text style={styles.getStartedLabel}>{content.welcome.getStarted}</Text>
             </GlassSurface>
           </Pressable>
           <View style={{ height: 12 }} />
           <Pressable onPress={() => goTo('sign-in')}>
             <Text style={styles.signIn}>
-              {'Already have an account? '}
-              <Text style={styles.signInBold}>Sign In</Text>
+              {content.welcome.signInPrompt}
+              <Text style={styles.signInBold}>{content.welcome.signInAction}</Text>
             </Text>
           </Pressable>
           <View style={{ flex: 1 }} />
@@ -88,21 +90,21 @@ function MockScreen() {
 
       <View style={styles.header}>
         <Icon name="leaf.fill" size={9} weight="semibold" color={colors.ink} />
-        <Text style={styles.headerText}>Quit Snus</Text>
+        <Text style={styles.headerText}>{content.welcome.mock.wordmark}</Text>
       </View>
 
       <View style={styles.streakLabel}>
-        <Text style={styles.streakLabelText}>YOUR STREAK</Text>
+        <Text style={styles.streakLabelText}>{content.welcome.mock.streakLabel}</Text>
       </View>
 
       <StreakRing />
 
-      <StatCard value="€48" caption="saved" left={6.65} />
-      <StatCard value="84" caption="pouches avoided" left={110.65} />
+      <StatCard value={content.welcome.mock.savedValue} caption={content.welcome.mock.savedCaption} left={6.65} />
+      <StatCard value={content.welcome.mock.avoidedValue} caption={content.welcome.mock.avoidedCaption} left={110.65} />
 
       <View style={styles.milestoneCard}>
-        <Text style={styles.milestoneTitle}>Next milestone</Text>
-        <Text style={styles.milestoneSub}>2 weeks · tomorrow</Text>
+        <Text style={styles.milestoneTitle}>{content.welcome.mock.milestoneTitle}</Text>
+        <Text style={styles.milestoneSub}>{content.welcome.mock.milestoneSub}</Text>
       </View>
     </View>
   );
@@ -128,8 +130,8 @@ function StreakRing() {
         />
       </Svg>
       <View style={styles.ringCenter}>
-        <Text style={styles.ringValue}>12</Text>
-        <Text style={styles.ringCaption}>days snus-free</Text>
+        <Text style={styles.ringValue}>{content.welcome.mock.streakValue}</Text>
+        <Text style={styles.ringCaption}>{content.welcome.mock.streakCaption}</Text>
       </View>
     </View>
   );

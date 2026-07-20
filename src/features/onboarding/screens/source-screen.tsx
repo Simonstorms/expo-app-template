@@ -13,22 +13,24 @@ import { Icon } from '@/components/ui/icon';
 import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { TitleBlock } from '@/components/ui/title-block';
 import { useOnboarding } from '../store';
+import { content } from '@/constants/content';
 import { colors, layout, text, withAlpha } from '@/constants/theme';
-import { type DiscoverySource, sourceOptions } from '../types';
+import { type DiscoverySource } from '../types';
 import { useFlow } from '../hooks/use-flow';
 
 export default function DiscoverySourceScreen() {
   const source = useOnboarding((state) => state.discoverySource);
   const set = useOnboarding((state) => state.set);
-  const { selectAndAdvance } = useFlow('source');
+  const flow = useFlow('source');
+  const { selectAndAdvance } = flow;
 
   return (
-    <OnboardingScaffold step="source" ctaTitle={null}>
+    <OnboardingScaffold flow={flow} ctaTitle={null}>
       <View style={styles.container}>
-        <TitleBlock title="Where did you hear about us?" />
+        <TitleBlock title={content.source.title} />
         <ScrollView showsVerticalScrollIndicator={false}>
           <GlassGroup spacing={12.3} style={styles.group}>
-            {sourceOptions.map((option) => (
+            {content.source.options.map((option) => (
               <SourceRow
                 key={option.id}
                 source={option.id}
@@ -80,13 +82,13 @@ function SourceRow({
 function SourceGlyph({ source }: { source: DiscoverySource }) {
   switch (source) {
     case 'instagram':
-      return <InstagramLogo size={27} />;
+      return <InstagramLogo size={23} />;
     case 'tiktok':
-      return <TikTokLogo size={27} />;
+      return <TikTokLogo size={23} />;
     case 'facebook':
-      return <FacebookLogo size={27} />;
+      return <FacebookLogo size={24} />;
     case 'youtube':
-      return <YouTubeLogo size={27} />;
+      return <YouTubeLogo size={26} />;
     case 'google':
       return <GoogleLogo size={23} />;
     case 'tv':

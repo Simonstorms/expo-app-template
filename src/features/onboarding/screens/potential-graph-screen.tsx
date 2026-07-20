@@ -7,6 +7,8 @@ import { Icon } from '@/components/ui/icon';
 import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { TitleBlock } from '@/components/ui/title-block';
 import { colors, layout, withAlpha } from '@/constants/theme';
+import { content } from '@/constants/content';
+import { useFlow } from '../hooks/use-flow';
 
 const PLOT_HEIGHT = 176;
 
@@ -47,11 +49,7 @@ const V_GRIDLINES: readonly { x: number; top: number }[] = [
   { x: 0.992, top: 39.7 },
 ];
 
-const AXIS_LABELS: readonly { x: number; text: string }[] = [
-  { x: 0.1296, text: '3 Days' },
-  { x: 0.3981, text: '7 Days' },
-  { x: 0.7666, text: '30 Days' },
-];
+const AXIS_LABEL_POSITIONS = [0.1296, 0.3981, 0.7666] as const;
 
 function buildCurvePath(width: number): string {
   const mapped = CURVE_POINTS.map(([fx, y]): Point => [fx * width, y]);
@@ -76,6 +74,7 @@ function buildAreaPath(width: number): string {
 }
 
 export default function PotentialGraphScreen() {
+  const flow = useFlow('potential-graph');
   const [plotWidth, setPlotWidth] = useState(0);
 
   const onChartLayout = (event: LayoutChangeEvent) => {
@@ -83,15 +82,15 @@ export default function PotentialGraphScreen() {
   };
 
   return (
-    <OnboardingScaffold step="potential-graph" ctaTitle="Continue">
+    <OnboardingScaffold flow={flow} ctaTitle={content.common.continue}>
       <View style={styles.container}>
-        <TitleBlock title="You have great potential to crush your goal" />
+        <TitleBlock title={content.potentialGraph.title} />
         <View style={styles.cardWrap}>
           <GlassSurface
             style={styles.card}
             radius={layout.cardRadius}
             tintColor={withAlpha('#F9F9F9', 0.9)}>
-            <Text style={styles.cardTitle}>Your freedom progress</Text>
+            <Text style={styles.cardTitle}>{content.potentialGraph.cardTitle}</Text>
             <View style={styles.chartOuter}>
               <View style={styles.chart} onLayout={onChartLayout}>
                 <View style={styles.plot}>
@@ -193,9 +192,9 @@ export default function PotentialGraphScreen() {
                 <View style={styles.baseline} />
                 <View style={styles.axisRow}>
                   {plotWidth > 0
-                    ? AXIS_LABELS.map((label) => (
-                        <View key={label.text} style={[styles.point, { left: label.x * plotWidth, top: 20 }]}>
-                          <Text style={styles.axisLabel}>{label.text}</Text>
+                    ? content.potentialGraph.axisLabels.map((label, index) => (
+                        <View key={label} style={[styles.point, { left: AXIS_LABEL_POSITIONS[index] * plotWidth, top: 20 }]}>
+                          <Text style={styles.axisLabel}>{label}</Text>
                         </View>
                       ))
                     : null}
@@ -203,10 +202,7 @@ export default function PotentialGraphScreen() {
               </View>
             </View>
             <View style={styles.footnoteWrap}>
-              <Text style={styles.footnote}>
-                Based on Quit Snus historical data, the first days feel slow, but after 7 days you speed
-                toward your goal quickly!
-              </Text>
+              <Text style={styles.footnote}>{content.potentialGraph.footnote}</Text>
             </View>
           </GlassSurface>
         </View>

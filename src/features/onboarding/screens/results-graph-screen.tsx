@@ -7,6 +7,8 @@ import { Icon } from '@/components/ui/icon';
 import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { TitleBlock } from '@/components/ui/title-block';
 import { colors, withAlpha } from '@/constants/theme';
+import { content } from '@/constants/content';
+import { useFlow } from '../hooks/use-flow';
 
 const graphInk = '#1E1B24';
 const graphRed = '#DC6868';
@@ -59,10 +61,11 @@ function smoothPath(points: Point[]): string {
 }
 
 export default function LongTermResultsScreen() {
+  const flow = useFlow('results-graph');
   return (
-    <OnboardingScaffold step="results-graph" ctaTitle="Continue">
+    <OnboardingScaffold flow={flow} ctaTitle={content.common.continue}>
       <View style={styles.container}>
-        <TitleBlock title="Quit Snus creates long-term results" />
+        <TitleBlock title={content.resultsGraph.title} />
         <View style={styles.cardWrap}>
           <GraphCard />
         </View>
@@ -132,24 +135,24 @@ function GraphCard() {
         </Svg>
       </View>
 
-      <Text style={styles.cardTitle}>Your nicotine intake</Text>
+      <Text style={styles.cardTitle}>{content.resultsGraph.cardTitle}</Text>
 
       <View style={styles.brandRow}>
         <View style={styles.brandName}>
           <Icon name="leaf.fill" size={11} weight="bold" color={graphInk} />
-          <Text style={styles.brandText}>Quit Snus</Text>
+          <Text style={styles.brandText}>{content.resultsGraph.brandText}</Text>
         </View>
         <View style={styles.pill}>
-          <Text style={styles.pillText}>Nicotine</Text>
+          <Text style={styles.pillText}>{content.resultsGraph.pillLabel}</Text>
         </View>
       </View>
 
-      <Text style={[styles.curveLabel, { top: 83, right: width - sx(324.3) }]}>Cold turkey</Text>
-      <Text style={[styles.axisLabel, { top: 183.3, left: sx(20.6) }]}>Month 1</Text>
-      <Text style={[styles.axisLabel, { top: 183.3, right: width - sx(323) }]}>Month 6</Text>
+      <Text style={[styles.curveLabel, { top: 83, right: width - sx(324.3) }]}>{content.resultsGraph.curveLabel}</Text>
+      <Text style={[styles.axisLabel, { top: 183.3, left: sx(20.6) }]}>{content.resultsGraph.axisStart}</Text>
+      <Text style={[styles.axisLabel, { top: 183.3, right: width - sx(323) }]}>{content.resultsGraph.axisEnd}</Text>
 
       <View style={styles.footnote}>
-        <Text style={styles.footnoteText}>80% of Quit Snus users stay snus-free even 6 months later</Text>
+        <Text style={styles.footnoteText}>{content.resultsGraph.footnote}</Text>
       </View>
     </GlassSurface>
   );

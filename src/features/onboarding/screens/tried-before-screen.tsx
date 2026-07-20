@@ -6,28 +6,30 @@ import { Icon } from '@/components/ui/icon';
 import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { TitleBlock } from '@/components/ui/title-block';
 import { useOnboarding } from '../store';
+import { content } from '@/constants/content';
 import { colors, layout, text, withAlpha } from '@/constants/theme';
 import { useFlow } from '../hooks/use-flow';
 
 export default function TriedBeforeScreen() {
   const triedBefore = useOnboarding((state) => state.triedBefore);
   const set = useOnboarding((state) => state.set);
-  const { selectAndAdvance } = useFlow('tried-before');
+  const flow = useFlow('tried-before');
+  const { selectAndAdvance } = flow;
 
   return (
-    <OnboardingScaffold step="tried-before" ctaTitle={null}>
+    <OnboardingScaffold flow={flow} ctaTitle={null}>
       <View style={styles.container}>
-        <TitleBlock title="Have you tried quitting snus before?" />
+        <TitleBlock title={content.triedBefore.title} />
         <View style={styles.spacer} />
         <GlassGroup spacing={22} style={styles.group}>
           <ThumbChoiceRow
-            title="No"
+            title={content.triedBefore.no}
             symbol="hand.thumbsdown.fill"
             selected={triedBefore === false}
             onPress={() => selectAndAdvance(() => set('triedBefore', false))}
           />
           <ThumbChoiceRow
-            title="Yes"
+            title={content.triedBefore.yes}
             symbol="hand.thumbsup.fill"
             selected={triedBefore === true}
             onPress={() => selectAndAdvance(() => set('triedBefore', true))}

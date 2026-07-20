@@ -10,7 +10,20 @@ import { syncOnboarding } from '../api';
 import { useOnboarding } from '../store';
 import { nextStep, progressFor, routePath, showsChrome, type Step } from '../steps';
 
-export function useFlow(step: Step) {
+const ADVANCE_DELAY_MS = 140;
+
+export type OnboardingFlow = {
+  advance: () => void;
+  goTo: (target: Step) => void;
+  back: () => void;
+  selectAndAdvance: (mutate: () => void) => void;
+  selectHaptic: () => void;
+  finish: () => Promise<void>;
+  progress: number;
+  showsChrome: boolean;
+};
+
+export function useFlow(step: Step): OnboardingFlow {
   const router = useRouter();
   const advancing = useRef(false);
 
@@ -49,7 +62,7 @@ export function useFlow(step: Step) {
       advancing.current = true;
       mutate();
       selectHaptic();
-      setTimeout(advance, 300);
+      setTimeout(advance, ADVANCE_DELAY_MS);
     },
     [advance, selectHaptic],
   );

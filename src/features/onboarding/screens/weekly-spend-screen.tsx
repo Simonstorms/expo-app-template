@@ -8,7 +8,9 @@ import { GlassSurface } from '@/components/ui/glass';
 import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { TitleBlock } from '@/components/ui/title-block';
 import { useOnboarding } from '../store';
+import { formatMoney } from '@/constants/brand';
 import { colors, withAlpha } from '@/constants/theme';
+import { content } from '@/constants/content';
 import { useFlow } from '../hooks/use-flow';
 
 const RANGE_MIN = 0;
@@ -59,18 +61,19 @@ function buildTicks(width: number, value: number): Tick[] {
 export default function WeeklySpendScreen() {
   const weeklySpend = useOnboarding((state) => state.weeklySpend);
   const set = useOnboarding((state) => state.set);
-  const { selectHaptic } = useFlow('weekly-spend');
+  const flow = useFlow('weekly-spend');
+  const { selectHaptic } = flow;
 
   const commit = useCallback((value: number) => set('weeklySpend', value), [set]);
 
   return (
-    <OnboardingScaffold step="weekly-spend" ctaTitle="Continue">
+    <OnboardingScaffold flow={flow} ctaTitle={content.common.continue}>
       <View style={styles.container}>
-        <TitleBlock title="How much do you spend on snus per week?" />
+        <TitleBlock title={content.weeklySpend.title} />
         <View style={styles.spacer} />
         <View style={styles.block}>
-          <Text style={styles.label}>Weekly spend</Text>
-          <Text style={styles.value}>{`${weeklySpend.toFixed(1)} €`}</Text>
+          <Text style={styles.label}>{content.weeklySpend.label}</Text>
+          <Text style={styles.value}>{formatMoney(weeklySpend, 1)}</Text>
           <View style={styles.rulerWrap}>
             <SpendRuler value={weeklySpend} onChange={commit} onSelectHaptic={selectHaptic} />
           </View>

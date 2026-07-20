@@ -24,11 +24,13 @@ See [`SETUP.md`](./SETUP.md) for the clone-to-running guide.
 
 - **Onboarding** — a 28-step flow with a Zustand store, a `useFlow` navigation state machine, progress
   chrome, and a content-driven step model.
-- **Auth** — Sign in with Apple (native id-token), Google (system-browser OAuth), email magic link,
-  and anonymous "guest" sessions, all through Supabase.
-- **Paywall** — presented via a Superwall placement, with a built-in fallback screen; gated on
-  RevenueCat **entitlements** (never product ids).
-- **Home + Settings** — a tabbed shell reading data through TanStack Query.
+- **Auth** — Sign in with Apple (native id-token), Google (system-browser OAuth), and email
+  **one-time code** (6-digit OTP), all through Supabase. Sign-in is required before the paywall.
+- **Paywall** — presented via a **Gated** Superwall placement, with a built-in fallback screen.
+  Access is **hard-gated**: entering the app requires a signed-in account **and** an active RevenueCat
+  **entitlement** (never product ids), enforced in the tabs route guard.
+- **Home + Settings** — a tabbed shell rendering demo content, ready to wire to your data. TanStack
+  Query powers the live session and entitlement queries.
 - **Backend** — Supabase client, RLS-correct SQL migrations, and an auto-provisioned profile.
 - **Analytics** — PostHog autocapture, Expo Router screen tracking, identify, session replay
   (opt-in), and feature flags.
@@ -39,7 +41,7 @@ See [`SETUP.md`](./SETUP.md) for the clone-to-running guide.
 | --- | --- |
 | Framework | Expo SDK 57, React Native 0.86, React 19 (React Compiler) |
 | Language | TypeScript (strict) |
-| Routing | Expo Router v6 (typed routes, `src/app`, route groups) |
+| Routing | Expo Router (typed routes, `src/app`, route groups) |
 | Server state | TanStack Query |
 | Client state | Zustand |
 | Backend / auth | Supabase (`@supabase/supabase-js`) |
@@ -50,7 +52,7 @@ See [`SETUP.md`](./SETUP.md) for the clone-to-running guide.
 
 ## Architecture
 
-Feature-based, not type-based. See [`ARCHITECTURE.md`](./ARCHITECTURE.md) for the full conventions.
+Feature-based, not type-based — each feature owns its screens, components, hooks, data access, and state.
 
 ```
 src/
@@ -61,11 +63,24 @@ src/
 ├── features/         # self-contained: onboarding, auth, paywall, home, settings
 │   └── <feature>/    #   screens/, components/, hooks/, api.ts, store.ts
 ├── components/ui/    # shared design-system primitives
+├── hooks/            # cross-feature hooks (analytics identity)
 ├── lib/              # cross-cutting clients: supabase, revenuecat, superwall, query-client
-├── constants/        # theme + config (capability flags)
+├── constants/        # theme, config (flags), brand + content (white-label copy)
 └── types/            # shared + generated Supabase types
 supabase/             # config + RLS migrations
 ```
+
+**Conventions**
+
+- `app/` holds routes only — every route file is a one-line re-export of a feature screen.
+- Cross-feature imports use the `@/` alias; imports within a feature stay relative. No barrel
+  `index.ts` files (they break Fast Refresh); the alias resolves through Expo's Metro/Babel preset.
+- Server state → TanStack Query (each feature's `api.ts` + a hook); client/UI state → thin Zustand.
+  Business logic lives in hooks; components stay presentational.
+- Every backend integration is guarded by a capability flag in `src/constants/config.ts`, so an empty
+  `.env` runs a pure UI demo.
+- Only public values use the `EXPO_PUBLIC_` prefix; real secrets belong behind a Supabase Edge
+  Function. Every Supabase table has RLS with per-command policies (`supabase/migrations/`).
 
 ## Requirements
 
@@ -91,10 +106,12 @@ Then wire the backend, login methods, and monetization in [`SETUP.md`](./SETUP.m
 
 Everything specific to the example lives in three places:
 
-- **Identity** — `app.json` (`name`, `slug`, `scheme`, `ios.bundleIdentifier`, `android.package`).
-- **Design tokens** — `src/constants/theme.ts` (colors, spacing, typography).
-- **Onboarding content** — `src/features/onboarding/` (`types.ts` options, `steps.ts` order, screen
-  copy).
+- **Identity** — `app.json` (`name`, `slug`, `scheme`, `ios.bundleIdentifier`, `android.package`);
+  rename the `com.example.expoapptemplate` placeholder before shipping.
+- **Design tokens** — `src/constants/theme.ts` (colors, layout, typography).
+- **Brand + copy** — `src/constants/brand.ts` (app name, currency, substance/unit tokens,
+  `formatMoney`) and `src/constants/content.ts` (all screen copy + option lists);
+  `src/features/onboarding/steps.ts` sets the step order.
 
 ## Credits and notices
 

@@ -2,26 +2,17 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { SuperwallProvider } from 'expo-superwall';
-import { type ReactNode, useEffect } from 'react';
+import { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-import { hasSuperwall } from '@/constants/config';
 import { useAnalyticsIdentity } from '@/hooks/use-analytics-identity';
+import { PaywallProvider } from '@/features/paywall/components/paywall-provider';
 import { useRevenueCatSync } from '@/features/paywall/hooks/use-revenuecat';
 import { AnalyticsProvider, ScreenTracker } from '@/lib/analytics';
 import { queryClient } from '@/lib/query-client';
-import { superwallApiKeys } from '@/lib/superwall';
 
 SplashScreen.preventAutoHideAsync();
-
-function PaywallProvider({ children }: { children: ReactNode }) {
-  if (hasSuperwall) {
-    return <SuperwallProvider apiKeys={superwallApiKeys}>{children}</SuperwallProvider>;
-  }
-  return <>{children}</>;
-}
 
 function AppServices() {
   useRevenueCatSync();
@@ -48,6 +39,8 @@ export default function RootLayout() {
                   headerShown: false,
                   contentStyle: { backgroundColor: '#ffffff' },
                   animation: 'slide_from_right',
+                  animationDuration: 300,
+                  animationMatchesGesture: true,
                   gestureEnabled: true,
                 }}
               />

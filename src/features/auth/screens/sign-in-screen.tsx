@@ -1,139 +1,112 @@
-import { useFocusEffect } from 'expo-router';
-import { useCallback, useRef } from 'react';
+import { useState } from 'react';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
-import Svg, { Defs, LinearGradient, Stop, Text as SvgText } from 'react-native-svg';
 
-import { hasSupabase } from '@/constants/config';
-import { signInAsGuest, signInWithApple, signInWithGoogle } from '../api';
+import { signInWithApple, signInWithGoogle } from '../api';
+import { EmailSignIn } from '../components/email-sign-in';
+import { GoogleLogo } from '@/components/ui/brand-logos';
 import { GlassGroup, GlassSurface } from '@/components/ui/glass';
 import { Icon } from '@/components/ui/icon';
 import { OnboardingScaffold } from '@/features/onboarding/components/onboarding-scaffold';
 import { TitleBlock } from '@/components/ui/title-block';
+import { content } from '@/constants/content';
 import { colors, withAlpha } from '@/constants/theme';
 import { useFlow } from '@/features/onboarding/hooks/use-flow';
 
+type Mode = 'options' | 'email';
+
 export default function SignInScreen() {
-  const { advance } = useFlow('sign-in');
-  const busy = useRef(false);
+  const flow = useFlow('sign-in');
+  const { advance } = flow;
+  const [mode, setMode] = useState<Mode>('options');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  useFocusEffect(
-    useCallback(() => {
-      busy.current = false;
-    }, []),
-  );
-
-  const onApple = async () => {
-    if (busy.current) return;
-    busy.current = true;
-    if (hasSupabase) {
-      try {
-        await signInWithApple();
-      } catch {
-        busy.current = false;
-        return;
-      }
+  const runProvider = async (signIn: () => Promise<void>) => {
+    if (busy) return;
+    setBusy(true);
+    setError(null);
+    try {
+      await signIn();
+      advance();
+    } catch {
+      setError(content.signIn.error);
+    } finally {
+      setBusy(false);
     }
-    advance();
   };
 
-  const onGoogle = async () => {
-    if (busy.current) return;
-    busy.current = true;
-    if (hasSupabase) {
-      try {
-        await signInWithGoogle();
-      } catch {
-        busy.current = false;
-        return;
-      }
-    }
-    advance();
-  };
-
-  const onSkip = async () => {
-    if (busy.current) return;
-    busy.current = true;
-    if (hasSupabase) {
-      await signInAsGuest().catch(() => undefined);
-    }
-    advance();
-  };
+  if (mode === 'email') {
+    return (
+      <OnboardingScaffold flow={{ ...flow, showsChrome: false }} ctaTitle={null}>
+        <EmailSignIn onSuccess={advance} onBack={() => setMode('options')} />
+      </OnboardingScaffold>
+    );
+  }
 
   return (
-    <OnboardingScaffold step="sign-in" ctaTitle={null}>
+    <OnboardingScaffold flow={flow} ctaTitle={null}>
       <View style={styles.container}>
-        <TitleBlock title="Save your progress" />
+        <TitleBlock title={content.signIn.title} subtitle={content.signIn.subtitle} />
         <View style={styles.topSpacer} />
-        <GlassGroup spacing={23} style={styles.buttons}>
-          {Platform.OS === 'ios' ? <AppleButton onPress={onApple} /> : null}
-          <GoogleButton onPress={onGoogle} />
+        <GlassGroup spacing={16} style={styles.buttons}>
+          {Platform.OS === 'ios' ? (
+            <AppleButton disabled={busy} onPress={() => runProvider(signInWithApple)} />
+          ) : null}
+          <GoogleButton disabled={busy} onPress={() => runProvider(signInWithGoogle)} />
+          <EmailButton
+            disabled={busy}
+            onPress={() => {
+              setError(null);
+              setMode('email');
+            }}
+          />
         </GlassGroup>
-        <SkipFooter onPress={onSkip} />
+        {error ? <Text style={styles.error}>{error}</Text> : null}
         <View style={styles.bottomSpacer} />
       </View>
     </OnboardingScaffold>
   );
 }
 
-function AppleButton({ onPress }: { onPress: () => void }) {
+type ButtonProps = { onPress: () => void; disabled?: boolean };
+
+function AppleButton({ onPress, disabled }: ButtonProps) {
   return (
-    <Pressable onPress={onPress}>
+    <Pressable onPress={onPress} disabled={disabled} style={disabled ? styles.dimmed : undefined}>
       <GlassSurface radius={31} tintColor={colors.ink} isInteractive style={styles.button}>
         <Icon name="applelogo" size={26} color={colors.white} />
-        <Text style={styles.appleLabel}>Sign in with Apple</Text>
+        <Text style={styles.appleLabel}>{content.signIn.apple}</Text>
       </GlassSurface>
     </Pressable>
   );
 }
 
-function GoogleButton({ onPress }: { onPress: () => void }) {
+function GoogleButton({ onPress, disabled }: ButtonProps) {
   return (
-    <Pressable onPress={onPress}>
+    <Pressable onPress={onPress} disabled={disabled} style={disabled ? styles.dimmed : undefined}>
       <GlassSurface
         radius={31}
         tintColor={withAlpha(colors.white, 0.92)}
         isInteractive
-        style={[styles.button, styles.googleBorder]}>
-        <GoogleGGlyph />
-        <Text style={styles.googleLabel}>Sign in with Google</Text>
+        style={[styles.button, styles.outlined]}>
+        <GoogleLogo size={24} />
+        <Text style={styles.darkLabel}>{content.signIn.google}</Text>
       </GlassSurface>
     </Pressable>
   );
 }
 
-function GoogleGGlyph() {
+function EmailButton({ onPress, disabled }: ButtonProps) {
   return (
-    <Svg width={30} height={30} viewBox="0 0 30 30">
-      <Defs>
-        <LinearGradient id="googleG" x1="0" y1="0" x2="1" y2="0">
-          <Stop offset="0" stopColor="#4186F3" />
-          <Stop offset="0.28" stopColor="#4186F3" />
-          <Stop offset="0.3" stopColor="#34A954" />
-          <Stop offset="0.5" stopColor="#34A954" />
-          <Stop offset="0.52" stopColor="#FCBC05" />
-          <Stop offset="0.72" stopColor="#FCBC05" />
-          <Stop offset="0.74" stopColor="#E94232" />
-          <Stop offset="1" stopColor="#E94232" />
-        </LinearGradient>
-      </Defs>
-      <SvgText
-        x={15}
-        y={23}
-        fontSize={27}
-        fontWeight="bold"
-        fill="url(#googleG)"
-        textAnchor="middle">
-        G
-      </SvgText>
-    </Svg>
-  );
-}
-
-function SkipFooter({ onPress }: { onPress: () => void }) {
-  return (
-    <Pressable onPress={onPress} style={styles.footer}>
-      <Text style={styles.footerText}>Would you like to sign in later?</Text>
-      <Text style={styles.footerSkip}>Skip</Text>
+    <Pressable onPress={onPress} disabled={disabled} style={disabled ? styles.dimmed : undefined}>
+      <GlassSurface
+        radius={31}
+        tintColor={withAlpha(colors.white, 0.92)}
+        isInteractive
+        style={[styles.button, styles.outlined]}>
+        <Icon name="envelope.fill" size={22} color={colors.ink} />
+        <Text style={styles.darkLabel}>{content.signIn.email}</Text>
+      </GlassSurface>
     </Pressable>
   );
 }
@@ -145,7 +118,7 @@ const styles = StyleSheet.create({
   topSpacer: {
     flex: 1,
     minHeight: 24,
-    maxHeight: 209,
+    maxHeight: 180,
   },
   buttons: {
     paddingHorizontal: 40,
@@ -157,38 +130,31 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 21,
   },
+  dimmed: {
+    opacity: 0.55,
+  },
   appleLabel: {
     fontSize: 20,
     fontWeight: '600',
     color: colors.white,
   },
-  googleBorder: {
+  outlined: {
     borderRadius: 31,
     borderWidth: 1.7,
     borderColor: colors.ink,
   },
-  googleLabel: {
+  darkLabel: {
     fontSize: 20,
     fontWeight: '600',
     color: colors.ink,
   },
-  footer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
-    paddingTop: 44,
-  },
-  footerText: {
-    fontSize: 15,
-    fontWeight: '400',
-    color: colors.ink,
-  },
-  footerSkip: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: colors.ink,
-    textDecorationLine: 'underline',
+  error: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: colors.orange,
+    textAlign: 'center',
+    paddingTop: 22,
+    paddingHorizontal: 40,
   },
   bottomSpacer: {
     flex: 1,

@@ -9,8 +9,6 @@ try {
   glassAvailable = false;
 }
 
-export const isGlassAvailable = glassAvailable;
-
 type GlassProps = {
   style?: StyleProp<ViewStyle>;
   tintColor?: string;
@@ -20,7 +18,7 @@ type GlassProps = {
   children?: ReactNode;
 };
 
-export function Glass({
+function Glass({
   style,
   tintColor,
   glassEffectStyle = 'regular',
