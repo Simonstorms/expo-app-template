@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { signInWithApple, signInWithGoogle } from '../api';
+import { AuthCancelledError, signInWithApple, signInWithGoogle } from '../api';
 import { EmailSignIn } from '../components/email-sign-in';
 import { GoogleLogo } from '@/components/ui/brand-logos';
 import { GlassGroup, GlassSurface } from '@/components/ui/glass';
@@ -10,6 +10,7 @@ import { OnboardingScaffold } from '@/features/onboarding/components/onboarding-
 import { TitleBlock } from '@/components/ui/title-block';
 import { content } from '@/constants/content';
 import { colors, withAlpha } from '@/constants/theme';
+import { captureEvent } from '@/lib/analytics';
 import { useFlow } from '@/features/onboarding/hooks/use-flow';
 
 type Mode = 'options' | 'email';
@@ -21,15 +22,17 @@ export default function SignInScreen() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const runProvider = async (signIn: () => Promise<void>) => {
+  const runProvider = async (signIn: () => Promise<void>, provider: string) => {
     if (busy) return;
     setBusy(true);
     setError(null);
     try {
       await signIn();
       advance();
-    } catch {
+    } catch (err) {
+      if (err instanceof AuthCancelledError) return;
       setError(content.signIn.error);
+      captureEvent('sign_in_failed', { provider });
     } finally {
       setBusy(false);
     }
@@ -50,9 +53,9 @@ export default function SignInScreen() {
         <View style={styles.topSpacer} />
         <GlassGroup spacing={16} style={styles.buttons}>
           {Platform.OS === 'ios' ? (
-            <AppleButton disabled={busy} onPress={() => runProvider(signInWithApple)} />
+            <AppleButton disabled={busy} onPress={() => runProvider(signInWithApple, 'apple')} />
           ) : null}
-          <GoogleButton disabled={busy} onPress={() => runProvider(signInWithGoogle)} />
+          <GoogleButton disabled={busy} onPress={() => runProvider(signInWithGoogle, 'google')} />
           <EmailButton
             disabled={busy}
             onPress={() => {

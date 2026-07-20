@@ -9,6 +9,37 @@ import { supabase } from '@/lib/supabase';
 
 WebBrowser.maybeCompleteAuthSession();
 
+export class AuthCancelledError extends Error {
+  constructor() {
+    super('Sign-in was cancelled.');
+    this.name = 'AuthCancelledError';
+  }
+}
+
+function isAppleCancellation(error: unknown): boolean {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'code' in error &&
+    (error as { code?: string }).code === 'ERR_REQUEST_CANCELED'
+  );
+}
+
+async function requestAppleCredential(hashedNonce: string) {
+  try {
+    return await AppleAuthentication.signInAsync({
+      requestedScopes: [
+        AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+        AppleAuthentication.AppleAuthenticationScope.EMAIL,
+      ],
+      nonce: hashedNonce,
+    });
+  } catch (error) {
+    if (isAppleCancellation(error)) throw new AuthCancelledError();
+    throw error;
+  }
+}
+
 export async function signInWithApple(): Promise<void> {
   if (!hasSupabase) return;
   const rawNonce = Crypto.randomUUID();
@@ -16,13 +47,7 @@ export async function signInWithApple(): Promise<void> {
     Crypto.CryptoDigestAlgorithm.SHA256,
     rawNonce,
   );
-  const credential = await AppleAuthentication.signInAsync({
-    requestedScopes: [
-      AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
-      AppleAuthentication.AppleAuthenticationScope.EMAIL,
-    ],
-    nonce: hashedNonce,
-  });
+  const credential = await requestAppleCredential(hashedNonce);
   if (!credential.identityToken) {
     throw new Error('Apple sign-in did not return an identity token.');
   }
@@ -68,7 +93,7 @@ export async function signInWithGoogle(): Promise<void> {
   if (!data.url) throw new Error('Google sign-in could not be started.');
   const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
   if (result.type !== 'success') {
-    throw new Error('Google sign-in was cancelled.');
+    throw new AuthCancelledError();
   }
   const session = await createSessionFromUrl(result.url);
   if (!session) {
