@@ -7,6 +7,8 @@ import { GlassGroup, GlassSurface } from '@/components/ui/glass';
 import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { TitleBlock } from '@/components/ui/title-block';
 import { colors, layout, withAlpha } from '@/constants/theme';
+import { content } from '@/constants/content';
+import { useFlow } from '../hooks/use-flow';
 
 const CARD_HEIGHT = 358;
 const COLUMN_WIDTH = 102;
@@ -34,6 +36,7 @@ function cardGlows(width: number): CardGlow[] {
 }
 
 export default function ComparisonScreen() {
+  const flow = useFlow('comparison');
   const [cardWidth, setCardWidth] = useState(0);
   const barRevealed = useSharedValue(0);
 
@@ -52,9 +55,9 @@ export default function ComparisonScreen() {
   const glows = cardGlows(cardWidth);
 
   return (
-    <OnboardingScaffold step="comparison" ctaTitle="Continue">
+    <OnboardingScaffold flow={flow} ctaTitle={content.common.continue}>
       <View style={styles.container}>
-        <TitleBlock title="Quit twice as fast with Quit Snus vs on your own" />
+        <TitleBlock title={content.comparison.title} />
         <View style={styles.card} onLayout={handleCardLayout}>
           {cardWidth > 0 ? (
             <Svg width={cardWidth} height={CARD_HEIGHT} style={StyleSheet.absoluteFill}>
@@ -90,11 +93,11 @@ export default function ComparisonScreen() {
                 radius={layout.cardRadius}
                 tintColor={withAlpha(colors.white, 0.85)}
                 style={styles.column}>
-                <Text style={styles.columnLabel}>{'Without\nQuit Snus'}</Text>
+                <Text style={styles.columnLabel}>{content.comparison.columnLeft}</Text>
                 <View style={styles.columnSpacer} />
                 <View style={styles.badgeInset}>
                   <View style={styles.badge}>
-                    <Text style={styles.badgeLabel}>20%</Text>
+                    <Text style={styles.badgeLabel}>{content.comparison.badgeLabel}</Text>
                   </View>
                 </View>
               </GlassSurface>
@@ -102,17 +105,17 @@ export default function ComparisonScreen() {
                 radius={layout.cardRadius}
                 tintColor={withAlpha(colors.white, 0.85)}
                 style={styles.column}>
-                <Text style={styles.columnLabel}>{'With\nQuit Snus'}</Text>
+                <Text style={styles.columnLabel}>{content.comparison.columnRight}</Text>
                 <View style={styles.columnSpacer} />
                 <Animated.View style={[styles.bar, barAnimatedStyle]}>
-                  <Text style={styles.barLabel}>2X</Text>
+                  <Text style={styles.barLabel}>{content.comparison.barLabel}</Text>
                 </Animated.View>
               </GlassSurface>
             </GlassGroup>
             <Text style={styles.caption}>
-              <Text style={styles.captionDark}>Quit Snus makes it easy and holds</Text>
+              <Text style={styles.captionDark}>{content.comparison.captionDark}</Text>
               {'\n'}
-              <Text style={styles.captionLight}>you accountable.</Text>
+              <Text style={styles.captionLight}>{content.comparison.captionLight}</Text>
             </Text>
             <View style={styles.cardBottomSpacer} />
           </View>

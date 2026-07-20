@@ -65,10 +65,14 @@ export async function signInWithGoogle(): Promise<void> {
     options: { redirectTo, skipBrowserRedirect: true },
   });
   if (error) throw error;
-  if (!data.url) return;
+  if (!data.url) throw new Error('Google sign-in could not be started.');
   const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
-  if (result.type === 'success') {
-    await createSessionFromUrl(result.url);
+  if (result.type !== 'success') {
+    throw new Error('Google sign-in was cancelled.');
+  }
+  const session = await createSessionFromUrl(result.url);
+  if (!session) {
+    throw new Error('Google sign-in did not return a session.');
   }
 }
 
@@ -76,14 +80,14 @@ export async function signInWithEmail(email: string): Promise<void> {
   if (!hasSupabase) return;
   const { error } = await supabase.auth.signInWithOtp({
     email,
-    options: { emailRedirectTo: Linking.createURL('/') },
+    options: { shouldCreateUser: true },
   });
   if (error) throw error;
 }
 
-export async function signInAsGuest(): Promise<void> {
+export async function verifyEmailOtp(email: string, token: string): Promise<void> {
   if (!hasSupabase) return;
-  const { error } = await supabase.auth.signInAnonymously();
+  const { error } = await supabase.auth.verifyOtp({ email, token, type: 'email' });
   if (error) throw error;
 }
 

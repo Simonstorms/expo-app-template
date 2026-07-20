@@ -15,6 +15,7 @@ import { PrimaryCTA } from '@/components/ui/primary-cta';
 import { TitleBlock } from '@/components/ui/title-block';
 import { useOnboarding } from '../store';
 import { colors, layout, withAlpha } from '@/constants/theme';
+import { content } from '@/constants/content';
 import { useFlow } from '../hooks/use-flow';
 
 const LINE_INK = '#0A0A0E';
@@ -62,7 +63,8 @@ function LabelPill({
 
 export default function AppleHealthScreen() {
   const set = useOnboarding((state) => state.set);
-  const { advance } = useFlow('apple-health');
+  const flow = useFlow('apple-health');
+  const { advance } = flow;
   const insets = useSafeAreaInsets();
 
   const onConnect = () => {
@@ -71,7 +73,7 @@ export default function AppleHealthScreen() {
   };
 
   return (
-    <OnboardingScaffold step="apple-health" ctaTitle={null}>
+    <OnboardingScaffold flow={flow} ctaTitle={null}>
       <View style={styles.container}>
         <View style={styles.illustration}>
           <View style={styles.circle} />
@@ -86,8 +88,8 @@ export default function AppleHealthScreen() {
             <Path d={ARROWHEADS} fill={LINE_INK} />
           </Svg>
 
-          <LabelPill text="Walking" height={29.3} left={53.3} top={43} />
-          <LabelPill text="Running" height={30.7} left={32.7} top={82} />
+          <LabelPill text={content.appleHealth.labelWalking} height={29.3} left={53.3} top={43} />
+          <LabelPill text={content.appleHealth.labelRunning} height={30.7} left={32.7} top={82} />
 
           <GlassSurface
             radius={18}
@@ -113,8 +115,8 @@ export default function AppleHealthScreen() {
             <Icon name="leaf.fill" size={34} color={colors.white} />
           </GlassSurface>
 
-          <LabelPill text="Heart Rate" height={31.7} left={274.3} top={113.3} />
-          <LabelPill text="Sleep" height={30} left={250.3} top={153.3} />
+          <LabelPill text={content.appleHealth.labelHeartRate} height={31.7} left={274.3} top={113.3} />
+          <LabelPill text={content.appleHealth.labelSleep} height={30} left={250.3} top={153.3} />
 
           <GlassSurface
             radius={9.15}
@@ -126,11 +128,8 @@ export default function AppleHealthScreen() {
         </View>
 
         <View style={styles.titleGap} />
-        <TitleBlock title={'Connect to\nApple Health'} />
-        <Text style={styles.subtitle}>
-          Sync your daily activity between Quit Snus and the Health app to have the most thorough
-          data.
-        </Text>
+        <TitleBlock title={content.appleHealth.title} />
+        <Text style={styles.subtitle}>{content.appleHealth.subtitle}</Text>
 
         <View style={styles.spacer} />
 
@@ -143,10 +142,10 @@ export default function AppleHealthScreen() {
             pointerEvents="none"
           />
           <View style={styles.ctaWrap}>
-            <PrimaryCTA title="Continue" onPress={onConnect} />
+            <PrimaryCTA title={content.common.continue} onPress={onConnect} />
           </View>
           <Pressable style={styles.notNow} onPress={advance}>
-            <Text style={styles.notNowText}>Not now</Text>
+            <Text style={styles.notNowText}>{content.appleHealth.skip}</Text>
           </Pressable>
         </View>
       </View>

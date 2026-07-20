@@ -9,6 +9,7 @@ import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { TitleBlock } from '@/components/ui/title-block';
 import { useOnboarding } from '../store';
 import { colors, layout, withAlpha } from '@/constants/theme';
+import { content } from '@/constants/content';
 import { useFlow } from '../hooks/use-flow';
 
 const ink = '#1E1A22';
@@ -25,11 +26,12 @@ const footerFill = 'rgba(254, 254, 254, 0.94)';
 
 export default function RolloverScreen() {
   const set = useOnboarding((state) => state.set);
-  const { advance } = useFlow('rollover');
+  const flow = useFlow('rollover');
+  const { advance } = flow;
 
   return (
     <OnboardingScaffold
-      step="rollover"
+      flow={flow}
       footer={
         <View style={styles.footer}>
           <View style={styles.footerHairline} />
@@ -44,18 +46,18 @@ export default function RolloverScreen() {
         </View>
       }>
       <View style={styles.container}>
-        <TitleBlock title="Roll over unused pouches to the next day?" />
+        <TitleBlock title={content.rollover.title} />
         <View style={styles.pillWrap}>
           <GlassSurface radius={13} tintColor={withAlpha(colors.progressTrack, 0.7)} style={styles.pill}>
             <Text style={styles.pillText}>
-              <Text style={{ color: ink }}>Roll over up to </Text>
-              <Text style={{ color: blue }}>2 pouches</Text>
+              <Text style={{ color: ink }}>{content.rollover.pillPrefix}</Text>
+              <Text style={{ color: blue }}>{content.rollover.pillHighlight}</Text>
             </Text>
           </GlassSurface>
         </View>
         <GlassGroup style={styles.illustration}>
           <DayCard left={28.7} top={0} height={210}>
-            <DayCardHeader title="Yesterday" titleColor={salmon} fill={headerPink} />
+            <DayCardHeader title={content.rollover.dayYesterday} titleColor={salmon} fill={headerPink} />
             <CountText denominatorText="/5" />
             <MiniRing start={0} end={0.76} track={ringTrackA} left={42} top={111} />
             <LeftBadge
@@ -66,7 +68,7 @@ export default function RolloverScreen() {
             />
           </DayCard>
           <DayCard left={204.7} top={63} height={228}>
-            <DayCardHeader title="Today" titleColor={ink} fill={headerGray} />
+            <DayCardHeader title={content.rollover.dayToday} titleColor={ink} fill={headerGray} />
             <CountText denominatorText="/7" />
             <RolloverChip left={12.7} top={87.7} />
             <MiniRing start={0.017} end={0.8} track={ringTrackB} left={41.6} top={129.7} />
@@ -193,7 +195,7 @@ function LeftBadge({
 }) {
   return (
     <View style={[styles.badge, { width, left, top }]}>
-      <Text style={styles.badgeText}>Left</Text>
+      <Text style={styles.badgeText}>{content.rollover.badgeLabel}</Text>
       {secondLine}
     </View>
   );

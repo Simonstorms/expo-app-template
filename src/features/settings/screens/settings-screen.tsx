@@ -1,4 +1,3 @@
-import { LinearGradient } from 'expo-linear-gradient';
 import { Fragment } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -9,7 +8,9 @@ import { restorePurchases } from '@/features/paywall/api';
 import { useEntitlement } from '@/features/paywall/hooks/use-entitlement';
 import { GlassSurface } from '@/components/ui/glass';
 import { Icon } from '@/components/ui/icon';
-import { backgroundGradient, colors, withAlpha } from '@/constants/theme';
+import { ScreenBackground } from '@/components/ui/screen-background';
+import { content } from '@/constants/content';
+import { colors, withAlpha } from '@/constants/theme';
 
 const dangerRed = '#DC6868';
 
@@ -36,24 +37,29 @@ export default function SettingsScreen() {
   const sections: Section[] = [
     {
       key: 'account',
-      title: 'Account',
+      title: content.settings.sectionAccount,
       rows: [
         {
           symbol: 'person.crop.circle.fill',
-          label: 'Signed in',
-          value: user?.email ?? 'Guest',
+          label: content.settings.accountSignedIn,
+          value: user?.email ?? content.settings.accountGuest,
           onPress: noop,
         },
       ],
     },
     {
       key: 'subscription',
-      title: 'Subscription',
+      title: content.settings.sectionSubscription,
       rows: [
-        { symbol: 'crown.fill', label: 'Quit Snus Pro', value: isPro ? 'Active' : 'Free', onPress: noop },
+        {
+          symbol: 'crown.fill',
+          label: content.settings.subPro,
+          value: isPro ? content.settings.subActive : content.settings.subFree,
+          onPress: noop,
+        },
         {
           symbol: 'arrow.clockwise',
-          label: 'Restore purchases',
+          label: content.settings.subRestore,
           onPress: () => {
             void restorePurchases();
           },
@@ -62,19 +68,19 @@ export default function SettingsScreen() {
     },
     {
       key: 'preferences',
-      title: 'Preferences',
+      title: content.settings.sectionPreferences,
       rows: [
-        { symbol: 'bell.fill', label: 'Notifications', onPress: noop },
-        { symbol: 'clock.fill', label: 'Reminders', onPress: noop },
+        { symbol: 'bell.fill', label: content.settings.prefNotifications, onPress: noop },
+        { symbol: 'clock.fill', label: content.settings.prefReminders, onPress: noop },
       ],
     },
     {
       key: 'about',
-      title: 'About',
+      title: content.settings.sectionAbout,
       rows: [
-        { symbol: 'lock.fill', label: 'Privacy Policy', onPress: noop },
-        { symbol: 'doc.text.fill', label: 'Terms of Service', onPress: noop },
-        { symbol: 'star.fill', label: 'Rate Quit Snus', onPress: noop },
+        { symbol: 'lock.fill', label: content.settings.aboutPrivacy, onPress: noop },
+        { symbol: 'doc.text.fill', label: content.settings.aboutTerms, onPress: noop },
+        { symbol: 'star.fill', label: content.settings.aboutRate, onPress: noop },
       ],
     },
     {
@@ -82,30 +88,31 @@ export default function SettingsScreen() {
       rows: [
         {
           symbol: 'rectangle.portrait.and.arrow.right',
-          label: 'Sign out',
+          label: content.settings.signOut,
           onPress: () => {
             void signOut();
           },
         },
-        { symbol: 'trash.fill', label: 'Delete account', tint: dangerRed, onPress: noop },
+        {
+          symbol: 'trash.fill',
+          label: content.settings.deleteAccount,
+          tint: dangerRed,
+          onPress: noop,
+        },
       ],
     },
   ];
 
   return (
     <View style={styles.root}>
-      <LinearGradient
-        colors={backgroundGradient.colors}
-        locations={backgroundGradient.locations}
-        style={StyleSheet.absoluteFill}
-      />
+      <ScreenBackground />
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[
           styles.content,
           { paddingTop: insets.top + 12, paddingBottom: insets.bottom + 28 },
         ]}>
-        <Text style={styles.screenTitle}>Settings</Text>
+        <Text style={styles.screenTitle}>{content.settings.title}</Text>
         {sections.map((section) => (
           <View key={section.key} style={styles.section}>
             {section.title ? <Text style={styles.sectionLabel}>{section.title}</Text> : null}
@@ -119,7 +126,7 @@ export default function SettingsScreen() {
             </GlassSurface>
           </View>
         ))}
-        <Text style={styles.version}>Quit Snus · v1.0.0</Text>
+        <Text style={styles.version}>{content.settings.version}</Text>
       </ScrollView>
     </View>
   );

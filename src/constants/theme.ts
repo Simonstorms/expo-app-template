@@ -1,4 +1,4 @@
-import { Platform, type TextStyle } from 'react-native';
+import { type TextStyle } from 'react-native';
 
 export const colors = {
   ink: '#000000',
@@ -27,8 +27,6 @@ export const backgroundGradient = {
   colors: ['#FFFFFF', '#FFFFFF', '#F7F7F8'] as const,
   locations: [0, 0.6, 1] as const,
 };
-
-export const fontFamily = Platform.select({ ios: 'System', default: undefined });
 
 export const text = {
   title: {

@@ -61,7 +61,7 @@ export function SelectionRow({
   );
 }
 
-export function IconCircle({
+function IconCircle({
   symbol,
   size,
   selected,

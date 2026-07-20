@@ -6,22 +6,23 @@ import { Icon } from '@/components/ui/icon';
 import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { TitleBlock } from '@/components/ui/title-block';
 import { useOnboarding } from '../store';
+import { content } from '@/constants/content';
 import { colors, text, withAlpha } from '@/constants/theme';
-import { obstacleOptions } from '../types';
 import { useFlow } from '../hooks/use-flow';
 
 export default function ObstaclesScreen() {
   const obstacle = useOnboarding((state) => state.obstacle);
   const set = useOnboarding((state) => state.set);
-  const { selectAndAdvance } = useFlow('obstacles');
+  const flow = useFlow('obstacles');
+  const { selectAndAdvance } = flow;
 
   return (
-    <OnboardingScaffold step="obstacles" ctaTitle={null}>
+    <OnboardingScaffold flow={flow} ctaTitle={null}>
       <View style={styles.container}>
-        <TitleBlock title="What’s stopping you from quitting?" />
+        <TitleBlock title={content.obstacles.title} />
         <ScrollView showsVerticalScrollIndicator={false}>
           <GlassGroup spacing={10} style={styles.group}>
-            {obstacleOptions.map((option) => (
+            {content.obstacles.options.map((option) => (
               <ObstacleRow
                 key={option.id}
                 label={option.label}

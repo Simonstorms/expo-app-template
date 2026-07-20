@@ -2,18 +2,24 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { colors, text } from '@/constants/theme';
+import { content } from '@/constants/content';
+import { useFlow } from '../hooks/use-flow';
 
 export default function RealisticTargetScreen() {
+  const flow = useFlow('realistic-target');
+  const [headlineStart, headlineEnd = ''] = content.realisticTarget.headline.split(
+    content.realisticTarget.headlineHighlight,
+  );
+
   return (
-    <OnboardingScaffold step="realistic-target" ctaTitle="Continue">
+    <OnboardingScaffold flow={flow} ctaTitle={content.common.continue}>
       <View style={styles.container}>
         <Text style={styles.headline}>
-          Quitting in <Text style={styles.highlight}>90 days</Text> is a realistic target. It’s not hard at
-          all!
+          {headlineStart}
+          <Text style={styles.highlight}>{content.realisticTarget.headlineHighlight}</Text>
+          {headlineEnd}
         </Text>
-        <Text style={styles.caption}>
-          90% of users say cravings fade noticeably after the first week with Quit Snus.
-        </Text>
+        <Text style={styles.caption}>{content.realisticTarget.caption}</Text>
       </View>
     </OnboardingScaffold>
   );

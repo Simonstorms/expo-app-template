@@ -1,4 +1,6 @@
-import { config, hasSuperwall } from '@/constants/config';
+import type { SubscriptionStatus } from 'expo-superwall';
+
+import { config } from '@/constants/config';
 
 export const superwallApiKeys = {
   ios: config.superwallIosKey,
@@ -7,4 +9,10 @@ export const superwallApiKeys = {
 
 export const paywallPlacement = config.superwallPlacement;
 
-export { hasSuperwall };
+export function subscriptionStatusFor(isPro: boolean): SubscriptionStatus {
+  if (!isPro) return { status: 'INACTIVE' };
+  return {
+    status: 'ACTIVE',
+    entitlements: [{ id: config.revenueCatEntitlement, type: 'SERVICE_LEVEL' }],
+  };
+}

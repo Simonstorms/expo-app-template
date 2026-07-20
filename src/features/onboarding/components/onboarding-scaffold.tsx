@@ -1,16 +1,15 @@
-import { LinearGradient } from 'expo-linear-gradient';
 import type { ReactNode } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { BackChip, LanguagePill, ProgressBar } from './header';
 import { PrimaryCTA } from '@/components/ui/primary-cta';
-import { backgroundGradient, colors, layout } from '@/constants/theme';
-import type { Step } from '../steps';
-import { useFlow } from '../hooks/use-flow';
+import { ScreenBackground } from '@/components/ui/screen-background';
+import { colors, layout } from '@/constants/theme';
+import type { OnboardingFlow } from '../hooks/use-flow';
 
 export function OnboardingScaffold({
-  step,
+  flow,
   ctaTitle,
   ctaEnabled = true,
   showsLanguagePill = false,
@@ -18,7 +17,7 @@ export function OnboardingScaffold({
   footer,
   children,
 }: {
-  step: Step;
+  flow: OnboardingFlow;
   ctaTitle?: string | null;
   ctaEnabled?: boolean;
   showsLanguagePill?: boolean;
@@ -26,16 +25,11 @@ export function OnboardingScaffold({
   footer?: ReactNode;
   children: ReactNode;
 }) {
-  const flow = useFlow(step);
   const insets = useSafeAreaInsets();
 
   return (
     <View style={styles.root}>
-      <LinearGradient
-        colors={backgroundGradient.colors}
-        locations={backgroundGradient.locations}
-        style={StyleSheet.absoluteFill}
-      />
+      <ScreenBackground />
       <View style={[styles.body, { paddingTop: insets.top }]}>
         {flow.showsChrome && (
           <View style={[styles.header, { paddingRight: showsLanguagePill ? 16 : 32 }]}>

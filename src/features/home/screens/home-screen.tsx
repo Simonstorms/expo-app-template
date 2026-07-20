@@ -1,4 +1,3 @@
-import { LinearGradient } from 'expo-linear-gradient';
 import type { ReactNode } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -7,7 +6,9 @@ import Svg, { Circle } from 'react-native-svg';
 import { GlassGroup, GlassSurface } from '@/components/ui/glass';
 import { Icon } from '@/components/ui/icon';
 import { PrimaryCTA } from '@/components/ui/primary-cta';
-import { backgroundGradient, colors, withAlpha } from '@/constants/theme';
+import { ScreenBackground } from '@/components/ui/screen-background';
+import { content } from '@/constants/content';
+import { colors, withAlpha } from '@/constants/theme';
 
 const accentOrange = '#DE9B6C';
 const accentRed = '#DC6868';
@@ -18,11 +19,7 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.root}>
-      <LinearGradient
-        colors={backgroundGradient.colors}
-        locations={backgroundGradient.locations}
-        style={StyleSheet.absoluteFill}
-      />
+      <ScreenBackground />
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[
@@ -31,14 +28,14 @@ export default function HomeScreen() {
         ]}>
         <View style={styles.header}>
           <Icon name="leaf.fill" size={22} weight="semibold" color={colors.ctaFill} />
-          <Text style={styles.wordmark}>Quit Snus</Text>
+          <Text style={styles.wordmark}>{content.home.wordmark}</Text>
         </View>
 
         <GlassSurface radius={22} tintColor={withAlpha(colors.white, 0.85)} style={styles.heroCard}>
           <View style={styles.heroText}>
-            <Text style={styles.heroValue}>12</Text>
-            <Text style={styles.heroLabel}>Days snus-free</Text>
-            <Text style={styles.heroSub}>You are building a strong streak.</Text>
+            <Text style={styles.heroValue}>{content.home.heroValue}</Text>
+            <Text style={styles.heroLabel}>{content.home.heroLabel}</Text>
+            <Text style={styles.heroSub}>{content.home.heroSub}</Text>
           </View>
           <Ring diameter={92} lineWidth={8} progress={0.62} tint={colors.ink}>
             <Icon name="leaf.fill" size={24} weight="semibold" color={colors.ink} />
@@ -46,31 +43,31 @@ export default function HomeScreen() {
         </GlassSurface>
 
         <View style={styles.statRow}>
-          <StatCard label="Avoided" value="84" tint={accentRed} progress={0.72} symbol="capsule.portrait.fill" />
-          <StatCard label="Saved" value="45,00 €" tint={accentOrange} progress={0.55} symbol="banknote.fill" />
-          <StatCard label="Health" value="92%" tint={accentBlue} progress={0.92} symbol="heart.fill" />
+          <StatCard label={content.home.statAvoidedLabel} value={content.home.statAvoidedValue} tint={accentRed} progress={0.72} symbol="capsule.portrait.fill" />
+          <StatCard label={content.home.statSavedLabel} value={content.home.statSavedValue} tint={accentOrange} progress={0.55} symbol="banknote.fill" />
+          <StatCard label={content.home.statHealthLabel} value={content.home.statHealthValue} tint={accentBlue} progress={0.92} symbol="heart.fill" />
         </View>
 
-        <Text style={styles.sectionTitle}>Recent check-ins</Text>
+        <Text style={styles.sectionTitle}>{content.home.sectionTitle}</Text>
         <GlassGroup spacing={11}>
           <CheckInRow
-            title="Craving resisted at work"
-            time="14:10"
-            detail="3 cravings resisted"
+            title={content.home.checkinCravingTitle}
+            time={content.home.checkinCravingTime}
+            detail={content.home.checkinCravingDetail}
             symbol="flame.fill"
             tint={accentRed}
           />
           <CheckInRow
-            title="Walked instead of a pouch"
-            time="08:32"
-            detail="20 min of activity"
+            title={content.home.checkinWalkTitle}
+            time={content.home.checkinWalkTime}
+            detail={content.home.checkinWalkDetail}
             symbol="figure.walk"
             tint={accentBlue}
           />
         </GlassGroup>
 
         <View style={styles.cta}>
-          <PrimaryCTA title="Log a check-in" onPress={() => {}} />
+          <PrimaryCTA title={content.home.cta} onPress={() => {}} />
         </View>
       </ScrollView>
     </View>

@@ -12,6 +12,8 @@ import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { TitleBlock } from '@/components/ui/title-block';
 import { useOnboarding } from '../store';
 import { colors, text } from '@/constants/theme';
+import { content } from '@/constants/content';
+import { useFlow } from '../hooks/use-flow';
 
 const wheelValues = Array.from({ length: 40 }, (_, index) => index + 1);
 
@@ -22,13 +24,14 @@ export default function HabitsScreen() {
   const yearsOfUse = useOnboarding((state) => state.yearsOfUse);
   const pouchesPerDay = useOnboarding((state) => state.pouchesPerDay);
   const set = useOnboarding((state) => state.set);
+  const flow = useFlow('habits');
 
   return (
-    <OnboardingScaffold step="habits" ctaTitle="Continue">
+    <OnboardingScaffold flow={flow} ctaTitle={content.common.continue}>
       <View style={styles.container}>
         <TitleBlock
-          title="Your snus habits"
-          subtitle="This will be used to calibrate your custom plan."
+          title={content.habits.title}
+          subtitle={content.habits.subtitle}
         />
         <View style={styles.topSpacer} />
         <TypeToggle
@@ -36,8 +39,8 @@ export default function HabitsScreen() {
           onToggle={() => set('snusType', snusType === 'loose' ? 'pouches' : 'loose')}
         />
         <View style={styles.headers}>
-          <Text style={[text.row, styles.headerYears]}>Years of use</Text>
-          <Text style={[text.row, styles.headerPerDay]}>Per day</Text>
+          <Text style={[text.row, styles.headerYears]}>{content.habits.headerYears}</Text>
+          <Text style={[text.row, styles.headerPerDay]}>{content.habits.headerPerDay}</Text>
         </View>
         <View style={styles.wheels}>
           <Picker<number>
@@ -48,7 +51,7 @@ export default function HabitsScreen() {
             {wheelValues.map((value) => (
               <Picker.Item
                 key={value}
-                label={value === 1 ? '1 year' : `${value} years`}
+                label={value === 1 ? `1 ${content.habits.yearSingular}` : `${value} ${content.habits.yearPlural}`}
                 value={value}
               />
             ))}
@@ -86,7 +89,7 @@ function TypeToggle({ isLoose, onToggle }: { isLoose: boolean; onToggle: () => v
   return (
     <Pressable style={styles.toggle} onPress={onToggle}>
       <Animated.Text style={[styles.toggleLabel, styles.pouchesLabel, pouchesStyle]}>
-        Pouches
+        {content.habits.typePouches}
       </Animated.Text>
       <GlassSurface
         radius={15.5}
@@ -97,7 +100,7 @@ function TypeToggle({ isLoose, onToggle }: { isLoose: boolean; onToggle: () => v
         <Animated.View style={[styles.capsuleBorder, borderStyle]} />
       </GlassSurface>
       <Animated.Text style={[styles.toggleLabel, styles.looseLabel, looseStyle]}>
-        Loose
+        {content.habits.typeLoose}
       </Animated.Text>
     </Pressable>
   );

@@ -7,6 +7,7 @@ import { GlassSurface } from '@/components/ui/glass';
 import { Icon } from '@/components/ui/icon';
 import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { PrimaryCTA } from '@/components/ui/primary-cta';
+import { content } from '@/constants/content';
 import { colors, layout, withAlpha } from '@/constants/theme';
 import { useFlow } from '../hooks/use-flow';
 import { usePlan } from '../hooks/use-plan';
@@ -28,11 +29,12 @@ const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
 
 export default function PlanReadyScreen() {
   const { goalDate, dailyLimit, moneySaved } = usePlan();
-  const { advance } = useFlow('plan-ready');
+  const flow = useFlow('plan-ready');
+  const { advance } = flow;
   const insets = useSafeAreaInsets();
 
   return (
-    <OnboardingScaffold step="plan-ready" ctaTitle={null}>
+    <OnboardingScaffold flow={flow} ctaTitle={null}>
       <View style={styles.container}>
         <ScrollView
           showsVerticalScrollIndicator={false}
@@ -40,31 +42,31 @@ export default function PlanReadyScreen() {
           <View style={styles.checkBadge}>
             <Icon name="checkmark" size={15} weight="bold" color={colors.white} />
           </View>
-          <Text style={styles.headline}>{'Congratulations\nyour custom plan is ready!'}</Text>
-          <Text style={styles.subhead}>You should be snus-free by:</Text>
+          <Text style={styles.headline}>{content.planReady.headline}</Text>
+          <Text style={styles.subhead}>{content.planReady.subhead}</Text>
           <GlassSurface
             radius={49 / 2}
             tintColor={withAlpha(colors.cardFill, 0.85)}
             style={styles.goalPill}>
-            <Text style={styles.goalPillText}>{`Snus-free by ${goalDate}`}</Text>
+            <Text style={styles.goalPillText}>{`${content.planReady.goalPrefix} ${goalDate}`}</Text>
           </GlassSurface>
           <View style={styles.card}>
-            <Text style={styles.cardTitle}>Daily recommendation</Text>
-            <Text style={styles.cardSubtitle}>You can edit this anytime</Text>
+            <Text style={styles.cardTitle}>{content.planReady.cardTitle}</Text>
+            <Text style={styles.cardSubtitle}>{content.planReady.cardSubtitle}</Text>
             <View style={styles.tileGrid}>
               <View style={styles.tileRow}>
                 <MetricTile
                   symbol="capsule.portrait.fill"
                   iconTint={colors.ink}
-                  label="Daily limit"
+                  label={content.planReady.metricDailyLimitLabel}
                   value={dailyLimit}
-                  unit="pouches"
+                  unit={content.planReady.metricDailyLimitUnit}
                   ringColor={colors.ink}
                 />
                 <MetricTile
                   symbol="banknote.fill"
                   iconTint={ringOrange}
-                  label="Money saved"
+                  label={content.planReady.metricMoneySavedLabel}
                   value={moneySaved}
                   ringColor={ringOrange}
                 />
@@ -73,15 +75,15 @@ export default function PlanReadyScreen() {
                 <MetricTile
                   symbol="brain.fill"
                   iconTint={ringRed}
-                  label="Craving level"
-                  value="Low"
+                  label={content.planReady.metricCravingLabel}
+                  value={content.planReady.metricCravingValue}
                   ringColor={ringRed}
                 />
                 <MetricTile
                   symbol="heart.fill"
                   iconTint={ringBlue}
-                  label="Health score"
-                  value="7/10"
+                  label={content.planReady.metricHealthLabel}
+                  value={content.planReady.metricHealthValue}
                   ringColor={ringBlue}
                 />
               </View>
@@ -97,7 +99,7 @@ export default function PlanReadyScreen() {
             pointerEvents="none"
           />
           <View style={[styles.ctaWrap, { paddingBottom: insets.bottom + 8 }]}>
-            <PrimaryCTA title="Let's get started!" onPress={advance} />
+            <PrimaryCTA title={content.planReady.cta} onPress={advance} />
           </View>
         </View>
       </View>

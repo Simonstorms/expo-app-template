@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const ONBOARDING_COMPLETE_KEY = 'quitsnus.onboarding-complete';
+const ONBOARDING_COMPLETE_KEY = 'app.onboarding-complete';
 
 export async function setOnboardingComplete(value: boolean): Promise<void> {
   await AsyncStorage.setItem(ONBOARDING_COMPLETE_KEY, value ? '1' : '0');

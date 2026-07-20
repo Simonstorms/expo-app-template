@@ -5,25 +5,26 @@ import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { SelectionRow } from '@/components/ui/selection-row';
 import { TitleBlock } from '@/components/ui/title-block';
 import { useOnboarding } from '../store';
+import { content } from '@/constants/content';
 import { layout } from '@/constants/theme';
-import { goalOptions } from '../types';
 import { useFlow } from '../hooks/use-flow';
 
 export default function GoalScreen() {
   const goal = useOnboarding((state) => state.goal);
   const set = useOnboarding((state) => state.set);
-  const { selectAndAdvance } = useFlow('goal');
+  const flow = useFlow('goal');
+  const { selectAndAdvance } = flow;
 
   return (
-    <OnboardingScaffold step="goal" ctaTitle={null}>
+    <OnboardingScaffold flow={flow} ctaTitle={null}>
       <View style={styles.container}>
         <TitleBlock
-          title="What is your goal?"
-          subtitle="This helps us generate your personalized quit plan."
+          title={content.goal.title}
+          subtitle={content.goal.subtitle}
         />
         <View style={styles.spacer} />
         <GlassGroup spacing={22} style={styles.group}>
-          {goalOptions.map((option) => (
+          {content.goal.options.map((option) => (
             <SelectionRow
               key={option.id}
               title={option.label}

@@ -5,6 +5,8 @@ import { GradientRing } from '@/components/ui/gradient-ring';
 import { Icon } from '@/components/ui/icon';
 import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { colors, layout, withAlpha } from '@/constants/theme';
+import { content } from '@/constants/content';
+import { useFlow } from '../hooks/use-flow';
 
 type ConfettiMark = {
   id: number;
@@ -40,8 +42,10 @@ const CONFETTI_MARKS: ConfettiMark[] = CONFETTI_POINTS.map(([x, y], index) => ({
 }));
 
 export default function TrustPrivacyScreen() {
+  const flow = useFlow('trust-privacy');
+
   return (
-    <OnboardingScaffold step="trust-privacy" ctaTitle="Continue">
+    <OnboardingScaffold flow={flow} ctaTitle={content.common.continue}>
       <View style={styles.container}>
         <View style={styles.illustrationWrap}>
           <GradientRing diameter={201} ringWidth={33}>
@@ -64,8 +68,8 @@ export default function TrustPrivacyScreen() {
           </GradientRing>
         </View>
         <View style={styles.titleWrap}>
-          <Text style={styles.title}>{'Thank you for\ntrusting us'}</Text>
-          <Text style={styles.titleSubtitle}>Now let’s personalize Quit Snus for you…</Text>
+          <Text style={styles.title}>{content.trustPrivacy.title}</Text>
+          <Text style={styles.titleSubtitle}>{content.trustPrivacy.subtitle}</Text>
         </View>
         <View style={styles.cardOuter}>
           <View style={styles.cardShell}>
@@ -74,10 +78,8 @@ export default function TrustPrivacyScreen() {
               tintColor={withAlpha('#F7F6FB', 0.85)}
               style={styles.cardSurface}>
               <View style={styles.cardContent}>
-                <Text style={styles.cardTitle}>Your privacy and security matter to us.</Text>
-                <Text style={styles.cardCaption}>
-                  {'We promise to always keep your\npersonal information private and secure.'}
-                </Text>
+                <Text style={styles.cardTitle}>{content.trustPrivacy.cardTitle}</Text>
+                <Text style={styles.cardCaption}>{content.trustPrivacy.cardCaption}</Text>
               </View>
             </GlassSurface>
             <View style={styles.badgeWrap}>

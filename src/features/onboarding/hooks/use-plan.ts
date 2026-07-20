@@ -1,21 +1,9 @@
+import { formatMoney } from '@/constants/brand';
+import { content } from '@/constants/content';
+
 import { useOnboarding } from '../store';
 
 const QUIT_HORIZON_DAYS = 90;
-
-const monthNames = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
-];
 
 function quitDate(): Date {
   const date = new Date();
@@ -40,9 +28,9 @@ export function usePlan(): Plan {
   const weeklySpend = useOnboarding((state) => state.weeklySpend);
 
   const date = quitDate();
-  const goalDate = `${monthNames[date.getMonth()]} ${date.getDate()}`;
+  const goalDate = `${content.birthdate.monthNames[date.getMonth()]} ${date.getDate()}`;
   const dailyLimit = `${Math.max(1, pouchesPerDay - Math.trunc(reducePerWeek))}`;
-  const moneySaved = `${dailySpend(weeklySpend).toFixed(2)} €`.replace('.', ',');
+  const moneySaved = formatMoney(dailySpend(weeklySpend));
 
   return { quitDate: date, goalDate, dailyLimit, moneySaved };
 }
