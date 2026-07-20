@@ -6,21 +6,19 @@ import { PrimaryCTA } from '@/components/ui/primary-cta';
 import { TitleBlock } from '@/components/ui/title-block';
 import { content } from '@/constants/content';
 import { colors, layout, withAlpha } from '@/constants/theme';
-import { signInWithEmail, verifyEmailOtp } from '../api';
+import { signInWithEmail } from '../api';
 
-type Step = 'email' | 'code';
+type Step = 'email' | 'sent';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const CODE_LENGTH = 6;
 
-export function EmailSignIn({ onSuccess, onBack }: { onSuccess: () => void; onBack: () => void }) {
+export function EmailSignIn({ onBack }: { onBack: () => void }) {
   const [step, setStep] = useState<Step>('email');
   const [email, setEmail] = useState('');
-  const [code, setCode] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  const sendCode = async () => {
+  const sendLink = async () => {
     if (busy) return;
     const trimmed = email.trim();
     if (!EMAIL_PATTERN.test(trimmed)) {
@@ -31,30 +29,10 @@ export function EmailSignIn({ onSuccess, onBack }: { onSuccess: () => void; onBa
     setError(null);
     try {
       await signInWithEmail(trimmed);
-      setCode('');
-      setStep('code');
+      setStep('sent');
     } catch {
       setError(content.signIn.error);
     } finally {
-      setBusy(false);
-    }
-  };
-
-  const verify = async () => {
-    if (busy) return;
-    const trimmed = code.trim();
-    if (trimmed.length < CODE_LENGTH) {
-      setError(content.signIn.invalidCode);
-      return;
-    }
-    setBusy(true);
-    setError(null);
-    try {
-      await verifyEmailOtp(email.trim(), trimmed);
-      setBusy(false);
-      onSuccess();
-    } catch {
-      setError(content.signIn.invalidCode);
       setBusy(false);
     }
   };
@@ -78,17 +56,17 @@ export function EmailSignIn({ onSuccess, onBack }: { onSuccess: () => void; onBa
       </Pressable>
 
       <TitleBlock
-        title={isEmailStep ? content.signIn.emailTitle : content.signIn.codeTitle}
+        title={isEmailStep ? content.signIn.emailTitle : content.signIn.sentTitle}
         subtitle={
           isEmailStep
             ? content.signIn.emailSubtitle
-            : `${content.signIn.codeSubtitlePrefix}${email.trim()}`
+            : `${content.signIn.sentSubtitlePrefix}${email.trim()}${content.signIn.sentSubtitleSuffix}`
         }
       />
 
       <View style={styles.form}>
-        <GlassSurface radius={16} tintColor={withAlpha(colors.white, 0.92)} style={styles.field}>
-          {isEmailStep ? (
+        {isEmailStep ? (
+          <GlassSurface radius={16} tintColor={withAlpha(colors.white, 0.92)} style={styles.field}>
             <TextInput
               value={email}
               onChangeText={setEmail}
@@ -101,24 +79,11 @@ export function EmailSignIn({ onSuccess, onBack }: { onSuccess: () => void; onBa
               textContentType="emailAddress"
               autoFocus
               style={styles.input}
-              onSubmitEditing={sendCode}
+              onSubmitEditing={sendLink}
               returnKeyType="send"
             />
-          ) : (
-            <TextInput
-              value={code}
-              onChangeText={(next) => setCode(next.replace(/[^0-9]/g, '').slice(0, CODE_LENGTH))}
-              placeholder={content.signIn.codePlaceholder}
-              placeholderTextColor={colors.disabledFill}
-              keyboardType="number-pad"
-              textContentType="oneTimeCode"
-              autoFocus
-              style={[styles.input, styles.codeInput]}
-              onSubmitEditing={verify}
-              returnKeyType="done"
-            />
-          )}
-        </GlassSurface>
+          </GlassSurface>
+        ) : null}
 
         {error ? <Text style={styles.error}>{error}</Text> : null}
 
@@ -127,19 +92,14 @@ export function EmailSignIn({ onSuccess, onBack }: { onSuccess: () => void; onBa
             <View style={styles.spinner}>
               <ActivityIndicator color={colors.ink} />
             </View>
+          ) : isEmailStep ? (
+            <PrimaryCTA title={content.signIn.sendLink} onPress={sendLink} />
           ) : (
-            <PrimaryCTA
-              title={isEmailStep ? content.signIn.sendCode : content.signIn.verify}
-              onPress={isEmailStep ? sendCode : verify}
-            />
+            <Pressable onPress={sendLink} style={styles.resendRow} hitSlop={12}>
+              <Text style={styles.resendText}>{content.signIn.resend}</Text>
+            </Pressable>
           )}
         </View>
-
-        {isEmailStep ? null : (
-          <Pressable onPress={sendCode} disabled={busy} style={styles.resendRow} hitSlop={12}>
-            <Text style={styles.resendText}>{content.signIn.resend}</Text>
-          </Pressable>
-        )}
       </View>
     </View>
   );
@@ -175,10 +135,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '500',
     color: colors.ink,
-  },
-  codeInput: {
-    letterSpacing: 8,
-    fontWeight: '700',
   },
   error: {
     fontSize: 14,

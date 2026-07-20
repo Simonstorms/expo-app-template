@@ -1,6 +1,6 @@
-project_id = "quit-snus-template"
+project_id = "expoapptemplate"
 
 [auth]
-enable_anonymous_sign_ins = true
-site_url = "quitsnusonboarding://"
-additional_redirect_urls = ["quitsnusonboarding://"]
+enable_anonymous_sign_ins = false
+site_url = "expoapptemplate://"
+additional_redirect_urls = ["expoapptemplate://", "expoapptemplate://**"]

@@ -59,7 +59,7 @@ export async function signInWithApple(): Promise<void> {
   if (error) throw error;
 }
 
-async function createSessionFromUrl(url: string): Promise<Session | null> {
+export async function completeSessionFromUrl(url: string): Promise<Session | null> {
   const { queryParams } = Linking.parse(url);
   const code = typeof queryParams?.code === 'string' ? queryParams.code : null;
   if (code) {
@@ -95,8 +95,10 @@ export async function signInWithGoogle(): Promise<void> {
   if (result.type !== 'success') {
     throw new AuthCancelledError();
   }
-  const session = await createSessionFromUrl(result.url);
-  if (!session) {
+  const session = await completeSessionFromUrl(result.url).catch(() => null);
+  if (session) return;
+  const { data: existing } = await supabase.auth.getSession();
+  if (!existing.session) {
     throw new Error('Google sign-in did not return a session.');
   }
 }
@@ -105,14 +107,8 @@ export async function signInWithEmail(email: string): Promise<void> {
   if (!hasSupabase) return;
   const { error } = await supabase.auth.signInWithOtp({
     email,
-    options: { shouldCreateUser: true },
+    options: { shouldCreateUser: true, emailRedirectTo: Linking.createURL('/') },
   });
-  if (error) throw error;
-}
-
-export async function verifyEmailOtp(email: string, token: string): Promise<void> {
-  if (!hasSupabase) return;
-  const { error } = await supabase.auth.verifyOtp({ email, token, type: 'email' });
   if (error) throw error;
 }
 

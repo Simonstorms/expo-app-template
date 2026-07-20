@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { AuthCancelledError, signInWithApple, signInWithGoogle } from '../api';
 import { EmailSignIn } from '../components/email-sign-in';
+import { useSession } from '../hooks/use-session';
 import { GoogleLogo } from '@/components/ui/brand-logos';
 import { GlassGroup, GlassSurface } from '@/components/ui/glass';
 import { Icon } from '@/components/ui/icon';
@@ -18,9 +19,18 @@ type Mode = 'options' | 'email';
 export default function SignInScreen() {
   const flow = useFlow('sign-in');
   const { advance } = flow;
+  const { isSignedIn } = useSession();
   const [mode, setMode] = useState<Mode>('options');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const advancedRef = useRef(false);
+
+  useEffect(() => {
+    if (isSignedIn && !advancedRef.current) {
+      advancedRef.current = true;
+      advance();
+    }
+  }, [isSignedIn, advance]);
 
   const runProvider = async (signIn: () => Promise<void>, provider: string) => {
     if (busy) return;
@@ -28,7 +38,6 @@ export default function SignInScreen() {
     setError(null);
     try {
       await signIn();
-      advance();
     } catch (err) {
       if (err instanceof AuthCancelledError) return;
       setError(content.signIn.error);
@@ -41,7 +50,7 @@ export default function SignInScreen() {
   if (mode === 'email') {
     return (
       <OnboardingScaffold flow={{ ...flow, showsChrome: false }} ctaTitle={null}>
-        <EmailSignIn onSuccess={advance} onBack={() => setMode('options')} />
+        <EmailSignIn onBack={() => setMode('options')} />
       </OnboardingScaffold>
     );
   }
