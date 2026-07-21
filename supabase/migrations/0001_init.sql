@@ -63,3 +63,25 @@ $$;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute function public.handle_new_user();
+
+-- handle_new_user runs from the auth.users trigger context, which does not
+-- require EXECUTE on the calling role, so it should not be reachable through
+-- the exposed REST API (PostgREST /rpc).
+revoke execute on function public.handle_new_user() from public, anon, authenticated;
+
+-- Self-service account deletion. Deleting from auth.users cascades to
+-- public.profiles and public.onboarding_responses via their ON DELETE CASCADE
+-- foreign keys. SECURITY DEFINER lets a signed-in user remove their own auth
+-- record; it only ever deletes the caller's own row (auth.uid()), and EXECUTE
+-- is restricted to the authenticated role.
+create or replace function public.delete_current_user()
+returns void
+language sql
+security definer
+set search_path = ''
+as $$
+  delete from auth.users where id = (select auth.uid());
+$$;
+
+revoke execute on function public.delete_current_user() from public, anon;
+grant execute on function public.delete_current_user() to authenticated;

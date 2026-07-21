@@ -1,14 +1,15 @@
 import { Fragment } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { signOut } from '@/features/auth/api';
+import { deleteAccount, signOut } from '@/features/auth/api';
 import { useSession } from '@/features/auth/hooks/use-session';
 import { restorePurchases } from '@/features/paywall/api';
 import { useEntitlement } from '@/features/paywall/hooks/use-entitlement';
 import { GlassSurface } from '@/components/ui/glass';
 import { Icon } from '@/components/ui/icon';
 import { ScreenBackground } from '@/components/ui/screen-background';
+import { brand } from '@/constants/brand';
 import { content } from '@/constants/content';
 import { colors, withAlpha } from '@/constants/theme';
 
@@ -33,6 +34,29 @@ export default function SettingsScreen() {
   const { user } = useSession();
   const { isPro } = useEntitlement();
   const noop = () => {};
+
+  const openUrl = (url: string) => {
+    void Linking.openURL(url).catch(() => {});
+  };
+
+  const openSettings = () => {
+    void Linking.openSettings().catch(() => {});
+  };
+
+  const confirmDeleteAccount = () => {
+    Alert.alert(content.settings.deleteConfirmTitle, content.settings.deleteConfirmBody, [
+      { text: content.settings.deleteConfirmCancel, style: 'cancel' },
+      {
+        text: content.settings.deleteConfirmAction,
+        style: 'destructive',
+        onPress: () => {
+          deleteAccount().catch(() => {
+            Alert.alert(content.settings.deleteErrorTitle, content.settings.deleteErrorBody);
+          });
+        },
+      },
+    ]);
+  };
 
   const sections: Section[] = [
     {
@@ -70,17 +94,29 @@ export default function SettingsScreen() {
       key: 'preferences',
       title: content.settings.sectionPreferences,
       rows: [
-        { symbol: 'bell.fill', label: content.settings.prefNotifications, onPress: noop },
-        { symbol: 'clock.fill', label: content.settings.prefReminders, onPress: noop },
+        { symbol: 'bell.fill', label: content.settings.prefNotifications, onPress: openSettings },
+        { symbol: 'clock.fill', label: content.settings.prefReminders, onPress: openSettings },
       ],
     },
     {
       key: 'about',
       title: content.settings.sectionAbout,
       rows: [
-        { symbol: 'lock.fill', label: content.settings.aboutPrivacy, onPress: noop },
-        { symbol: 'doc.text.fill', label: content.settings.aboutTerms, onPress: noop },
-        { symbol: 'star.fill', label: content.settings.aboutRate, onPress: noop },
+        {
+          symbol: 'lock.fill',
+          label: content.settings.aboutPrivacy,
+          onPress: () => openUrl(brand.legal.privacyUrl),
+        },
+        {
+          symbol: 'doc.text.fill',
+          label: content.settings.aboutTerms,
+          onPress: () => openUrl(brand.legal.termsUrl),
+        },
+        {
+          symbol: 'star.fill',
+          label: content.settings.aboutRate,
+          onPress: () => openUrl(brand.legal.appStoreUrl),
+        },
       ],
     },
     {
@@ -97,7 +133,7 @@ export default function SettingsScreen() {
           symbol: 'trash.fill',
           label: content.settings.deleteAccount,
           tint: dangerRed,
-          onPress: noop,
+          onPress: confirmDeleteAccount,
         },
       ],
     },

@@ -353,5 +353,12 @@ export const content = {
     aboutRate: `Rate ${brand.appName}`,
     signOut: 'Sign out',
     deleteAccount: 'Delete account',
+    deleteConfirmTitle: 'Delete account?',
+    deleteConfirmBody:
+      'This permanently deletes your account and all of your data. This cannot be undone.',
+    deleteConfirmCancel: 'Cancel',
+    deleteConfirmAction: 'Delete',
+    deleteErrorTitle: 'Could not delete account',
+    deleteErrorBody: 'Something went wrong. Please try again.',
   },
 } as const;

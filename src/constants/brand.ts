@@ -30,6 +30,7 @@ export const brand = {
   legal: {
     privacyUrl: 'https://example.com/privacy',
     termsUrl: 'https://example.com/terms',
+    appStoreUrl: 'https://apps.apple.com/app/id0000000000?action=write-review',
   },
 } as const;
 
