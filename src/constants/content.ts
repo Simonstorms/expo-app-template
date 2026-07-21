@@ -265,18 +265,7 @@ export const content = {
     subtitle: 'Sign in to sync your plan across your devices.',
     apple: 'Sign in with Apple',
     google: 'Sign in with Google',
-    email: 'Sign in with Email',
     error: 'Something went wrong. Please try again.',
-    emailTitle: 'Enter your email',
-    emailSubtitle: 'We’ll email you a secure sign-in link.',
-    emailPlaceholder: 'you@example.com',
-    sendLink: 'Send sign-in link',
-    sentTitle: 'Check your email',
-    sentSubtitlePrefix: 'We sent a sign-in link to ',
-    sentSubtitleSuffix: '. Open it on this device to finish signing in.',
-    resend: 'Resend link',
-    back: 'Back',
-    invalidEmail: 'Please enter a valid email address.',
   },
 
   paywall: {

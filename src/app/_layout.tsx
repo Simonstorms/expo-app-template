@@ -7,7 +7,6 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { useAnalyticsIdentity } from '@/hooks/use-analytics-identity';
-import { useAuthDeepLink } from '@/features/auth/hooks/use-auth-deep-link';
 import { useRevenueCatSync } from '@/features/paywall/hooks/use-revenuecat';
 import { AnalyticsProvider, ScreenTracker } from '@/lib/analytics';
 import { queryClient } from '@/lib/query-client';
@@ -17,7 +16,6 @@ SplashScreen.preventAutoHideAsync();
 function AppServices() {
   useRevenueCatSync();
   useAnalyticsIdentity();
-  useAuthDeepLink();
   return null;
 }
 

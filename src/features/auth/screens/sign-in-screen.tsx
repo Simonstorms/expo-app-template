@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { AuthCancelledError, signInWithApple, signInWithGoogle } from '../api';
-import { EmailSignIn } from '../components/email-sign-in';
 import { useSession } from '../hooks/use-session';
 import { GoogleLogo } from '@/components/ui/brand-logos';
 import { GlassGroup, GlassSurface } from '@/components/ui/glass';
@@ -14,13 +13,10 @@ import { colors, withAlpha } from '@/constants/theme';
 import { captureEvent } from '@/lib/analytics';
 import { useFlow } from '@/features/onboarding/hooks/use-flow';
 
-type Mode = 'options' | 'email';
-
 export default function SignInScreen() {
   const flow = useFlow('sign-in');
   const { advance } = flow;
   const { isSignedIn } = useSession();
-  const [mode, setMode] = useState<Mode>('options');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const advancedRef = useRef(false);
@@ -47,14 +43,6 @@ export default function SignInScreen() {
     }
   };
 
-  if (mode === 'email') {
-    return (
-      <OnboardingScaffold flow={{ ...flow, showsChrome: false }} ctaTitle={null}>
-        <EmailSignIn onBack={() => setMode('options')} />
-      </OnboardingScaffold>
-    );
-  }
-
   return (
     <OnboardingScaffold flow={flow} ctaTitle={null}>
       <View style={styles.container}>
@@ -65,13 +53,6 @@ export default function SignInScreen() {
             <AppleButton disabled={busy} onPress={() => runProvider(signInWithApple, 'apple')} />
           ) : null}
           <GoogleButton disabled={busy} onPress={() => runProvider(signInWithGoogle, 'google')} />
-          <EmailButton
-            disabled={busy}
-            onPress={() => {
-              setError(null);
-              setMode('email');
-            }}
-          />
         </GlassGroup>
         {error ? <Text style={styles.error}>{error}</Text> : null}
         <View style={styles.bottomSpacer} />
@@ -103,21 +84,6 @@ function GoogleButton({ onPress, disabled }: ButtonProps) {
         style={[styles.button, styles.outlined]}>
         <GoogleLogo size={24} />
         <Text style={styles.darkLabel}>{content.signIn.google}</Text>
-      </GlassSurface>
-    </Pressable>
-  );
-}
-
-function EmailButton({ onPress, disabled }: ButtonProps) {
-  return (
-    <Pressable onPress={onPress} disabled={disabled} style={disabled ? styles.dimmed : undefined}>
-      <GlassSurface
-        radius={31}
-        tintColor={withAlpha(colors.white, 0.92)}
-        isInteractive
-        style={[styles.button, styles.outlined]}>
-        <Icon name="envelope.fill" size={22} color={colors.ink} />
-        <Text style={styles.darkLabel}>{content.signIn.email}</Text>
       </GlassSurface>
     </Pressable>
   );

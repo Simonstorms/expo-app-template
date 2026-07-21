@@ -104,15 +104,6 @@ export async function signInWithGoogle(): Promise<void> {
   }
 }
 
-export async function signInWithEmail(email: string): Promise<void> {
-  if (!hasSupabase) return;
-  const { error } = await supabase.auth.signInWithOtp({
-    email,
-    options: { shouldCreateUser: true, emailRedirectTo: Linking.createURL('/') },
-  });
-  if (error) throw error;
-}
-
 export async function signOut(): Promise<void> {
   if (!hasSupabase) return;
   await supabase.auth.signOut();

@@ -24,8 +24,8 @@ See [`SETUP.md`](./SETUP.md) for the clone-to-running guide.
 
 - **Onboarding** — a 28-step flow with a Zustand store, a `useFlow` navigation state machine, progress
   chrome, and a content-driven step model.
-- **Auth** — Sign in with Apple (native id-token), Google (system-browser OAuth), and email
-  **one-time code** (6-digit OTP), all through Supabase. Sign-in is required before the paywall.
+- **Auth** — Sign in with Apple (native id-token) and Google (system-browser OAuth), both through
+  Supabase. Sign-in is required before the paywall.
 - **Paywall** — presented via a **Gated** Superwall placement, with a built-in fallback screen.
   Access is **hard-gated**: entering the app requires a signed-in account **and** an active RevenueCat
   **entitlement** (never product ids), enforced in the tabs route guard.
