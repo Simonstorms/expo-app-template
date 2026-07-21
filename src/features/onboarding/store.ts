@@ -4,8 +4,8 @@ import type {
   DiscoverySource,
   Gender,
   Obstacle,
+  HabitVariant,
   QuitGoal,
-  SnusType,
   UsageLevel,
 } from './types';
 
@@ -14,7 +14,7 @@ type OnboardingState = {
   usageLevel?: UsageLevel;
   discoverySource?: DiscoverySource;
   triedBefore?: boolean;
-  snusType: SnusType;
+  variant: HabitVariant;
   yearsOfUse: number;
   pouchesPerDay: number;
   birthMonth: number;
@@ -40,7 +40,7 @@ const initialState: OnboardingValues = {
   usageLevel: undefined,
   discoverySource: undefined,
   triedBefore: undefined,
-  snusType: 'pouches',
+  variant: 'pouches',
   yearsOfUse: 5,
   pouchesPerDay: 10,
   birthMonth: 6,

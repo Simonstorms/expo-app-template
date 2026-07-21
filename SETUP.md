@@ -7,8 +7,7 @@ present in `.env`. With an empty `.env` the app runs as a full UI demo (onboardi
 | Capability | Env keys | Without them |
 | --- | --- | --- |
 | Supabase auth + data | `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_ANON_KEY` | Sign-in buttons just continue the flow; nothing is persisted to a server |
-| RevenueCat | `EXPO_PUBLIC_REVENUECAT_IOS_KEY`, `EXPO_PUBLIC_REVENUECAT_ANDROID_KEY` | Paywall is presentation-only |
-| Superwall | `EXPO_PUBLIC_SUPERWALL_IOS_KEY`, `EXPO_PUBLIC_SUPERWALL_ANDROID_KEY` | Local paywall screen is used |
+| RevenueCat (entitlements + paywall) | `EXPO_PUBLIC_REVENUECAT_IOS_KEY`, `EXPO_PUBLIC_REVENUECAT_ANDROID_KEY` | Built-in fallback paywall screen is shown; the hard gate stays inert |
 | PostHog analytics | `EXPO_PUBLIC_POSTHOG_KEY` (+ `EXPO_PUBLIC_POSTHOG_HOST`) | No analytics, screen tracking, or session replay |
 
 ## 1. Install and run
@@ -60,16 +59,8 @@ In the Supabase dashboard under **Authentication → Providers**:
 - **Google** — turn on the provider and paste your Google OAuth client id/secret. The app uses the
   system browser (`signInWithOAuth`) and returns to the `expoapptemplate://` scheme, so no native
   Google SDK is required.
-- **Email (one-time code)** — enable the Email provider, then edit **Authentication → Email
-  Templates → Magic Link** so the body renders `{{ .Token }}` (a 6-digit code) instead of
-  `{{ .ConfirmationURL }}`. The app sends the code with `signInWithEmail` and verifies it with
-  `verifyEmailOtp` (`type: 'email'`), so it never uses a magic-link redirect.
-
 Guest/anonymous sign-in is intentionally not offered — the hard gate requires a real account — so
 keep "Allow anonymous sign-ins" **disabled**.
-
-For production, protect email sign-in with Supabase Auth CAPTCHA (hCaptcha/Turnstile) and rate limits
-to prevent scripted account creation.
 
 Add the app scheme to **Authentication → URL Configuration → Redirect URLs**:
 `expoapptemplate://` (used by the Google system-browser flow).
@@ -88,48 +79,29 @@ eas build --profile development --platform ios
 `eas.json` already defines `development`, `preview`, and `production` profiles. Set per-environment
 values as EAS environment variables (never commit real keys — `.env` is gitignored).
 
-## 5. Enable monetization (RevenueCat + Superwall)
+## 5. Enable monetization (RevenueCat)
 
-RevenueCat is the entitlement source of truth; Superwall presents the paywall via a placement. Both
-activate only when their keys are present.
+RevenueCat is the entitlement source of truth **and** renders the paywall UI (via
+`react-native-purchases-ui`). It activates only when its keys are present.
 
-1. **RevenueCat** — create an app, add public SDK keys and the entitlement id to `.env`:
+Create an app in RevenueCat, then add the public SDK keys and entitlement id to `.env`:
 
-   ```
-   EXPO_PUBLIC_REVENUECAT_IOS_KEY=appl_...
-   EXPO_PUBLIC_REVENUECAT_ANDROID_KEY=goog_...
-   EXPO_PUBLIC_REVENUECAT_ENTITLEMENT=pro
-   ```
+```
+EXPO_PUBLIC_REVENUECAT_IOS_KEY=appl_...
+EXPO_PUBLIC_REVENUECAT_ANDROID_KEY=goog_...
+EXPO_PUBLIC_REVENUECAT_ENTITLEMENT=pro
+```
 
-   Configure the entitlement (default id `pro`) plus products/offerings in the dashboard. The app
-   configures the SDK at startup and syncs the RevenueCat App User ID to the Supabase user on
-   sign-in/out. RevenueCat is the **source of truth** for the entitlement.
+Configure the entitlement (default id `pro`), plus products and an offering, in the dashboard, and
+design the paywall on that offering — `RevenueCatUI.Paywall` renders whatever the dashboard serves.
+The app configures the SDK at startup and syncs the RevenueCat App User ID to the Supabase user on
+sign-in/out, so entitlements follow the account.
 
-2. **Superwall** — add public keys and the placement name:
-
-   ```
-   EXPO_PUBLIC_SUPERWALL_IOS_KEY=pk_...
-   EXPO_PUBLIC_SUPERWALL_ANDROID_KEY=pk_...
-   EXPO_PUBLIC_SUPERWALL_PLACEMENT=onboarding_complete
-   ```
-
-   Create a campaign triggered by the `onboarding_complete` placement and set its paywall to
-   **Gated** — that way the paywall's `feature` callback fires **only** when the user is already
-   paying or begins paying, so dismissing without subscribing never advances. When Superwall keys are
-   present the paywall route presents it via `registerPlacement`; otherwise the built-in paywall
-   screen is shown (dev fallback only — it cannot enforce the gate).
-
-   The app pushes RevenueCat's entitlement into Superwall's subscription status
-   (`useSuperwallSync` → `setSubscriptionStatus`), so an already-subscribed user skips the paywall.
-
-   **Purchase controller (already wired):** RevenueCat is the entitlement source of truth, so
-   purchases made on the Superwall paywall are routed through RevenueCat via a custom purchase
-   controller — `src/lib/revenuecat-purchase-controller.ts`, mounted by
-   `CustomPurchaseControllerProvider` wrapping `SuperwallProvider` in `src/app/_layout.tsx`. Superwall
-   detects the controller and enables manual purchase management automatically, so a completed
-   purchase flips `useEntitlement().isPro` and the hard gate opens. For this to work, the **product
-   identifiers on your Superwall paywall must match products that exist in RevenueCat** (mapped to the
-   `pro` entitlement). Requires a real StoreKit config / sandbox tester to exercise end to end.
+When the keys are present, the paywall route renders the RevenueCat paywall
+(`src/features/paywall/screens/revenuecat-paywall-screen.tsx`); a completed or restored purchase that
+grants the entitlement flips `useEntitlement().isPro` and opens the hard gate. With no keys the
+built-in `paywall-screen.tsx` is shown as a dev fallback (it cannot enforce the gate). Exercising a
+real purchase requires a StoreKit config / sandbox tester.
 
 ### Hard gate
 
@@ -168,12 +140,12 @@ Off by default. To enable it: turn on session recordings in your PostHog **Proje
 ```
 src/lib/supabase.ts                 guarded Supabase client (keychain session via expo-secure-store, auto-refresh)
 src/constants/config.ts             reads EXPO_PUBLIC_* + capability flags (hasSupabase, ...)
-src/features/auth/                  api.ts (Apple/Google/email-OTP/signOut) + useSession hook + email-sign-in component
+src/features/auth/                  api.ts (Apple/Google/signOut) + useSession hook
 src/features/onboarding/api.ts      syncs answers to Supabase after sign-in
 src/lib/revenuecat.ts               configure + logIn/logOut sync with the Supabase user
-src/lib/superwall.ts                api keys + placement name + RC→Superwall status mapping
+src/lib/revenuecat-ui.ts            guarded react-native-purchases-ui access (Customer Center)
 src/lib/analytics.tsx               PostHog client + provider + screen tracker + identify/capture
-src/features/paywall/               api.ts (restore), use-entitlement, use-revenuecat, use-superwall-sync, screens/
+src/features/paywall/               api.ts (restore), use-entitlement, use-revenuecat, screens/ (RevenueCat paywall + fallback)
 src/app/(tabs)/_layout.tsx          hard-gate guard (requires session + entitlement)
 supabase/migrations/                schema + RLS
 ```

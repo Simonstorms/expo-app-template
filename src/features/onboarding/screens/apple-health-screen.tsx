@@ -111,7 +111,7 @@ export default function AppleHealthScreen() {
             radius={18}
             tintColor={colors.ctaFill}
             fallbackColor={colors.ctaFill}
-            style={[styles.quitSnusCard, { left: 241.3, top: 26.7 }]}>
+            style={[styles.quitCard, { left: 241.3, top: 26.7 }]}>
             <Icon name="leaf.fill" size={34} color={colors.white} />
           </GlassSurface>
 
@@ -198,7 +198,7 @@ const styles = StyleSheet.create({
   heart: {
     transform: [{ translateX: 8.8 }, { translateY: -10.7 }],
   },
-  quitSnusCard: {
+  quitCard: {
     position: 'absolute',
     width: 80.3,
     height: 80,

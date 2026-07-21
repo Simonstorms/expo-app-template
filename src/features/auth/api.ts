@@ -68,18 +68,6 @@ export async function completeSessionFromUrl(url: string): Promise<Session | nul
     if (error) throw error;
     return data.session;
   }
-  const accessToken =
-    typeof queryParams?.access_token === 'string' ? queryParams.access_token : null;
-  const refreshToken =
-    typeof queryParams?.refresh_token === 'string' ? queryParams.refresh_token : null;
-  if (accessToken && refreshToken) {
-    const { data, error } = await supabase.auth.setSession({
-      access_token: accessToken,
-      refresh_token: refreshToken,
-    });
-    if (error) throw error;
-    return data.session;
-  }
   return null;
 }
 

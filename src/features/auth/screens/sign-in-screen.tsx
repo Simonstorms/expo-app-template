@@ -66,7 +66,13 @@ type ButtonProps = { onPress: () => void; disabled?: boolean };
 
 function AppleButton({ onPress, disabled }: ButtonProps) {
   return (
-    <Pressable onPress={onPress} disabled={disabled} style={disabled ? styles.dimmed : undefined}>
+    <Pressable
+      onPress={onPress}
+      disabled={disabled}
+      accessibilityRole="button"
+      accessibilityLabel={content.signIn.apple}
+      accessibilityState={{ disabled: Boolean(disabled) }}
+      style={disabled ? styles.dimmed : undefined}>
       <GlassSurface radius={31} tintColor={colors.ink} isInteractive style={styles.button}>
         <Icon name="applelogo" size={26} color={colors.white} />
         <Text style={styles.appleLabel}>{content.signIn.apple}</Text>
@@ -77,7 +83,13 @@ function AppleButton({ onPress, disabled }: ButtonProps) {
 
 function GoogleButton({ onPress, disabled }: ButtonProps) {
   return (
-    <Pressable onPress={onPress} disabled={disabled} style={disabled ? styles.dimmed : undefined}>
+    <Pressable
+      onPress={onPress}
+      disabled={disabled}
+      accessibilityRole="button"
+      accessibilityLabel={content.signIn.google}
+      accessibilityState={{ disabled: Boolean(disabled) }}
+      style={disabled ? styles.dimmed : undefined}>
       <GlassSurface
         radius={31}
         tintColor={withAlpha(colors.white, 0.92)}

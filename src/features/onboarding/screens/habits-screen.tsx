@@ -20,7 +20,7 @@ const wheelValues = Array.from({ length: 40 }, (_, index) => index + 1);
 const toggleSpring = { mass: 1, stiffness: 386, damping: 32 };
 
 export default function HabitsScreen() {
-  const snusType = useOnboarding((state) => state.snusType);
+  const variant = useOnboarding((state) => state.variant);
   const yearsOfUse = useOnboarding((state) => state.yearsOfUse);
   const pouchesPerDay = useOnboarding((state) => state.pouchesPerDay);
   const set = useOnboarding((state) => state.set);
@@ -35,8 +35,8 @@ export default function HabitsScreen() {
         />
         <View style={styles.topSpacer} />
         <TypeToggle
-          isLoose={snusType === 'loose'}
-          onToggle={() => set('snusType', snusType === 'loose' ? 'pouches' : 'loose')}
+          isLoose={variant === 'loose'}
+          onToggle={() => set('variant', variant === 'loose' ? 'pouches' : 'loose')}
         />
         <View style={styles.headers}>
           <Text style={[text.row, styles.headerYears]}>{content.habits.headerYears}</Text>

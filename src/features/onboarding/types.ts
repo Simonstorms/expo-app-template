@@ -11,7 +11,7 @@ export type DiscoverySource =
   | 'youtube'
   | 'google';
 
-export type SnusType = 'pouches' | 'loose';
+export type HabitVariant = 'pouches' | 'loose';
 
 export type QuitGoal = 'quitCompletely' | 'cutBack' | 'stayFree';
 

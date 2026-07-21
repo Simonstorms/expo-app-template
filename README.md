@@ -1,8 +1,8 @@
-# Viral Consumer App Template
+# Expo App Template
 
 A production-ready, **feature-based Expo (SDK 57)** starter for consumer mobile apps: a polished
 onboarding flow, authentication, a paywall, and a tabbed home + settings shell — wired for
-**Supabase**, **RevenueCat**, and **Superwall**, and shipped as a working example (a "quit nicotine
+**Supabase**, **RevenueCat**, and **PostHog**, and shipped as a working example (a "quit nicotine
 pouches" app) you rebrand into your own.
 
 Built on Expo SDK 57 / React Native 0.86 / React 19 (React Compiler), TypeScript strict, Expo Router
@@ -15,8 +15,8 @@ activates each feature only when its keys are present:
 
 - **Empty `.env`** → the app runs as a full UI demo (onboarding → paywall → home ⇄ settings). Sign-in
   continues the flow, the built-in paywall is shown, nothing hits a server.
-- **Add keys** → the same code does real Supabase auth + data, RevenueCat entitlements, and Superwall
-  paywalls. No code changes.
+- **Add keys** → the same code does real Supabase auth + data, RevenueCat entitlements and paywalls,
+  and PostHog analytics. No code changes.
 
 See [`SETUP.md`](./SETUP.md) for the clone-to-running guide.
 
@@ -26,9 +26,9 @@ See [`SETUP.md`](./SETUP.md) for the clone-to-running guide.
   chrome, and a content-driven step model.
 - **Auth** — Sign in with Apple (native id-token) and Google (system-browser OAuth), both through
   Supabase. Sign-in is required before the paywall.
-- **Paywall** — presented via a **Gated** Superwall placement, with a built-in fallback screen.
-  Access is **hard-gated**: entering the app requires a signed-in account **and** an active RevenueCat
-  **entitlement** (never product ids), enforced in the tabs route guard.
+- **Paywall** — presented via **RevenueCat Paywalls** (`react-native-purchases-ui`), with a built-in
+  fallback screen. Access is **hard-gated**: entering the app requires a signed-in account **and** an
+  active RevenueCat **entitlement** (never product ids), enforced in the tabs route guard.
 - **Home + Settings** — a tabbed shell rendering demo content, ready to wire to your data. TanStack
   Query powers the live session and entitlement queries.
 - **Backend** — Supabase client, RLS-correct SQL migrations, and an auto-provisioned profile.
@@ -46,7 +46,7 @@ See [`SETUP.md`](./SETUP.md) for the clone-to-running guide.
 | Client state | Zustand |
 | Backend / auth | Supabase (`@supabase/supabase-js`) |
 | Subscriptions | RevenueCat (`react-native-purchases`) |
-| Paywalls | Superwall (`expo-superwall`) |
+| Paywalls | RevenueCat Paywalls (`react-native-purchases-ui`) |
 | Analytics | PostHog (`posthog-react-native`) |
 | Design | `expo-glass-effect` (Liquid Glass), `expo-symbols`, `react-native-reanimated`, `react-native-svg` |
 
@@ -57,14 +57,14 @@ Feature-based, not type-based — each feature owns its screens, components, hoo
 ```
 src/
 ├── app/              # Expo Router routes ONLY — thin re-exports of feature screens
-│   ├── _layout.tsx   # providers: Query, Superwall (guarded), safe-area, services
+│   ├── _layout.tsx   # providers: Query, Analytics, safe-area, services
 │   ├── (tabs)/       # home + settings
 │   └── *.tsx         # onboarding / auth / paywall routes
 ├── features/         # self-contained: onboarding, auth, paywall, home, settings
 │   └── <feature>/    #   screens/, components/, hooks/, api.ts, store.ts
 ├── components/ui/    # shared design-system primitives
 ├── hooks/            # cross-feature hooks (analytics identity)
-├── lib/              # cross-cutting clients: supabase, revenuecat, superwall, query-client
+├── lib/              # cross-cutting clients: supabase, revenuecat, analytics, query-client
 ├── constants/        # theme, config (flags), brand + content (white-label copy)
 └── types/            # shared + generated Supabase types
 supabase/             # config + RLS migrations
@@ -84,7 +84,7 @@ supabase/             # config + RLS migrations
 
 ## Requirements
 
-Native modules here (Liquid Glass, SF Symbols, native pickers, Supabase/RevenueCat/Superwall) are
+Native modules here (Liquid Glass, SF Symbols, native pickers, Supabase/RevenueCat) are
 **not** available in Expo Go, so you need a development build.
 
 - Node 20+
