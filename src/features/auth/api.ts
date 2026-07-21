@@ -113,6 +113,6 @@ export async function deleteAccount(): Promise<void> {
   if (!hasSupabase) return;
   const { error } = await supabase.rpc('delete_current_user');
   if (error) throw error;
-  await supabase.auth.signOut();
+  await supabase.auth.signOut({ scope: 'local' });
   await setOnboardingComplete(false).catch(() => undefined);
 }

@@ -34,6 +34,7 @@ export default function SignInScreen() {
     setError(null);
     try {
       await signIn();
+      captureEvent('sign_in_succeeded', { provider });
     } catch (err) {
       if (err instanceof AuthCancelledError) return;
       setError(content.signIn.error);
