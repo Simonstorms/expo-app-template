@@ -43,3 +43,9 @@ example
 # generated native folders
 /ios
 /android
+
+# agent tooling / caches (not part of the app)
+.agents/
+.claude/skills/
+skills-lock.json
+supabase/.temp/

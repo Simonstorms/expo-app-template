@@ -1,4 +1,4 @@
-# Expo App Template
+# Viral Consumer App Template
 
 A production-ready, **feature-based Expo (SDK 57)** starter for consumer mobile apps: a polished
 onboarding flow, authentication, a paywall, and a tabbed home + settings shell — wired for

@@ -10,6 +10,8 @@ import { GlassSurface } from '@/components/ui/glass';
 import { Icon } from '@/components/ui/icon';
 import { ScreenBackground } from '@/components/ui/screen-background';
 import { brand } from '@/constants/brand';
+import { hasRevenueCat } from '@/constants/config';
+import { presentCustomerCenter } from '@/lib/revenuecat-ui';
 import { content } from '@/constants/content';
 import { colors, withAlpha } from '@/constants/theme';
 
@@ -81,6 +83,17 @@ export default function SettingsScreen() {
           value: isPro ? content.settings.subActive : content.settings.subFree,
           onPress: noop,
         },
+        ...(hasRevenueCat
+          ? [
+              {
+                symbol: 'person.crop.circle',
+                label: content.settings.subManage,
+                onPress: () => {
+                  void presentCustomerCenter();
+                },
+              },
+            ]
+          : []),
         {
           symbol: 'arrow.clockwise',
           label: content.settings.subRestore,

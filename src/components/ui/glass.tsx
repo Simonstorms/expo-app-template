@@ -1,10 +1,11 @@
+import * as Device from 'expo-device';
 import { GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
 import type { ReactNode } from 'react';
 import { type StyleProp, StyleSheet, View, type ViewStyle } from 'react-native';
 
 let glassAvailable = false;
 try {
-  glassAvailable = isLiquidGlassAvailable();
+  glassAvailable = isLiquidGlassAvailable() && Device.isDevice;
 } catch {
   glassAvailable = false;
 }
