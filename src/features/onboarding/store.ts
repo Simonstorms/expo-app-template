@@ -1,4 +1,7 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getLocales } from 'expo-localization';
 import { create } from 'zustand';
+import { createJSONStorage, persist } from 'zustand/middleware';
 
 import type {
   DiscoverySource,
@@ -10,6 +13,7 @@ import type {
 } from './types';
 
 type OnboardingState = {
+  language: string;
   gender?: Gender;
   usageLevel?: UsageLevel;
   discoverySource?: DiscoverySource;
@@ -33,9 +37,23 @@ type OnboardingState = {
   reset: () => void;
 };
 
-type OnboardingValues = Omit<OnboardingState, 'set' | 'reset'>;
+export type OnboardingValues = Omit<OnboardingState, 'set' | 'reset'>;
+
+const PERSIST_KEY = 'onboarding';
+
+const ACTION_KEYS: ReadonlySet<string> = new Set(['set', 'reset']);
+
+function deviceLanguage(): string {
+  return getLocales()[0]?.languageTag ?? 'en';
+}
+
+function answersOf(state: OnboardingState): OnboardingValues {
+  const entries = Object.entries(state).filter(([key]) => !ACTION_KEYS.has(key));
+  return Object.fromEntries(entries) as OnboardingValues;
+}
 
 const initialState: OnboardingValues = {
+  language: deviceLanguage(),
   gender: undefined,
   usageLevel: undefined,
   discoverySource: undefined,
@@ -56,8 +74,21 @@ const initialState: OnboardingValues = {
   referralCode: '',
 };
 
-export const useOnboarding = create<OnboardingState>((setState) => ({
-  ...initialState,
-  set: (key, value) => setState({ [key]: value } as Partial<OnboardingState>),
-  reset: () => setState(initialState),
-}));
+export const useOnboarding = create<OnboardingState>()(
+  persist(
+    (setState) => ({
+      ...initialState,
+      set: (key, value) => setState({ [key]: value } as Partial<OnboardingState>),
+      reset: () => setState(initialState),
+    }),
+    {
+      name: PERSIST_KEY,
+      storage: createJSONStorage(() => AsyncStorage),
+      partialize: answersOf,
+    },
+  ),
+);
+
+export function onboardingAnswers(): Record<string, unknown> {
+  return { ...answersOf(useOnboarding.getState()) };
+}

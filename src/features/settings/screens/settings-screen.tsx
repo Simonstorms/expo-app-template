@@ -1,28 +1,44 @@
-import { Fragment } from 'react';
-import { Alert, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Fragment, useState } from 'react';
+import {
+  Alert,
+  Linking,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  View,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { deleteAccount, signOut } from '@/features/auth/api';
-import { useSession } from '@/features/auth/hooks/use-session';
-import { restorePurchases } from '@/features/paywall/api';
-import { useEntitlement } from '@/features/paywall/hooks/use-entitlement';
 import { GlassSurface } from '@/components/ui/glass';
 import { Icon } from '@/components/ui/icon';
 import { ScreenBackground } from '@/components/ui/screen-background';
 import { brand } from '@/constants/brand';
 import { hasRevenueCat } from '@/constants/config';
-import { presentCustomerCenter } from '@/lib/revenuecat-ui';
 import { content } from '@/constants/content';
 import { colors, withAlpha } from '@/constants/theme';
+import { deleteAccount, signOut } from '@/features/auth/api';
+import { useSession } from '@/features/auth/hooks/use-session';
+import { restorePurchases } from '@/features/paywall/api';
+import { useEntitlement } from '@/features/paywall/hooks/use-entitlement';
+import { analyticsOptedOut, captureEvent, setAnalyticsOptOut } from '@/lib/analytics';
+import { presentCustomerCenter } from '@/lib/revenuecat-ui';
 
 const dangerRed = '#DC6868';
+
+type Toggle = {
+  value: boolean;
+  onValueChange: (next: boolean) => void;
+};
 
 type Row = {
   symbol: string;
   label: string;
   value?: string;
   tint?: string;
-  onPress: () => void;
+  toggle?: Toggle;
+  onPress?: () => void;
 };
 
 type Section = {
@@ -35,7 +51,12 @@ export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const { user } = useSession();
   const { isPro } = useEntitlement();
-  const noop = () => {};
+  const [shareAnalytics, setShareAnalytics] = useState(() => !analyticsOptedOut());
+
+  const toggleShareAnalytics = (next: boolean) => {
+    setShareAnalytics(next);
+    void setAnalyticsOptOut(!next).catch(() => undefined);
+  };
 
   const openUrl = (url: string) => {
     void Linking.openURL(url).catch(() => {});
@@ -52,6 +73,7 @@ export default function SettingsScreen() {
         text: content.settings.deleteConfirmAction,
         style: 'destructive',
         onPress: () => {
+          captureEvent('account_deleted');
           deleteAccount().catch(() => {
             Alert.alert(content.settings.deleteErrorTitle, content.settings.deleteErrorBody);
           });
@@ -69,7 +91,6 @@ export default function SettingsScreen() {
           symbol: 'person.crop.circle.fill',
           label: content.settings.accountSignedIn,
           value: user?.email ?? content.settings.accountGuest,
-          onPress: noop,
         },
       ],
     },
@@ -81,7 +102,6 @@ export default function SettingsScreen() {
           symbol: 'crown.fill',
           label: content.settings.subPro,
           value: isPro ? content.settings.subActive : content.settings.subFree,
-          onPress: noop,
         },
         ...(hasRevenueCat
           ? [
@@ -109,6 +129,12 @@ export default function SettingsScreen() {
       rows: [
         { symbol: 'bell.fill', label: content.settings.prefNotifications, onPress: openSettings },
         { symbol: 'clock.fill', label: content.settings.prefReminders, onPress: openSettings },
+        {
+          symbol: 'chart.bar.fill',
+          label: content.settings.prefAnalytics,
+          toggle: { value: shareAnalytics, onValueChange: toggleShareAnalytics },
+          onPress: () => toggleShareAnalytics(!shareAnalytics),
+        },
       ],
     },
     {
@@ -126,10 +152,19 @@ export default function SettingsScreen() {
           onPress: () => openUrl(brand.legal.termsUrl),
         },
         {
-          symbol: 'star.fill',
-          label: content.settings.aboutRate,
-          onPress: () => openUrl(brand.legal.appStoreUrl),
+          symbol: 'envelope.fill',
+          label: content.settings.aboutSupport,
+          onPress: () => openUrl(`mailto:${brand.legal.supportEmail}`),
         },
+        ...(brand.legal.appStoreUrl.length > 0
+          ? [
+              {
+                symbol: 'star.fill',
+                label: content.settings.aboutRate,
+                onPress: () => openUrl(brand.legal.appStoreUrl),
+              },
+            ]
+          : []),
       ],
     },
     {
@@ -139,6 +174,7 @@ export default function SettingsScreen() {
           symbol: 'rectangle.portrait.and.arrow.right',
           label: content.settings.signOut,
           onPress: () => {
+            captureEvent('signed_out');
             void signOut();
           },
         },
@@ -160,7 +196,8 @@ export default function SettingsScreen() {
         contentContainerStyle={[
           styles.content,
           { paddingTop: insets.top + 12, paddingBottom: insets.bottom + 28 },
-        ]}>
+        ]}
+      >
         <Text style={styles.screenTitle}>{content.settings.title}</Text>
         {sections.map((section) => (
           <View key={section.key} style={styles.section}>
@@ -183,14 +220,47 @@ export default function SettingsScreen() {
 
 function SettingRow({ row }: { row: Row }) {
   const tint = row.tint ?? colors.ink;
-  return (
-    <Pressable
-      onPress={row.onPress}
-      style={({ pressed }) => [styles.row, { opacity: pressed ? 0.6 : 1 }]}>
+  const leading = (
+    <>
       <View style={[styles.rowIcon, { backgroundColor: withAlpha(tint, 0.1) }]}>
         <Icon name={row.symbol} size={15} weight="semibold" color={tint} />
       </View>
       <Text style={[styles.rowLabel, { color: tint }]}>{row.label}</Text>
+    </>
+  );
+
+  if (row.toggle) {
+    return (
+      <View style={styles.row}>
+        {leading}
+        <Switch
+          value={row.toggle.value}
+          onValueChange={row.toggle.onValueChange}
+          accessibilityLabel={row.label}
+        />
+      </View>
+    );
+  }
+
+  const label = row.value ? `${row.label}, ${row.value}` : row.label;
+
+  if (!row.onPress) {
+    return (
+      <View accessible accessibilityLabel={label} style={styles.row}>
+        {leading}
+        {row.value ? <Text style={styles.rowValue}>{row.value}</Text> : null}
+      </View>
+    );
+  }
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      onPress={row.onPress}
+      style={({ pressed }) => [styles.row, { opacity: pressed ? 0.6 : 1 }]}
+    >
+      {leading}
       <View style={styles.rowRight}>
         {row.value ? <Text style={styles.rowValue}>{row.value}</Text> : null}
         <Icon name="chevron.right" size={13} weight="semibold" color={colors.disabledFill} />

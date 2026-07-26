@@ -18,10 +18,7 @@ export default function GoalScreen() {
   return (
     <OnboardingScaffold flow={flow} ctaTitle={null}>
       <View style={styles.container}>
-        <TitleBlock
-          title={content.goal.title}
-          subtitle={content.goal.subtitle}
-        />
+        <TitleBlock title={content.goal.title} subtitle={content.goal.subtitle} />
         <View style={styles.spacer} />
         <GlassGroup spacing={22} style={styles.group}>
           {content.goal.options.map((option) => (

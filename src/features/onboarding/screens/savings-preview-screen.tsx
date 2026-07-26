@@ -1,8 +1,19 @@
 import { useEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withDelay, withSpring } from 'react-native-reanimated';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withSpring,
+} from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
-import Svg, { Defs, LinearGradient as SvgLinearGradient, RadialGradient, Rect, Stop } from 'react-native-svg';
+import Svg, {
+  Defs,
+  LinearGradient as SvgLinearGradient,
+  RadialGradient,
+  Rect,
+  Stop,
+} from 'react-native-svg';
 
 import { ChoicePairButtons } from '@/components/ui/choice-pair-buttons';
 import { GlassSurface } from '@/components/ui/glass';
@@ -38,7 +49,14 @@ function HeroBackground() {
   return (
     <Svg width={HERO_WIDTH} height={HERO_HEIGHT}>
       <Defs>
-        <SvgLinearGradient id="heroBase" x1={0} y1={0} x2={HERO_WIDTH} y2={HERO_HEIGHT} gradientUnits="userSpaceOnUse">
+        <SvgLinearGradient
+          id="heroBase"
+          x1={0}
+          y1={0}
+          x2={HERO_WIDTH}
+          y2={HERO_HEIGHT}
+          gradientUnits="userSpaceOnUse"
+        >
           <Stop offset={0} stopColor={heroStopZero} />
           <Stop offset={0.38} stopColor={heroStopOne} />
           <Stop offset={0.62} stopColor={heroStopTwo} />
@@ -126,15 +144,27 @@ export default function SavingsPreviewScreen() {
               <GlassSurface
                 style={styles.statCard}
                 radius={layout.cardRadius}
-                tintColor={withAlpha(colors.white, 0.85)}>
+                tintColor={withAlpha(colors.white, 0.85)}
+              >
                 <Text style={styles.savedLabel}>{content.savingsPreview.savedLabel}</Text>
                 <View style={styles.amountRow}>
-                  <Icon name="banknote.fill" size={18} weight="semibold" color={colors.ink} style={styles.banknote} />
+                  <Icon
+                    name="banknote.fill"
+                    size={18}
+                    weight="semibold"
+                    color={colors.ink}
+                    style={styles.banknote}
+                  />
                   <Text style={styles.amountText}>{content.savingsPreview.amount}</Text>
                 </View>
                 <View style={styles.todayRow}>
                   <View style={styles.euroBadge}>
-                    <Icon name={content.savingsPreview.icon} size={12.5} weight="bold" color={colors.white} />
+                    <Icon
+                      name={content.savingsPreview.icon}
+                      size={12.5}
+                      weight="bold"
+                      color={colors.white}
+                    />
                   </View>
                   <View style={styles.todayColumn}>
                     <Text style={styles.todayLabel}>{content.savingsPreview.todayLabel}</Text>

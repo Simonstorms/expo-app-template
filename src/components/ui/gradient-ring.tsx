@@ -73,7 +73,9 @@ export function GradientRing({
   }
 
   return (
-    <View style={{ width: diameter, height: diameter, alignItems: 'center', justifyContent: 'center' }}>
+    <View
+      style={{ width: diameter, height: diameter, alignItems: 'center', justifyContent: 'center' }}
+    >
       <Svg width={diameter} height={diameter} style={StyleSheet.absoluteFill}>
         {paths}
       </Svg>

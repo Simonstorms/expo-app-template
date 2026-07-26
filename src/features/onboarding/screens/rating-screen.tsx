@@ -53,7 +53,8 @@ export default function RatingRequestScreen() {
           <GlassSurface
             radius={20}
             tintColor={withAlpha(colors.white, 0.9)}
-            style={styles.laurelCard}>
+            style={styles.laurelCard}
+          >
             <View style={styles.laurelRow}>
               <Icon name="laurel.leading" size={55} width={64} height={55} color={colors.orange} />
               <View style={styles.laurelCenter}>
@@ -80,10 +81,13 @@ export default function RatingRequestScreen() {
           <GlassSurface
             radius={20}
             tintColor={withAlpha(colors.cardFill, 0.85)}
-            style={styles.testimonialCard}>
+            style={styles.testimonialCard}
+          >
             <View style={styles.testimonialTop}>
               <View style={styles.testimonialAvatar}>
-                <Text style={styles.testimonialAvatarLetter}>{content.rating.testimonialName.charAt(0)}</Text>
+                <Text style={styles.testimonialAvatarLetter}>
+                  {content.rating.testimonialName.charAt(0)}
+                </Text>
               </View>
               <Text style={styles.testimonialName}>{content.rating.testimonialName}</Text>
               <View style={styles.flexSpacer} />

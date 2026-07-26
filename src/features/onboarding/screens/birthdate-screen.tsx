@@ -82,7 +82,8 @@ function WheelColumn({
         selectedValue={selectedValue}
         onValueChange={onValueChange}
         itemStyle={styles.item}
-        style={styles.picker}>
+        style={styles.picker}
+      >
         {items.map((item) => (
           <Picker.Item key={item.value} label={item.label} value={item.value} />
         ))}

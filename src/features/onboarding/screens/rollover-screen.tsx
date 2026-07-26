@@ -44,11 +44,16 @@ export default function RolloverScreen() {
             />
           </View>
         </View>
-      }>
+      }
+    >
       <View style={styles.container}>
         <TitleBlock title={content.rollover.title} />
         <View style={styles.pillWrap}>
-          <GlassSurface radius={13} tintColor={withAlpha(colors.progressTrack, 0.7)} style={styles.pill}>
+          <GlassSurface
+            radius={13}
+            tintColor={withAlpha(colors.progressTrack, 0.7)}
+            style={styles.pill}
+          >
             <Text style={styles.pillText}>
               <Text style={{ color: ink }}>{content.rollover.pillPrefix}</Text>
               <Text style={{ color: blue }}>{content.rollover.pillHighlight}</Text>
@@ -57,7 +62,11 @@ export default function RolloverScreen() {
         </View>
         <GlassGroup style={styles.illustration}>
           <DayCard left={28.7} top={0} height={210}>
-            <DayCardHeader title={content.rollover.dayYesterday} titleColor={salmon} fill={headerPink} />
+            <DayCardHeader
+              title={content.rollover.dayYesterday}
+              titleColor={salmon}
+              fill={headerPink}
+            />
             <CountText denominatorText="/5" />
             <MiniRing start={0} end={0.76} track={ringTrackA} left={42} top={111} />
             <LeftBadge

@@ -1,17 +1,37 @@
-import { useEffect, useRef, useState } from 'react';
-import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import * as AppleAuthentication from 'expo-apple-authentication';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Linking, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { AuthCancelledError, signInWithApple, signInWithGoogle } from '../api';
-import { useSession } from '../hooks/use-session';
 import { GoogleLogo } from '@/components/ui/brand-logos';
 import { GlassGroup, GlassSurface } from '@/components/ui/glass';
-import { Icon } from '@/components/ui/icon';
-import { OnboardingScaffold } from '@/features/onboarding/components/onboarding-scaffold';
 import { TitleBlock } from '@/components/ui/title-block';
+import { brand } from '@/constants/brand';
+import { hasSupabase } from '@/constants/config';
 import { content } from '@/constants/content';
-import { colors, withAlpha } from '@/constants/theme';
-import { captureEvent } from '@/lib/analytics';
+import { colors, font, withAlpha } from '@/constants/theme';
+import { OnboardingScaffold } from '@/features/onboarding/components/onboarding-scaffold';
 import { useFlow } from '@/features/onboarding/hooks/use-flow';
+import { captureEvent } from '@/lib/analytics';
+import { AuthCancelledError, signInWithApple, signInWithGoogle } from '../api';
+import { useSession } from '../hooks/use-session';
+
+const BUTTON_HEIGHT = 62;
+const BUTTON_RADIUS = 31;
+
+type SignInOutcome = 'succeeded' | 'cancelled' | 'failed';
+
+async function runSignIn(signIn: () => Promise<void>): Promise<SignInOutcome> {
+  try {
+    await signIn();
+    return 'succeeded';
+  } catch (error) {
+    return error instanceof AuthCancelledError ? 'cancelled' : 'failed';
+  }
+}
+
+function openUrl(url: string): void {
+  void Linking.openURL(url).catch(() => undefined);
+}
 
 export default function SignInScreen() {
   const flow = useFlow('sign-in');
@@ -21,27 +41,31 @@ export default function SignInScreen() {
   const [error, setError] = useState<string | null>(null);
   const advancedRef = useRef(false);
 
-  useEffect(() => {
-    if (isSignedIn && !advancedRef.current) {
-      advancedRef.current = true;
-      advance();
-    }
-  }, [isSignedIn, advance]);
+  const advanceOnce = useCallback(() => {
+    if (advancedRef.current) return;
+    advancedRef.current = true;
+    advance();
+  }, [advance]);
 
-  const runProvider = async (signIn: () => Promise<void>, provider: string) => {
-    if (busy) return;
+  useEffect(() => {
+    if (isSignedIn) advanceOnce();
+  }, [isSignedIn, advanceOnce]);
+
+  const start = (signIn: () => Promise<void>, provider: string) => {
+    if (busy || advancedRef.current) return;
     setBusy(true);
     setError(null);
-    try {
-      await signIn();
-      captureEvent('sign_in_succeeded', { provider });
-    } catch (err) {
-      if (err instanceof AuthCancelledError) return;
-      setError(content.signIn.error);
-      captureEvent('sign_in_failed', { provider });
-    } finally {
+    void runSignIn(signIn).then((outcome) => {
       setBusy(false);
-    }
+      if (outcome === 'cancelled') return;
+      if (outcome === 'failed') {
+        setError(content.signIn.error);
+        captureEvent('sign_in_failed', { provider });
+        return;
+      }
+      captureEvent('sign_in_succeeded', { provider });
+      if (!hasSupabase) advanceOnce();
+    });
   };
 
   return (
@@ -51,37 +75,42 @@ export default function SignInScreen() {
         <View style={styles.topSpacer} />
         <GlassGroup spacing={16} style={styles.buttons}>
           {Platform.OS === 'ios' ? (
-            <AppleButton disabled={busy} onPress={() => runProvider(signInWithApple, 'apple')} />
+            <AppleAuthentication.AppleAuthenticationButton
+              buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
+              buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
+              cornerRadius={BUTTON_RADIUS}
+              style={[styles.appleButton, busy ? styles.dimmed : null]}
+              onPress={() => start(signInWithApple, 'apple')}
+            />
           ) : null}
-          <GoogleButton disabled={busy} onPress={() => runProvider(signInWithGoogle, 'google')} />
+          <GoogleButton disabled={busy} onPress={() => start(signInWithGoogle, 'google')} />
         </GlassGroup>
         {error ? <Text style={styles.error}>{error}</Text> : null}
+        <Text style={styles.legal}>
+          {content.signIn.legalPrefix}{' '}
+          <Text
+            accessibilityRole="link"
+            style={styles.legalLink}
+            onPress={() => openUrl(brand.legal.termsUrl)}
+          >
+            {content.signIn.legalTerms}
+          </Text>{' '}
+          {content.signIn.legalAnd}{' '}
+          <Text
+            accessibilityRole="link"
+            style={styles.legalLink}
+            onPress={() => openUrl(brand.legal.privacyUrl)}
+          >
+            {content.signIn.legalPrivacy}
+          </Text>
+        </Text>
         <View style={styles.bottomSpacer} />
       </View>
     </OnboardingScaffold>
   );
 }
 
-type ButtonProps = { onPress: () => void; disabled?: boolean };
-
-function AppleButton({ onPress, disabled }: ButtonProps) {
-  return (
-    <Pressable
-      onPress={onPress}
-      disabled={disabled}
-      accessibilityRole="button"
-      accessibilityLabel={content.signIn.apple}
-      accessibilityState={{ disabled: Boolean(disabled) }}
-      style={disabled ? styles.dimmed : undefined}>
-      <GlassSurface radius={31} tintColor={colors.ink} isInteractive style={styles.button}>
-        <Icon name="applelogo" size={26} color={colors.white} />
-        <Text style={styles.appleLabel}>{content.signIn.apple}</Text>
-      </GlassSurface>
-    </Pressable>
-  );
-}
-
-function GoogleButton({ onPress, disabled }: ButtonProps) {
+function GoogleButton({ onPress, disabled }: { onPress: () => void; disabled?: boolean }) {
   return (
     <Pressable
       onPress={onPress}
@@ -89,12 +118,14 @@ function GoogleButton({ onPress, disabled }: ButtonProps) {
       accessibilityRole="button"
       accessibilityLabel={content.signIn.google}
       accessibilityState={{ disabled: Boolean(disabled) }}
-      style={disabled ? styles.dimmed : undefined}>
+      style={disabled ? styles.dimmed : undefined}
+    >
       <GlassSurface
-        radius={31}
+        radius={BUTTON_RADIUS}
         tintColor={withAlpha(colors.white, 0.92)}
         isInteractive
-        style={[styles.button, styles.outlined]}>
+        style={[styles.button, styles.outlined]}
+      >
         <GoogleLogo size={24} />
         <Text style={styles.darkLabel}>{content.signIn.google}</Text>
       </GlassSurface>
@@ -115,37 +146,50 @@ const styles = StyleSheet.create({
     paddingHorizontal: 40,
   },
   button: {
-    height: 62,
+    height: BUTTON_HEIGHT,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 21,
   },
+  appleButton: {
+    height: BUTTON_HEIGHT,
+  },
   dimmed: {
     opacity: 0.55,
   },
-  appleLabel: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: colors.white,
-  },
   outlined: {
-    borderRadius: 31,
+    borderRadius: BUTTON_RADIUS,
     borderWidth: 1.7,
     borderColor: colors.ink,
   },
   darkLabel: {
     fontSize: 20,
+    fontFamily: font.semibold,
     fontWeight: '600',
     color: colors.ink,
   },
   error: {
     fontSize: 14,
+    fontFamily: font.medium,
     fontWeight: '500',
-    color: colors.orange,
+    color: colors.danger,
     textAlign: 'center',
     paddingTop: 22,
     paddingHorizontal: 40,
+  },
+  legal: {
+    fontSize: 12,
+    fontFamily: font.regular,
+    color: colors.tertiaryText,
+    textAlign: 'center',
+    lineHeight: 17,
+    paddingTop: 22,
+    paddingHorizontal: 44,
+  },
+  legalLink: {
+    color: colors.secondaryText,
+    textDecorationLine: 'underline',
   },
   bottomSpacer: {
     flex: 1,

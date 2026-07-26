@@ -18,10 +18,7 @@ export default function GenderScreen() {
   return (
     <OnboardingScaffold flow={flow} ctaTitle={null} showsLanguagePill>
       <View style={styles.container}>
-        <TitleBlock
-          title={content.gender.title}
-          subtitle={content.gender.subtitle}
-        />
+        <TitleBlock title={content.gender.title} subtitle={content.gender.subtitle} />
         <View style={styles.spacer} />
         <GlassGroup spacing={11} style={styles.group}>
           {content.gender.options.map((option) => (

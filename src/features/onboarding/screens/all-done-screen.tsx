@@ -43,12 +43,7 @@ export default function AllDoneScreen() {
           <GradientRing diameter={235} ringWidth={33}>
             <View style={styles.stage}>
               <Text style={styles.emoji}>🫰</Text>
-              <Icon
-                name="heart.fill"
-                size={16}
-                color="#E36778"
-                style={styles.heartIcon}
-              />
+              <Icon name="heart.fill" size={16} color="#E36778" style={styles.heartIcon} />
               {SPARKLE_MARKS.map((mark) => (
                 <View
                   key={mark.id}

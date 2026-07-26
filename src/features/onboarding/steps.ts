@@ -1,3 +1,5 @@
+import type { Href } from 'expo-router';
+
 export const STEPS = [
   'index',
   'welcome',
@@ -45,8 +47,8 @@ export function progressFor(step: Step): number {
   return (index + 1) / PROGRESS_STEPS.length;
 }
 
-export function routePath(step: Step): string {
-  return step === 'index' ? '/' : `/${step}`;
+export function routePath(step: Step): Href {
+  return step === 'index' ? '/' : (`/${step}` as Href);
 }
 
 export function nextStep(step: Step): Step | undefined {

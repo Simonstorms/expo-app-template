@@ -1,6 +1,11 @@
 import { useEffect, useState } from 'react';
 import { type LayoutChangeEvent, StyleSheet, Text, View } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withDelay, withSpring } from 'react-native-reanimated';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withSpring,
+} from 'react-native-reanimated';
 import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg';
 
 import { GlassGroup, GlassSurface } from '@/components/ui/glass';
@@ -69,7 +74,8 @@ export default function ComparisonScreen() {
                     cx={glow.cx}
                     cy={glow.cy}
                     r={glow.r}
-                    gradientUnits="userSpaceOnUse">
+                    gradientUnits="userSpaceOnUse"
+                  >
                     <Stop offset={0} stopColor={glow.color} stopOpacity={1} />
                     <Stop offset={1} stopColor={glow.color} stopOpacity={0} />
                   </RadialGradient>
@@ -92,7 +98,8 @@ export default function ComparisonScreen() {
               <GlassSurface
                 radius={layout.cardRadius}
                 tintColor={withAlpha(colors.white, 0.85)}
-                style={styles.column}>
+                style={styles.column}
+              >
                 <Text style={styles.columnLabel}>{content.comparison.columnLeft}</Text>
                 <View style={styles.columnSpacer} />
                 <View style={styles.badgeInset}>
@@ -104,7 +111,8 @@ export default function ComparisonScreen() {
               <GlassSurface
                 radius={layout.cardRadius}
                 tintColor={withAlpha(colors.white, 0.85)}
-                style={styles.column}>
+                style={styles.column}
+              >
                 <Text style={styles.columnLabel}>{content.comparison.columnRight}</Text>
                 <View style={styles.columnSpacer} />
                 <Animated.View style={[styles.bar, barAnimatedStyle]}>

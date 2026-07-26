@@ -89,7 +89,8 @@ export default function PotentialGraphScreen() {
           <GlassSurface
             style={styles.card}
             radius={layout.cardRadius}
-            tintColor={withAlpha('#F9F9F9', 0.9)}>
+            tintColor={withAlpha('#F9F9F9', 0.9)}
+          >
             <Text style={styles.cardTitle}>{content.potentialGraph.cardTitle}</Text>
             <View style={styles.chartOuter}>
               <View style={styles.chart} onLayout={onChartLayout}>
@@ -103,7 +104,8 @@ export default function PotentialGraphScreen() {
                           y1="0"
                           x2={plotWidth}
                           y2="0"
-                          gradientUnits="userSpaceOnUse">
+                          gradientUnits="userSpaceOnUse"
+                        >
                           <Stop offset="0" stopColor="#F1F1F1" />
                           <Stop offset="0.246" stopColor="#E9E9E9" />
                           <Stop offset="0.478" stopColor="#E4DEDA" />
@@ -116,7 +118,8 @@ export default function PotentialGraphScreen() {
                           y1="0"
                           x2={plotWidth}
                           y2="0"
-                          gradientUnits="userSpaceOnUse">
+                          gradientUnits="userSpaceOnUse"
+                        >
                           <Stop offset="0.011" stopColor="#1B1A1E" />
                           <Stop offset="0.395" stopColor="#523E3A" />
                           <Stop offset="0.72" stopColor="#A3775A" />
@@ -164,7 +167,13 @@ export default function PotentialGraphScreen() {
                         fill="none"
                       />
                       {DOT_POINTS.map(([fx, y]) => (
-                        <Circle key={`fill-${fx}`} cx={fx * plotWidth} cy={y} r={7} fill="#FBFAFE" />
+                        <Circle
+                          key={`fill-${fx}`}
+                          cx={fx * plotWidth}
+                          cy={y}
+                          r={7}
+                          fill="#FBFAFE"
+                        />
                       ))}
                       {DOT_POINTS.map(([fx, y]) => (
                         <Circle
@@ -193,7 +202,13 @@ export default function PotentialGraphScreen() {
                 <View style={styles.axisRow}>
                   {plotWidth > 0
                     ? content.potentialGraph.axisLabels.map((label, index) => (
-                        <View key={label} style={[styles.point, { left: AXIS_LABEL_POSITIONS[index] * plotWidth, top: 20 }]}>
+                        <View
+                          key={label}
+                          style={[
+                            styles.point,
+                            { left: AXIS_LABEL_POSITIONS[index] * plotWidth, top: 20 },
+                          ]}
+                        >
                           <Text style={styles.axisLabel}>{label}</Text>
                         </View>
                       ))

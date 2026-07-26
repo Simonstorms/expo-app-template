@@ -56,10 +56,7 @@ function withSceneAppDelegate(config) {
       contents = contents.replace(/^import React$/m, 'import React\nimport UIKit');
     }
 
-    contents = contents.replace(
-      /\n[ \t]*#if os\(iOS\) \|\| os\(tvOS\)[\s\S]*?#endif\n/,
-      '\n',
-    );
+    contents = contents.replace(/\n[ \t]*#if os\(iOS\) \|\| os\(tvOS\)[\s\S]*?#endif\n/, '\n');
 
     if (!contents.includes('class SceneDelegate')) {
       contents = `${contents.trimEnd()}\n${SCENE_DELEGATE}`;

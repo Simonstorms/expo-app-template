@@ -1,6 +1,15 @@
 import { useState } from 'react';
 import { type LayoutChangeEvent, StyleSheet, Text, View } from 'react-native';
-import Svg, { Circle, ClipPath, Defs, Line, LinearGradient, Path, Rect, Stop } from 'react-native-svg';
+import Svg, {
+  Circle,
+  ClipPath,
+  Defs,
+  Line,
+  LinearGradient,
+  Path,
+  Rect,
+  Stop,
+} from 'react-native-svg';
 
 import { GlassSurface } from '@/components/ui/glass';
 import { Icon } from '@/components/ui/icon';
@@ -28,18 +37,36 @@ const cardHeight = 299;
 type Point = { x: number; y: number };
 
 const blackPoints: Point[] = [
-  { x: 23.8, y: 74.8 }, { x: 61, y: 75.6 }, { x: 121, y: 83.6 },
-  { x: 141, y: 92.1 }, { x: 161, y: 106.5 }, { x: 181, y: 125.1 },
-  { x: 201, y: 140.3 }, { x: 221, y: 153 }, { x: 241, y: 163.1 },
-  { x: 261, y: 169 }, { x: 281, y: 170.6 }, { x: 316.6, y: 171.8 },
+  { x: 23.8, y: 74.8 },
+  { x: 61, y: 75.6 },
+  { x: 121, y: 83.6 },
+  { x: 141, y: 92.1 },
+  { x: 161, y: 106.5 },
+  { x: 181, y: 125.1 },
+  { x: 201, y: 140.3 },
+  { x: 221, y: 153 },
+  { x: 241, y: 163.1 },
+  { x: 261, y: 169 },
+  { x: 281, y: 170.6 },
+  { x: 316.6, y: 171.8 },
 ];
 
 const redPoints: Point[] = [
-  { x: 23.8, y: 75.3 }, { x: 41, y: 77.3 }, { x: 61, y: 78.6 },
-  { x: 81, y: 83.5 }, { x: 101, y: 92.8 }, { x: 121, y: 108.6 },
-  { x: 141, y: 127.1 }, { x: 160.3, y: 130.8 }, { x: 181, y: 118.8 },
-  { x: 201, y: 100.6 }, { x: 221, y: 81.3 }, { x: 241, y: 65.1 },
-  { x: 261, y: 52.8 }, { x: 281, y: 44 }, { x: 322.6, y: 36.8 },
+  { x: 23.8, y: 75.3 },
+  { x: 41, y: 77.3 },
+  { x: 61, y: 78.6 },
+  { x: 81, y: 83.5 },
+  { x: 101, y: 92.8 },
+  { x: 121, y: 108.6 },
+  { x: 141, y: 127.1 },
+  { x: 160.3, y: 130.8 },
+  { x: 181, y: 118.8 },
+  { x: 201, y: 100.6 },
+  { x: 221, y: 81.3 },
+  { x: 241, y: 65.1 },
+  { x: 261, y: 52.8 },
+  { x: 281, y: 44 },
+  { x: 322.6, y: 36.8 },
 ];
 
 function smoothPath(points: Point[]): string {
@@ -96,11 +123,25 @@ function GraphCard() {
       <View style={StyleSheet.absoluteFill} onLayout={onLayout}>
         <Svg width={width} height={cardHeight}>
           <Defs>
-            <LinearGradient id="grayGrad" gradientUnits="userSpaceOnUse" x1={0} y1={75} x2={0} y2={172}>
+            <LinearGradient
+              id="grayGrad"
+              gradientUnits="userSpaceOnUse"
+              x1={0}
+              y1={75}
+              x2={0}
+              y2={172}
+            >
               <Stop offset={0} stopColor={grayFill} stopOpacity={1} />
               <Stop offset={1} stopColor={grayFill} stopOpacity={0.45} />
             </LinearGradient>
-            <LinearGradient id="pinkGrad" gradientUnits="userSpaceOnUse" x1={0} y1={36.8} x2={0} y2={76.3}>
+            <LinearGradient
+              id="pinkGrad"
+              gradientUnits="userSpaceOnUse"
+              x1={0}
+              y1={36.8}
+              x2={0}
+              y2={76.3}
+            >
               <Stop offset={0} stopColor={graphRed} stopOpacity={0.18} />
               <Stop offset={1} stopColor={graphRed} stopOpacity={0.05} />
             </LinearGradient>
@@ -128,10 +169,31 @@ function GraphCard() {
           <Path d={blackLine} stroke={graphInk} strokeWidth={2} strokeLinecap="round" fill="none" />
           <Path d={redLine} stroke={graphRed} strokeWidth={2.3} strokeLinecap="round" fill="none" />
 
-          <Line x1={sx(20)} y1={172.3} x2={sx(323.6)} y2={172.3} stroke={baselineColor} strokeWidth={1.2} />
+          <Line
+            x1={sx(20)}
+            y1={172.3}
+            x2={sx(323.6)}
+            y2={172.3}
+            stroke={baselineColor}
+            strokeWidth={1.2}
+          />
 
-          <Circle cx={sx(23.8)} cy={74.8} r={6} fill={colors.white} stroke={graphInk} strokeWidth={2} />
-          <Circle cx={sx(316.6)} cy={171.8} r={6} fill={colors.white} stroke={graphInk} strokeWidth={2} />
+          <Circle
+            cx={sx(23.8)}
+            cy={74.8}
+            r={6}
+            fill={colors.white}
+            stroke={graphInk}
+            strokeWidth={2}
+          />
+          <Circle
+            cx={sx(316.6)}
+            cy={171.8}
+            r={6}
+            fill={colors.white}
+            stroke={graphInk}
+            strokeWidth={2}
+          />
         </Svg>
       </View>
 
@@ -147,9 +209,15 @@ function GraphCard() {
         </View>
       </View>
 
-      <Text style={[styles.curveLabel, { top: 83, right: width - sx(324.3) }]}>{content.resultsGraph.curveLabel}</Text>
-      <Text style={[styles.axisLabel, { top: 183.3, left: sx(20.6) }]}>{content.resultsGraph.axisStart}</Text>
-      <Text style={[styles.axisLabel, { top: 183.3, right: width - sx(323) }]}>{content.resultsGraph.axisEnd}</Text>
+      <Text style={[styles.curveLabel, { top: 83, right: width - sx(324.3) }]}>
+        {content.resultsGraph.curveLabel}
+      </Text>
+      <Text style={[styles.axisLabel, { top: 183.3, left: sx(20.6) }]}>
+        {content.resultsGraph.axisStart}
+      </Text>
+      <Text style={[styles.axisLabel, { top: 183.3, right: width - sx(323) }]}>
+        {content.resultsGraph.axisEnd}
+      </Text>
 
       <View style={styles.footnote}>
         <Text style={styles.footnoteText}>{content.resultsGraph.footnote}</Text>

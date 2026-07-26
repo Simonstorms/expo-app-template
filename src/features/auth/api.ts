@@ -29,10 +29,7 @@ function isAppleCancellation(error: unknown): boolean {
 async function requestAppleCredential(hashedNonce: string) {
   try {
     return await AppleAuthentication.signInAsync({
-      requestedScopes: [
-        AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
-        AppleAuthentication.AppleAuthenticationScope.EMAIL,
-      ],
+      requestedScopes: [AppleAuthentication.AppleAuthenticationScope.EMAIL],
       nonce: hashedNonce,
     });
   } catch (error) {
@@ -44,10 +41,7 @@ async function requestAppleCredential(hashedNonce: string) {
 export async function signInWithApple(): Promise<void> {
   if (!hasSupabase) return;
   const rawNonce = Crypto.randomUUID();
-  const hashedNonce = await Crypto.digestStringAsync(
-    Crypto.CryptoDigestAlgorithm.SHA256,
-    rawNonce,
-  );
+  const hashedNonce = await Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA256, rawNonce);
   const credential = await requestAppleCredential(hashedNonce);
   if (!credential.identityToken) {
     throw new Error('Apple sign-in did not return an identity token.');

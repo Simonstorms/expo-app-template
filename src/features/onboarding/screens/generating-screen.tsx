@@ -1,67 +1,38 @@
 import { LinearGradient } from 'expo-linear-gradient';
-import { useEffect, useState } from 'react';
-import { type LayoutChangeEvent, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, type ViewStyle } from 'react-native';
+import Animated, { type AnimatedStyle } from 'react-native-reanimated';
 
 import { GlassSurface } from '@/components/ui/glass';
-import { OnboardingScaffold } from '../components/onboarding-scaffold';
-import { colors, layout, withAlpha } from '@/constants/theme';
 import { content } from '@/constants/content';
+import { colors, layout, withAlpha } from '@/constants/theme';
+import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { useFlow } from '../hooks/use-flow';
+import { useStagedProgress } from '../hooks/use-staged-progress';
 
 const CARD_INK = '#1C1B22';
 const TRACK_COLOR = '#DDDDDD';
 const FILL_GRADIENT = ['#DC6A6C', '#9D8DB5', '#6F99DB'] as const;
-const PAUSE_THRESHOLDS = [23, 46, 68, 87];
+
+const AnimatedGradient = Animated.createAnimatedComponent(LinearGradient);
 
 export default function GeneratingPlanScreen() {
   const flow = useFlow('generating');
   const { advance } = flow;
-  const [progress, setProgress] = useState(0);
-
-  useEffect(() => {
-    let cancelled = false;
-    let timeoutId: ReturnType<typeof setTimeout>;
-    let current = 0;
-    const pauses = [...PAUSE_THRESHOLDS];
-
-    const tick = () => {
-      if (cancelled) return;
-      const next = Math.min(100, current + (0.8 + Math.random() * 0.8));
-      current = next;
-      setProgress(next);
-
-      if (next >= 100) {
-        timeoutId = setTimeout(() => {
-          if (!cancelled) advance();
-        }, 500);
-        return;
-      }
-
-      let delay = 40;
-      if (pauses.length > 0 && next >= pauses[0]) {
-        pauses.shift();
-        delay += 250 + Math.random() * 200;
-      }
-      timeoutId = setTimeout(tick, delay);
-    };
-
-    timeoutId = setTimeout(tick, 40);
-
-    return () => {
-      cancelled = true;
-      clearTimeout(timeoutId);
-    };
-  }, [advance]);
+  const { barStyle, value } = useStagedProgress(advance);
 
   return (
     <OnboardingScaffold flow={flow} ctaTitle={null}>
       <View style={styles.container}>
-        <Text style={styles.percent}>{Math.floor(progress)}%</Text>
+        <Text style={styles.percent}>{value}%</Text>
         <Text style={styles.headline}>{content.generating.headline}</Text>
-        <GradientBar progress={progress} />
+        <GradientBar barStyle={barStyle} />
         <Text style={styles.caption}>{content.generating.caption}</Text>
         <View style={styles.cardWrap}>
-          <GlassSurface style={styles.card} radius={12.5} tintColor={withAlpha(colors.cardFill, 0.85)}>
+          <GlassSurface
+            style={styles.card}
+            radius={12.5}
+            tintColor={withAlpha(colors.cardFill, 0.85)}
+          >
             <Text style={styles.cardTitle}>{content.generating.cardTitle}</Text>
             {content.generating.bullets.map((bullet) => (
               <View key={bullet} style={styles.bulletRow}>
@@ -77,27 +48,17 @@ export default function GeneratingPlanScreen() {
   );
 }
 
-function GradientBar({ progress }: { progress: number }) {
-  const [trackWidth, setTrackWidth] = useState(0);
-
-  const onLayout = (event: LayoutChangeEvent) => {
-    setTrackWidth(event.nativeEvent.layout.width);
-  };
-
-  const fillWidth = trackWidth > 0 ? Math.max(10, (trackWidth * progress) / 100) : 0;
-
+function GradientBar({ barStyle }: { barStyle: AnimatedStyle<ViewStyle> }) {
   return (
     <View style={styles.barWrap}>
-      <View style={styles.barTrackContainer} onLayout={onLayout}>
+      <View style={styles.barTrackContainer}>
         <View style={styles.barTrack} />
-        {fillWidth > 0 ? (
-          <LinearGradient
-            colors={FILL_GRADIENT}
-            start={{ x: 0, y: 0.5 }}
-            end={{ x: 1, y: 0.5 }}
-            style={[styles.barFill, { width: fillWidth }]}
-          />
-        ) : null}
+        <AnimatedGradient
+          colors={FILL_GRADIENT}
+          start={{ x: 0, y: 0.5 }}
+          end={{ x: 1, y: 0.5 }}
+          style={[styles.barFill, barStyle]}
+        />
       </View>
     </View>
   );

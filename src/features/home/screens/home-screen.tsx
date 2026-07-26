@@ -1,3 +1,4 @@
+import { useQuery } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -9,13 +10,42 @@ import { PrimaryCTA } from '@/components/ui/primary-cta';
 import { ScreenBackground } from '@/components/ui/screen-background';
 import { content } from '@/constants/content';
 import { colors, withAlpha } from '@/constants/theme';
+import { loadCheckIns, type CheckIn } from '../api';
 
 const accentOrange = '#DE9B6C';
 const accentRed = '#DC6868';
 const accentBlue = '#6996DA';
 
+const rowTints = [accentRed, accentBlue, accentOrange];
+
+const SHOWS_DEMO_DATA = __DEV__;
+
+function demoCheckIns(): CheckIn[] {
+  return [
+    {
+      id: 'demo-1',
+      title: content.home.checkinCravingTitle,
+      time: content.home.checkinCravingTime,
+      detail: content.home.checkinCravingDetail,
+      symbol: 'flame.fill',
+    },
+    {
+      id: 'demo-2',
+      title: content.home.checkinWalkTitle,
+      time: content.home.checkinWalkTime,
+      detail: content.home.checkinWalkDetail,
+      symbol: 'figure.walk',
+    },
+  ];
+}
+
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
+  const { data: savedCheckIns = [] } = useQuery({
+    queryKey: ['home', 'check-ins'],
+    queryFn: loadCheckIns,
+  });
+  const checkIns = SHOWS_DEMO_DATA && savedCheckIns.length === 0 ? demoCheckIns() : savedCheckIns;
 
   return (
     <View style={styles.root}>
@@ -25,7 +55,8 @@ export default function HomeScreen() {
         contentContainerStyle={[
           styles.content,
           { paddingTop: insets.top + 10, paddingBottom: insets.bottom + 28 },
-        ]}>
+        ]}
+      >
         <View style={styles.header}>
           <Icon name="leaf.fill" size={22} weight="semibold" color={colors.ctaFill} />
           <Text style={styles.wordmark}>{content.home.wordmark}</Text>
@@ -43,27 +74,41 @@ export default function HomeScreen() {
         </GlassSurface>
 
         <View style={styles.statRow}>
-          <StatCard label={content.home.statAvoidedLabel} value={content.home.statAvoidedValue} tint={accentRed} progress={0.72} symbol="capsule.portrait.fill" />
-          <StatCard label={content.home.statSavedLabel} value={content.home.statSavedValue} tint={accentOrange} progress={0.55} symbol="banknote.fill" />
-          <StatCard label={content.home.statHealthLabel} value={content.home.statHealthValue} tint={accentBlue} progress={0.92} symbol="heart.fill" />
+          <StatCard
+            label={content.home.statAvoidedLabel}
+            value={content.home.statAvoidedValue}
+            tint={accentRed}
+            progress={0.72}
+            symbol="capsule.portrait.fill"
+          />
+          <StatCard
+            label={content.home.statSavedLabel}
+            value={content.home.statSavedValue}
+            tint={accentOrange}
+            progress={0.55}
+            symbol="banknote.fill"
+          />
+          <StatCard
+            label={content.home.statHealthLabel}
+            value={content.home.statHealthValue}
+            tint={accentBlue}
+            progress={0.92}
+            symbol="heart.fill"
+          />
         </View>
 
         <Text style={styles.sectionTitle}>{content.home.sectionTitle}</Text>
         <GlassGroup spacing={11}>
-          <CheckInRow
-            title={content.home.checkinCravingTitle}
-            time={content.home.checkinCravingTime}
-            detail={content.home.checkinCravingDetail}
-            symbol="flame.fill"
-            tint={accentRed}
-          />
-          <CheckInRow
-            title={content.home.checkinWalkTitle}
-            time={content.home.checkinWalkTime}
-            detail={content.home.checkinWalkDetail}
-            symbol="figure.walk"
-            tint={accentBlue}
-          />
+          {checkIns.map((checkIn, index) => (
+            <CheckInRow
+              key={checkIn.id}
+              title={checkIn.title}
+              time={checkIn.time}
+              detail={checkIn.detail}
+              symbol={checkIn.symbol}
+              tint={rowTints[index % rowTints.length]}
+            />
+          ))}
         </GlassGroup>
 
         <View style={styles.cta}>
@@ -92,7 +137,7 @@ function Ring({
   const circumference = 2 * Math.PI * radius;
 
   return (
-    <View style={{ width: diameter, height: diameter, alignItems: 'center', justifyContent: 'center' }}>
+    <View style={[styles.ringStage, { width: diameter, height: diameter }]}>
       <Svg width={diameter} height={diameter} style={StyleSheet.absoluteFill}>
         <Circle
           cx={center}
@@ -226,6 +271,10 @@ const styles = StyleSheet.create({
     marginTop: 2,
     fontSize: 13,
     color: colors.secondaryText,
+  },
+  ringStage: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   statRow: {
     flexDirection: 'row',

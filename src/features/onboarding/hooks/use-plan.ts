@@ -1,25 +1,15 @@
 import { formatMoney } from '@/constants/brand';
 import { content } from '@/constants/content';
 
+import { projectPlan, type Projection } from '../projection';
 import { useOnboarding } from '../store';
-
-const QUIT_HORIZON_DAYS = 90;
-
-function quitDate(): Date {
-  const date = new Date();
-  date.setDate(date.getDate() + QUIT_HORIZON_DAYS);
-  return date;
-}
-
-function dailySpend(weeklySpend: number): number {
-  return weeklySpend / 7;
-}
 
 type Plan = {
   quitDate: Date;
   goalDate: string;
   dailyLimit: string;
   moneySaved: string;
+  projection: Projection;
 };
 
 export function usePlan(): Plan {
@@ -27,10 +17,20 @@ export function usePlan(): Plan {
   const reducePerWeek = useOnboarding((state) => state.reducePerWeek);
   const weeklySpend = useOnboarding((state) => state.weeklySpend);
 
-  const date = quitDate();
-  const goalDate = `${content.birthdate.monthNames[date.getMonth()]} ${date.getDate()}`;
-  const dailyLimit = `${Math.max(1, pouchesPerDay - Math.trunc(reducePerWeek))}`;
-  const moneySaved = formatMoney(dailySpend(weeklySpend));
+  const projection = projectPlan({
+    perDay: pouchesPerDay,
+    reducePerWeek,
+    weeklySpend,
+  });
 
-  return { quitDate: date, goalDate, dailyLimit, moneySaved };
+  const quitDate = new Date();
+  quitDate.setDate(quitDate.getDate() + projection.horizonDays);
+
+  return {
+    quitDate,
+    goalDate: `${content.birthdate.monthNames[quitDate.getMonth()]} ${quitDate.getDate()}`,
+    dailyLimit: `${projection.dailyLimit}`,
+    moneySaved: formatMoney(projection.dailySpend),
+    projection,
+  };
 }
