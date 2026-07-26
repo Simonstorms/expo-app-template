@@ -1,24 +1,49 @@
-import Animated, {
-  Easing,
-  useAnimatedStyle,
-  useDerivedValue,
-  useSharedValue,
-  withTiming,
-} from 'react-native-reanimated';
+import { getLocales } from 'expo-localization';
 import { type LayoutChangeEvent, Pressable, StyleSheet, Text, View } from 'react-native';
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
 import { GlassSurface } from '@/components/ui/glass';
 import { Icon } from '@/components/ui/icon';
+import { motion } from '@/constants/motion';
 import { colors, layout, withAlpha } from '@/constants/theme';
 
-export function BackChip({ onPress }: { onPress: () => void }) {
+export type ChipTone = 'light' | 'translucent';
+
+const MIN_FILL_WIDTH = 7;
+const REGIONAL_INDICATOR_BASE = 0x1f1e6;
+const LETTER_A = 'A'.codePointAt(0) ?? 65;
+
+function regionFlag(regionCode: string | null): string {
+  if (regionCode === null || regionCode.length !== 2) return '🌐';
+  const points = [...regionCode.toUpperCase()].map(
+    (letter) => REGIONAL_INDICATOR_BASE + ((letter.codePointAt(0) ?? LETTER_A) - LETTER_A),
+  );
+  return String.fromCodePoint(...points);
+}
+
+let lastProgress = 0;
+
+export function BackChip({
+  onPress,
+  tone = 'light',
+  label = 'Back',
+}: {
+  onPress: () => void;
+  tone?: ChipTone;
+  label?: string;
+}) {
+  const fill =
+    tone === 'translucent' ? withAlpha(colors.white, 0.55) : withAlpha(colors.cardFill, 0.8);
+
   return (
-    <Pressable onPress={onPress} hitSlop={8}>
+    <Pressable onPress={onPress} hitSlop={10} accessibilityRole="button" accessibilityLabel={label}>
       <GlassSurface
         radius={layout.chipSize / 2}
-        tintColor={withAlpha(colors.cardFill, 0.8)}
+        tintColor={fill}
+        fallbackColor={fill}
         isInteractive
-        style={styles.chip}>
+        style={styles.chip}
+      >
         <Icon name="arrow.left" size={17} weight="medium" color={colors.ink} />
       </GlassSurface>
     </Pressable>
@@ -27,30 +52,56 @@ export function BackChip({ onPress }: { onPress: () => void }) {
 
 export function ProgressBar({ progress }: { progress: number }) {
   const trackWidth = useSharedValue(0);
-  const animatedProgress = useDerivedValue(() =>
-    withTiming(progress, { duration: 450, easing: Easing.inOut(Easing.ease) }),
-  );
-
-  const fillStyle = useAnimatedStyle(() => ({
-    width: Math.max(7, trackWidth.value * animatedProgress.value),
-  }));
+  const fill = useSharedValue(lastProgress);
 
   const onLayout = (event: LayoutChangeEvent) => {
-    trackWidth.value = event.nativeEvent.layout.width;
+    trackWidth.set(event.nativeEvent.layout.width);
+    lastProgress = progress;
+    fill.set(withTiming(progress, { duration: motion.enter, easing: motion.easeOut }));
   };
 
+  const fillStyle = useAnimatedStyle(() => {
+    const width = trackWidth.get();
+    const scaleX = width > 0 ? Math.min(1, Math.max(MIN_FILL_WIDTH / width, fill.get())) : 0;
+    return {
+      opacity: width > 0 ? 1 : 0,
+      transform: [{ translateX: -width / 2 }, { scaleX }, { translateX: width / 2 }],
+    };
+  });
+
   return (
-    <View style={styles.track} onLayout={onLayout}>
+    <View
+      style={styles.track}
+      onLayout={onLayout}
+      accessibilityRole="progressbar"
+      accessibilityValue={{ min: 0, max: 100, now: Math.round(progress * 100) }}
+    >
       <Animated.View style={[styles.fill, fillStyle]} />
     </View>
   );
 }
 
-export function LanguagePill() {
+export function SkipLink({ onPress, label }: { onPress: () => void; label: string }) {
   return (
-    <GlassSurface radius={15} tintColor={withAlpha(colors.cardFill, 0.8)} style={styles.languagePill}>
-      <Text style={styles.flag}>🇺🇸</Text>
-      <Text style={styles.language}>EN</Text>
+    <Pressable onPress={onPress} hitSlop={12} accessibilityRole="button" accessibilityLabel={label}>
+      <Text style={styles.skip}>{label}</Text>
+    </Pressable>
+  );
+}
+
+export function LanguagePill() {
+  const locale = getLocales()[0];
+  const flag = regionFlag(locale?.regionCode ?? null);
+  const language = (locale?.languageCode ?? 'en').toUpperCase();
+
+  return (
+    <GlassSurface
+      radius={15}
+      tintColor={withAlpha(colors.cardFill, 0.8)}
+      style={styles.languagePill}
+    >
+      <Text style={styles.flag}>{flag}</Text>
+      <Text style={styles.language}>{language}</Text>
     </GlassSurface>
   );
 }
@@ -71,9 +122,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   fill: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
     height: 3,
     borderRadius: 1.5,
     backgroundColor: colors.ink,
+  },
+  skip: {
+    fontSize: 15,
+    fontWeight: '500',
+    color: colors.tertiaryText,
   },
   languagePill: {
     height: 30,

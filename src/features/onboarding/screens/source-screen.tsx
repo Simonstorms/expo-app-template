@@ -57,7 +57,9 @@ function SourceRow({
   selected: boolean;
   onPress: () => void;
 }) {
-  const scale = useDerivedValue(() => withSpring(selected ? 1.015 : 1, { damping: 15, stiffness: 220 }));
+  const scale = useDerivedValue(() =>
+    withSpring(selected ? 1.015 : 1, { damping: 15, stiffness: 220 }),
+  );
   const animatedStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
 
   return (
@@ -66,7 +68,8 @@ function SourceRow({
         <GlassSurface
           radius={layout.cardRadius}
           tintColor={selected ? colors.ink : withAlpha(colors.cardFill, 0.85)}
-          isInteractive>
+          isInteractive
+        >
           <View style={styles.row}>
             <View style={styles.iconCircle}>
               <SourceGlyph source={source} />

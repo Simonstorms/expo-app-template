@@ -1,19 +1,38 @@
 import * as Haptics from 'expo-haptics';
-import { type Href, useFocusEffect, useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useRef } from 'react';
 import { Platform } from 'react-native';
 
-import { captureEvent } from '@/lib/analytics';
+import { captureEvent, setPersonProperties } from '@/lib/analytics';
 import { setOnboardingComplete } from '@/lib/storage';
 import type { Json } from '@/types/database';
 import { syncOnboarding } from '../api';
-import { useOnboarding } from '../store';
-import { nextStep, progressFor, routePath, showsChrome, type Step } from '../steps';
+import { onboardingAnswers } from '../store';
+import { nextStep, progressFor, routePath, showsChrome, STEPS, type Step } from '../steps';
 
 const ADVANCE_DELAY_MS = 140;
 
+type AnswerValue = string | number | boolean;
+
+type Answers = Record<string, unknown>;
+
+function describeValue(value: unknown): AnswerValue {
+  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+    return value;
+  }
+  return JSON.stringify(value ?? null);
+}
+
+function answerFromDiff(before: Answers, after: Answers): AnswerValue | undefined {
+  const changed = Object.keys(after).filter((key) => !Object.is(before[key], after[key]));
+  if (changed.length === 0) return undefined;
+  if (changed.length === 1) return describeValue(after[changed[0]]);
+  return changed.map((key) => `${key}=${describeValue(after[key])}`).join(',');
+}
+
 export type OnboardingFlow = {
   advance: () => void;
+  replaceAdvance: () => void;
   goTo: (target: Step) => void;
   back: () => void;
   selectAndAdvance: (mutate: () => void) => void;
@@ -21,27 +40,46 @@ export type OnboardingFlow = {
   finish: () => Promise<void>;
   progress: number;
   showsChrome: boolean;
+  canGoBack: boolean;
 };
 
 export function useFlow(step: Step): OnboardingFlow {
   const router = useRouter();
   const advancing = useRef(false);
+  const answersOnEntry = useRef<Answers>(onboardingAnswers());
 
   useFocusEffect(
     useCallback(() => {
       advancing.current = false;
+      answersOnEntry.current = onboardingAnswers();
     }, []),
   );
+
+  const trackStepCompleted = useCallback(() => {
+    captureEvent('onboarding_step_completed', {
+      step,
+      step_index: STEPS.indexOf(step),
+      answer: answerFromDiff(answersOnEntry.current, onboardingAnswers()),
+    });
+  }, [step]);
 
   const advance = useCallback(() => {
     const next = nextStep(step);
     if (!next) return;
-    router.push(routePath(next) as Href);
-  }, [router, step]);
+    trackStepCompleted();
+    router.push(routePath(next));
+  }, [router, step, trackStepCompleted]);
+
+  const replaceAdvance = useCallback(() => {
+    const next = nextStep(step);
+    if (!next) return;
+    trackStepCompleted();
+    router.replace(routePath(next));
+  }, [router, step, trackStepCompleted]);
 
   const goTo = useCallback(
     (target: Step) => {
-      router.push(routePath(target) as Href);
+      router.push(routePath(target));
     },
     [router],
   );
@@ -68,19 +106,20 @@ export function useFlow(step: Step): OnboardingFlow {
   );
 
   const finish = useCallback(async () => {
-    const values = JSON.parse(JSON.stringify(useOnboarding.getState())) as Json;
-    captureEvent('onboarding_completed');
+    const values = onboardingAnswers() as Json;
+    captureEvent('onboarding_completed', { steps_total: STEPS.length });
+    setPersonProperties({ has_completed_onboarding: true });
     await syncOnboarding(values).catch(() => undefined);
     await setOnboardingComplete(true).catch(() => undefined);
     if (router.canDismiss()) {
       router.dismissAll();
     }
-    const home: string = '/home';
-    router.replace(home as Href);
+    router.replace('/home');
   }, [router]);
 
   return {
     advance,
+    replaceAdvance,
     goTo,
     back,
     selectAndAdvance,
@@ -88,5 +127,6 @@ export function useFlow(step: Step): OnboardingFlow {
     finish,
     progress: progressFor(step),
     showsChrome: showsChrome(step),
+    canGoBack: router.canGoBack(),
   };
 }

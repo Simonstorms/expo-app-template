@@ -24,7 +24,12 @@ export function useSession() {
     return () => data.subscription.unsubscribe();
   }, [queryClient]);
 
-  const query = useQuery({ queryKey: SESSION_KEY, queryFn: fetchSession });
+  const query = useQuery({
+    queryKey: SESSION_KEY,
+    queryFn: fetchSession,
+    gcTime: Infinity,
+    initialData: hasSupabase ? undefined : null,
+  });
 
   return {
     session: query.data ?? null,

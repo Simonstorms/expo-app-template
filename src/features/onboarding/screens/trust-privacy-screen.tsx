@@ -76,7 +76,8 @@ export default function TrustPrivacyScreen() {
             <GlassSurface
               radius={layout.cardRadius}
               tintColor={withAlpha('#F7F6FB', 0.85)}
-              style={styles.cardSurface}>
+              style={styles.cardSurface}
+            >
               <View style={styles.cardContent}>
                 <Text style={styles.cardTitle}>{content.trustPrivacy.cardTitle}</Text>
                 <Text style={styles.cardCaption}>{content.trustPrivacy.cardCaption}</Text>

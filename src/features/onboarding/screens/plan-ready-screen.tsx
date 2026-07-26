@@ -38,7 +38,8 @@ export default function PlanReadyScreen() {
       <View style={styles.container}>
         <ScrollView
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.scrollContent}>
+          contentContainerStyle={styles.scrollContent}
+        >
           <View style={styles.checkBadge}>
             <Icon name="checkmark" size={15} weight="bold" color={colors.white} />
           </View>
@@ -47,7 +48,8 @@ export default function PlanReadyScreen() {
           <GlassSurface
             radius={49 / 2}
             tintColor={withAlpha(colors.cardFill, 0.85)}
-            style={styles.goalPill}>
+            style={styles.goalPill}
+          >
             <Text style={styles.goalPillText}>{`${content.planReady.goalPrefix} ${goalDate}`}</Text>
           </GlassSurface>
           <View style={styles.card}>
@@ -123,10 +125,7 @@ function MetricTile({
   ringColor: string;
 }) {
   return (
-    <GlassSurface
-      radius={20}
-      tintColor={withAlpha(colors.white, 0.85)}
-      style={styles.tile}>
+    <GlassSurface radius={20} tintColor={withAlpha(colors.white, 0.85)} style={styles.tile}>
       <View style={styles.tileContent}>
         <View style={styles.tileTopRow}>
           <View style={styles.iconCircle}>
@@ -136,7 +135,8 @@ function MetricTile({
             style={styles.tileLabel}
             numberOfLines={1}
             adjustsFontSizeToFit
-            minimumFontScale={0.8}>
+            minimumFontScale={0.8}
+          >
             {label}
           </Text>
         </View>

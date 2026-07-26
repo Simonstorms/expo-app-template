@@ -21,7 +21,11 @@ export default function ReferralCodeScreen() {
         <TitleBlock title={content.referral.title} subtitle={content.referral.subtitle} />
         <View style={styles.spacer} />
         <View style={styles.fieldWrap}>
-          <GlassSurface radius={10} tintColor={withAlpha(colors.cardFill, 0.85)} style={styles.card}>
+          <GlassSurface
+            radius={10}
+            tintColor={withAlpha(colors.cardFill, 0.85)}
+            style={styles.card}
+          >
             <TextInput
               ref={inputRef}
               value={referralCode}
@@ -40,7 +44,8 @@ export default function ReferralCodeScreen() {
                 tintColor={referralCode.length === 0 ? '#C0BFC6' : colors.ctaFill}
                 fallbackColor={referralCode.length === 0 ? '#C0BFC6' : colors.ctaFill}
                 isInteractive
-                style={styles.submitButton}>
+                style={styles.submitButton}
+              >
                 <Text style={styles.submitLabel}>{content.referral.submit}</Text>
               </GlassSurface>
             </Pressable>

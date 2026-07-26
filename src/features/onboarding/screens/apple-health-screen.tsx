@@ -1,12 +1,7 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, {
-  Defs,
-  LinearGradient as SvgLinearGradient,
-  Path,
-  Stop,
-} from 'react-native-svg';
+import Svg, { Defs, LinearGradient as SvgLinearGradient, Path, Stop } from 'react-native-svg';
 
 import { GlassSurface } from '@/components/ui/glass';
 import { Icon } from '@/components/ui/icon';
@@ -33,8 +28,7 @@ const CONNECTOR_LINES =
   'M 163.3 160.8 L 181.6 160.8 A 15.7 15.7 0 0 0 197.3 145.1 L 197.3 138';
 
 const ARROWHEADS =
-  'M 192 94.7 L 202.6 94.7 L 197.3 104.3 Z ' +
-  'M 192.3 138 L 202.3 138 L 197.3 129 Z';
+  'M 192 94.7 L 202.6 94.7 L 197.3 104.3 Z ' + 'M 192.3 138 L 202.3 138 L 197.3 129 Z';
 
 const HEART_PATH =
   'M23.6,0c-3.4,0-6.3,2.7-7.6,5.6C14.7,2.7,11.8,0,8.4,0C3.8,0,0,3.8,0,8.4' +
@@ -55,7 +49,8 @@ function LabelPill({
     <GlassSurface
       radius={height / 2}
       tintColor={PILL_TINT}
-      style={[styles.pill, { left, top, height }]}>
+      style={[styles.pill, { left, top, height }]}
+    >
       <Text style={styles.pillText}>{text}</Text>
     </GlassSurface>
   );
@@ -94,7 +89,8 @@ export default function AppleHealthScreen() {
           <GlassSurface
             radius={18}
             tintColor={PILL_TINT}
-            style={[styles.healthCard, { left: 71.7, top: 128.7 }]}>
+            style={[styles.healthCard, { left: 71.7, top: 128.7 }]}
+          >
             <Svg width={38} height={35.15} viewBox="0 0 32 29.6" style={styles.heart}>
               <Defs>
                 <SvgLinearGradient id="heartFill" x1="0" y1="0" x2="0" y2="1">
@@ -111,18 +107,25 @@ export default function AppleHealthScreen() {
             radius={18}
             tintColor={colors.ctaFill}
             fallbackColor={colors.ctaFill}
-            style={[styles.quitCard, { left: 241.3, top: 26.7 }]}>
+            style={[styles.quitCard, { left: 241.3, top: 26.7 }]}
+          >
             <Icon name="leaf.fill" size={34} color={colors.white} />
           </GlassSurface>
 
-          <LabelPill text={content.appleHealth.labelHeartRate} height={31.7} left={274.3} top={113.3} />
+          <LabelPill
+            text={content.appleHealth.labelHeartRate}
+            height={31.7}
+            left={274.3}
+            top={113.3}
+          />
           <LabelPill text={content.appleHealth.labelSleep} height={30} left={250.3} top={153.3} />
 
           <GlassSurface
             radius={9.15}
             tintColor={colors.ctaFill}
             fallbackColor={colors.ctaFill}
-            style={[styles.checkDot, { left: 188.3, top: 103 }]}>
+            style={[styles.checkDot, { left: 188.3, top: 103 }]}
+          >
             <Icon name="checkmark" size={9} weight="bold" color={colors.white} />
           </GlassSurface>
         </View>

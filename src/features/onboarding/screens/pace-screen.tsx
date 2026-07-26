@@ -69,8 +69,14 @@ export default function QuitPaceScreen() {
       return;
     }
     currentValue.value = next;
-    frac.value = withTiming(fractionForValue(next), { duration: 120, easing: Easing.out(Easing.ease) });
-    pillOpacity.value = withTiming(next === 3 ? 1 : 0, { duration: 200, easing: Easing.inOut(Easing.ease) });
+    frac.value = withTiming(fractionForValue(next), {
+      duration: 120,
+      easing: Easing.out(Easing.ease),
+    });
+    pillOpacity.value = withTiming(next === 3 ? 1 : 0, {
+      duration: 200,
+      easing: Easing.inOut(Easing.ease),
+    });
     runOnJS(commit)(next);
   };
 
@@ -115,7 +121,8 @@ export default function QuitPaceScreen() {
               style={styles.sliderInner}
               onLayout={(event) => {
                 trackWidth.value = event.nativeEvent.layout.width;
-              }}>
+              }}
+            >
               <View style={styles.track} />
               <Animated.View style={[styles.fill, fillStyle]} />
               <Animated.View style={[styles.knob, knobStyle]}>

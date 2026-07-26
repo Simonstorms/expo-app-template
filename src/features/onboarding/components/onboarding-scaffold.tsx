@@ -2,40 +2,62 @@ import type { ReactNode } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { BackChip, LanguagePill, ProgressBar } from './header';
-import { PrimaryCTA } from '@/components/ui/primary-cta';
-import { ScreenBackground } from '@/components/ui/screen-background';
-import { colors, layout } from '@/constants/theme';
+import { PrimaryCTA, type CtaVariant } from '@/components/ui/primary-cta';
+import { ScreenBackground, type BackgroundVariant } from '@/components/ui/screen-background';
+import { colors, layout, withAlpha } from '@/constants/theme';
 import type { OnboardingFlow } from '../hooks/use-flow';
+import { BackChip, LanguagePill, ProgressBar, SkipLink } from './header';
+
+const SKIP_SPACER_WIDTH = 34;
 
 export function OnboardingScaffold({
   flow,
+  variant = 'light',
   ctaTitle,
+  ctaVariant = 'primary',
   ctaEnabled = true,
   showsLanguagePill = false,
+  onBack,
+  onSkip,
+  skipLabel,
   onContinue,
   footer,
   children,
 }: {
   flow: OnboardingFlow;
+  variant?: BackgroundVariant;
   ctaTitle?: string | null;
+  ctaVariant?: CtaVariant;
   ctaEnabled?: boolean;
   showsLanguagePill?: boolean;
+  onBack?: () => void;
+  onSkip?: () => void;
+  skipLabel?: string;
   onContinue?: () => void;
   footer?: ReactNode;
   children: ReactNode;
 }) {
   const insets = useSafeAreaInsets();
+  const chipTone = variant === 'light' ? 'light' : 'translucent';
 
   return (
     <View style={styles.root}>
-      <ScreenBackground />
+      <ScreenBackground variant={variant} />
       <View style={[styles.body, { paddingTop: insets.top }]}>
         {flow.showsChrome && (
-          <View style={[styles.header, { paddingRight: showsLanguagePill ? 16 : 32 }]}>
-            <BackChip onPress={flow.back} />
+          <View style={styles.header}>
+            {onBack || flow.canGoBack ? (
+              <BackChip onPress={onBack ?? flow.back} tone={chipTone} />
+            ) : (
+              <View style={styles.backSpacer} />
+            )}
             <ProgressBar progress={flow.progress} />
-            {showsLanguagePill && <LanguagePill />}
+            {showsLanguagePill ? <LanguagePill /> : null}
+            {onSkip && skipLabel ? (
+              <SkipLink onPress={onSkip} label={skipLabel} />
+            ) : showsLanguagePill ? null : (
+              <View style={styles.skipSpacer} />
+            )}
           </View>
         )}
         <View style={styles.content}>{children}</View>
@@ -46,7 +68,12 @@ export function OnboardingScaffold({
         <View style={[styles.ctaBar, { paddingBottom: insets.bottom + 8 }]}>
           <View style={styles.hairline} />
           <View style={styles.ctaInner}>
-            <PrimaryCTA title={ctaTitle} enabled={ctaEnabled} onPress={onContinue ?? flow.advance} />
+            <PrimaryCTA
+              title={ctaTitle}
+              variant={ctaVariant}
+              enabled={ctaEnabled}
+              onPress={onContinue ?? flow.advance}
+            />
           </View>
         </View>
       ) : null}
@@ -64,15 +91,22 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 26,
+    gap: 18,
     paddingLeft: 19,
+    paddingRight: 16,
     paddingTop: 8,
+  },
+  backSpacer: {
+    width: layout.chipSize,
+  },
+  skipSpacer: {
+    width: SKIP_SPACER_WIDTH,
   },
   content: {
     flex: 1,
   },
   ctaBar: {
-    backgroundColor: 'rgba(254, 254, 254, 0.94)',
+    backgroundColor: withAlpha(colors.white, 0.94),
   },
   hairline: {
     height: StyleSheet.hairlineWidth,

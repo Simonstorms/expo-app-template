@@ -7,10 +7,16 @@
     "icon": "./assets/images/icon.png",
     "scheme": "expoapptemplate",
     "userInterfaceStyle": "light",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
     "ios": {
       "icon": "./assets/expo.icon",
       "bundleIdentifier": "com.example.expoapptemplate",
-      "usesAppleSignIn": true
+      "usesAppleSignIn": true,
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "com.example.expoapptemplate",
@@ -38,7 +44,12 @@
       ],
       "expo-web-browser",
       "expo-apple-authentication",
-      "expo-secure-store",
+      [
+        "expo-secure-store",
+        {
+          "faceIDPermission": "Allow $(PRODUCT_NAME) to use Face ID to unlock your saved sign-in on this device."
+        }
+      ],
       "expo-localization",
       "./plugins/with-inhibit-pod-warnings",
       "./plugins/with-disable-script-sandboxing",

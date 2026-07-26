@@ -3,13 +3,7 @@ export type Gender = 'male' | 'female' | 'other';
 export type UsageLevel = 'light' | 'regular' | 'heavy';
 
 export type DiscoverySource =
-  | 'instagram'
-  | 'tiktok'
-  | 'tv'
-  | 'friends'
-  | 'facebook'
-  | 'youtube'
-  | 'google';
+  'instagram' | 'tiktok' | 'tv' | 'friends' | 'facebook' | 'youtube' | 'google';
 
 export type HabitVariant = 'pouches' | 'loose';
 

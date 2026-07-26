@@ -1,148 +1,149 @@
 import * as Notifications from 'expo-notifications';
-import { useEffect } from 'react';
+import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import Animated, {
-  Easing,
-  useAnimatedStyle,
-  useSharedValue,
-  withRepeat,
-  withTiming,
-} from 'react-native-reanimated';
 
-import { GlassSurface } from '@/components/ui/glass';
-import { OnboardingScaffold } from '../components/onboarding-scaffold';
-import { colors, withAlpha } from '@/constants/theme';
+import { NotificationPreview } from '@/components/ui/notification-preview';
+import { PrimaryCTA } from '@/components/ui/primary-cta';
 import { content } from '@/constants/content';
+import { colors, font, layout } from '@/constants/theme';
+import { captureEvent } from '@/lib/analytics';
+import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { useFlow } from '../hooks/use-flow';
 
 export default function NotificationsScreen() {
   const flow = useFlow('notifications');
   const { advance } = flow;
-  const fingerRaised = useSharedValue(0);
-
-  useEffect(() => {
-    fingerRaised.value = withRepeat(
-      withTiming(1, { duration: 850, easing: Easing.inOut(Easing.ease) }),
-      -1,
-      true,
-    );
-  }, [fingerRaised]);
-
-  const fingerStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: 79 }, { translateY: -5 * fingerRaised.value }],
-  }));
+  const [busy, setBusy] = useState(false);
 
   const requestPermission = async () => {
+    if (busy) return;
+    setBusy(true);
+    let granted = false;
     try {
-      await Notifications.requestPermissionsAsync();
-    } catch {}
+      granted = (await Notifications.requestPermissionsAsync()).granted;
+    } catch {
+      granted = false;
+    }
+    captureEvent('permission_requested', {
+      permission: 'notifications',
+      result: granted ? 'granted' : 'denied',
+      context: 'onboarding',
+    });
+    setBusy(false);
     advance();
   };
 
+  const skip = () => {
+    if (busy) return;
+    captureEvent('permission_requested', {
+      permission: 'notifications',
+      result: 'skipped',
+      context: 'onboarding',
+    });
+    advance();
+  };
+
+  const { previews } = content.notifications;
+
+  const footer = (
+    <View style={styles.footer}>
+      <PrimaryCTA
+        title={content.notifications.allow}
+        enabled={!busy}
+        onPress={() => {
+          void requestPermission();
+        }}
+      />
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={content.notifications.dismiss}
+        disabled={busy}
+        onPress={skip}
+        style={({ pressed }) => [styles.skipButton, { opacity: pressed || busy ? 0.6 : 1 }]}
+      >
+        <Text style={styles.skipLabel}>{content.notifications.dismiss}</Text>
+      </Pressable>
+    </View>
+  );
+
   return (
-    <OnboardingScaffold flow={flow} ctaTitle={null}>
+    <OnboardingScaffold flow={flow} footer={footer}>
       <View style={styles.container}>
-        <View style={styles.spacer} />
         <Text style={styles.title}>{content.notifications.title}</Text>
-        <AlertCard onDismiss={advance} onAllow={requestPermission} />
-        <Animated.Text style={[styles.finger, fingerStyle]}>{'👆'}</Animated.Text>
-        <View style={styles.spacer} />
+        <Text style={styles.caption}>{content.notifications.caption}</Text>
+        <View style={styles.stack}>
+          <NotificationPreview
+            title={previews.first.title}
+            body={previews.first.body}
+            time={previews.first.time}
+            symbol="sparkles"
+          />
+          <NotificationPreview
+            title={previews.second.title}
+            body={previews.second.body}
+            time={previews.second.time}
+            symbol="clock.fill"
+          />
+          <NotificationPreview
+            title={previews.third.title}
+            body={previews.third.body}
+            time={previews.third.time}
+            symbol="chart.bar.fill"
+          />
+        </View>
+        <View style={styles.grow} />
       </View>
     </OnboardingScaffold>
-  );
-}
-
-function AlertCard({ onDismiss, onAllow }: { onDismiss: () => void; onAllow: () => void }) {
-  return (
-    <GlassSurface radius={14} tintColor={withAlpha('#C6C6C6', 0.85)} isInteractive style={styles.card}>
-      <View style={styles.promptTextWrap}>
-        <Text style={styles.promptText}>{content.notifications.promptText}</Text>
-      </View>
-      <View style={styles.buttonsRow}>
-        <View style={styles.dismissColumn}>
-          <View style={styles.divider} />
-          <Pressable style={styles.dismissButton} onPress={onDismiss}>
-            <Text style={styles.dismissLabel}>{content.notifications.dismiss}</Text>
-          </Pressable>
-        </View>
-        <Pressable style={styles.allowButton} onPress={onAllow}>
-          <Text style={styles.allowLabel}>{content.notifications.allow}</Text>
-        </Pressable>
-      </View>
-    </GlassSurface>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    width: '100%',
-    alignItems: 'center',
-  },
-  spacer: {
-    flex: 1,
+    paddingHorizontal: layout.margin,
   },
   title: {
-    fontSize: 30,
+    paddingTop: 14,
+    fontSize: 26,
+    fontFamily: font.bold,
     fontWeight: '700',
-    letterSpacing: -0.5,
+    letterSpacing: -0.7,
+    lineHeight: 31,
     color: colors.ink,
     textAlign: 'center',
   },
-  card: {
-    width: 314.7,
-    height: 143,
-    marginTop: 31,
-    borderRadius: 14,
-    overflow: 'hidden',
-  },
-  promptTextWrap: {
-    width: '100%',
-    height: 92.3,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  promptText: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: colors.ink,
-    textAlign: 'center',
-    lineHeight: 21.5,
-  },
-  buttonsRow: {
-    flexDirection: 'row',
-  },
-  dismissColumn: {
-    width: 158.7,
-  },
-  divider: {
-    height: 0.7,
-    backgroundColor: '#A9A9A9',
-  },
-  dismissButton: {
-    height: 50,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  dismissLabel: {
-    fontSize: 20,
+  caption: {
+    marginTop: 8,
+    paddingHorizontal: 12,
+    fontSize: 14,
+    fontFamily: font.regular,
     fontWeight: '400',
-    color: '#1C1B21',
+    color: colors.secondaryText,
+    lineHeight: 20,
+    textAlign: 'center',
   },
-  allowButton: {
-    width: 156,
-    height: 50.7,
-    backgroundColor: colors.ctaFill,
+  stack: {
+    marginTop: 24,
+    gap: 10,
+  },
+  grow: {
+    flex: 1,
+    minHeight: 10,
+  },
+  footer: {
+    paddingHorizontal: layout.ctaMargin,
+    paddingTop: 12,
+    paddingBottom: 8,
+    gap: 12,
+  },
+  skipButton: {
     alignItems: 'center',
-    justifyContent: 'center',
+    paddingVertical: 6,
   },
-  allowLabel: {
-    fontSize: 20,
-    fontWeight: '500',
-    color: colors.white,
-  },
-  finger: {
-    fontSize: 32,
-    marginTop: 18,
+  skipLabel: {
+    fontSize: 15,
+    fontFamily: font.semibold,
+    fontWeight: '600',
+    color: colors.secondaryText,
   },
 });

@@ -37,7 +37,8 @@ export default function WelcomeScreen() {
               tintColor={colors.ink}
               fallbackColor={colors.ink}
               isInteractive
-              style={styles.getStarted}>
+              style={styles.getStarted}
+            >
               <Text style={styles.getStartedLabel}>{content.welcome.getStarted}</Text>
             </GlassSurface>
           </Pressable>
@@ -99,8 +100,16 @@ function MockScreen() {
 
       <StreakRing />
 
-      <StatCard value={content.welcome.mock.savedValue} caption={content.welcome.mock.savedCaption} left={6.65} />
-      <StatCard value={content.welcome.mock.avoidedValue} caption={content.welcome.mock.avoidedCaption} left={110.65} />
+      <StatCard
+        value={content.welcome.mock.savedValue}
+        caption={content.welcome.mock.savedCaption}
+        left={6.65}
+      />
+      <StatCard
+        value={content.welcome.mock.avoidedValue}
+        caption={content.welcome.mock.avoidedCaption}
+        left={110.65}
+      />
 
       <View style={styles.milestoneCard}>
         <Text style={styles.milestoneTitle}>{content.welcome.mock.milestoneTitle}</Text>

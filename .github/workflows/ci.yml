@@ -11,12 +11,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: oven-sh/setup-bun@v2
         with:
-          node-version: 20
-          cache: npm
-      - run: npm ci
+          bun-version: latest
+      - run: bun install --frozen-lockfile
       - name: Typecheck
-        run: npx tsc --noEmit
+        run: bun run typecheck
       - name: Lint
-        run: npx expo lint
+        run: bun run lint
+      - name: Format
+        run: bun run format:check

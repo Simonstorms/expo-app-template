@@ -24,13 +24,15 @@ function ChoiceButton({ title, onPress }: { title: string; onPress: () => void }
   return (
     <Pressable
       onPress={onPress}
-      style={({ pressed }) => [styles.flex, { opacity: pressed ? 0.92 : 1 }]}>
+      style={({ pressed }) => [styles.flex, { opacity: pressed ? 0.92 : 1 }]}
+    >
       <GlassSurface
         radius={layout.ctaHeight / 2}
         tintColor={colors.ctaFill}
         fallbackColor={colors.ctaFill}
         isInteractive
-        style={styles.button}>
+        style={styles.button}
+      >
         <Text style={[text.cta, styles.label]}>{title}</Text>
       </GlassSurface>
     </Pressable>

@@ -1,20 +1,22 @@
 import { StyleSheet, Text, View } from 'react-native';
 
-import { colors, layout, text } from '@/constants/theme';
+import { colors, font, layout, text } from '@/constants/theme';
 
 export function TitleBlock({
   title,
   subtitle,
   highlight,
+  align = 'left',
 }: {
   title: string;
   subtitle?: string;
   highlight?: string;
+  align?: 'left' | 'center';
 }) {
   return (
-    <View style={styles.container}>
-      <Text style={text.title}>{renderTitle(title, highlight)}</Text>
-      {subtitle ? <Text style={text.subtitle}>{subtitle}</Text> : null}
+    <View style={[styles.container, { alignItems: align === 'center' ? 'center' : 'flex-start' }]}>
+      <Text style={[text.title, { textAlign: align }]}>{renderTitle(title, highlight)}</Text>
+      {subtitle ? <Text style={[styles.subtitle, { textAlign: align }]}>{subtitle}</Text> : null}
     </View>
   );
 }
@@ -40,5 +42,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: layout.margin,
     paddingTop: 16,
     gap: 19,
+  },
+  subtitle: {
+    fontSize: 17,
+    fontFamily: font.regular,
+    fontWeight: '400',
+    color: colors.ink,
+    lineHeight: 23,
   },
 });

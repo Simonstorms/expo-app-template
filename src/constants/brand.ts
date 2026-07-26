@@ -27,10 +27,23 @@ export const brand = {
 
   currency,
 
+  trial: {
+    days: 7,
+  },
+
+  pricing: {
+    yearly: '$49.99',
+    yearlyPerMonth: '$4.16',
+    monthly: '$9.99',
+    offerYearly: '$29.99',
+    offerPerMonth: '$2.49',
+  },
+
   legal: {
     privacyUrl: 'https://example.com/privacy',
     termsUrl: 'https://example.com/terms',
-    appStoreUrl: 'https://apps.apple.com/app/id0000000000?action=write-review',
+    supportEmail: 'support@example.com',
+    appStoreUrl: '' as string,
   },
 } as const;
 

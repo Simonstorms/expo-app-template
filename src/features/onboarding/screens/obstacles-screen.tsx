@@ -49,7 +49,9 @@ function ObstacleRow({
   selected: boolean;
   onPress: () => void;
 }) {
-  const scale = useDerivedValue(() => withSpring(selected ? 1.015 : 1, { damping: 15, stiffness: 220 }));
+  const scale = useDerivedValue(() =>
+    withSpring(selected ? 1.015 : 1, { damping: 15, stiffness: 220 }),
+  );
   const animatedStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
 
   return (
@@ -58,7 +60,8 @@ function ObstacleRow({
         <GlassSurface
           radius={18}
           tintColor={selected ? colors.ink : withAlpha(colors.cardFill, 0.85)}
-          isInteractive>
+          isInteractive
+        >
           <View style={styles.row}>
             <View style={styles.iconCircle}>
               <Icon name={symbol} size={17} weight="semibold" color={colors.ink} />

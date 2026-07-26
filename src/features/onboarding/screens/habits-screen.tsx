@@ -29,10 +29,7 @@ export default function HabitsScreen() {
   return (
     <OnboardingScaffold flow={flow} ctaTitle={content.common.continue}>
       <View style={styles.container}>
-        <TitleBlock
-          title={content.habits.title}
-          subtitle={content.habits.subtitle}
-        />
+        <TitleBlock title={content.habits.title} subtitle={content.habits.subtitle} />
         <View style={styles.topSpacer} />
         <TypeToggle
           isLoose={variant === 'loose'}
@@ -47,11 +44,16 @@ export default function HabitsScreen() {
             selectedValue={yearsOfUse}
             onValueChange={(value) => set('yearsOfUse', value)}
             itemStyle={styles.pickerItem}
-            style={styles.pickerYears}>
+            style={styles.pickerYears}
+          >
             {wheelValues.map((value) => (
               <Picker.Item
                 key={value}
-                label={value === 1 ? `1 ${content.habits.yearSingular}` : `${value} ${content.habits.yearPlural}`}
+                label={
+                  value === 1
+                    ? `1 ${content.habits.yearSingular}`
+                    : `${value} ${content.habits.yearPlural}`
+                }
                 value={value}
               />
             ))}
@@ -60,7 +62,8 @@ export default function HabitsScreen() {
             selectedValue={pouchesPerDay}
             onValueChange={(value) => set('pouchesPerDay', value)}
             itemStyle={styles.pickerItem}
-            style={styles.pickerPerDay}>
+            style={styles.pickerPerDay}
+          >
             {wheelValues.map((value) => (
               <Picker.Item key={value} label={`${value}`} value={value} />
             ))}
@@ -95,7 +98,8 @@ function TypeToggle({ isLoose, onToggle }: { isLoose: boolean; onToggle: () => v
         radius={15.5}
         tintColor={isLoose ? colors.ink : '#E9E9E9'}
         isInteractive
-        style={styles.capsule}>
+        style={styles.capsule}
+      >
         <Animated.View style={[styles.knob, knobStyle]} />
         <Animated.View style={[styles.capsuleBorder, borderStyle]} />
       </GlassSurface>

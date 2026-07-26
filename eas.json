@@ -16,12 +16,25 @@
         "simulator": true
       }
     },
+    "development-device": {
+      "environment": "development",
+      "developmentClient": true,
+      "distribution": "internal",
+      "channel": "development",
+      "env": {
+        "EXPO_PUBLIC_ENV": "development"
+      },
+      "ios": {
+        "simulator": false
+      }
+    },
     "preview": {
       "environment": "preview",
       "distribution": "internal",
       "channel": "preview",
       "env": {
-        "EXPO_PUBLIC_ENV": "preview"
+        "EXPO_PUBLIC_ENV": "preview",
+        "EXPO_USE_PRECOMPILED_MODULES": "0"
       }
     },
     "production": {
@@ -29,7 +42,8 @@
       "channel": "production",
       "autoIncrement": true,
       "env": {
-        "EXPO_PUBLIC_ENV": "production"
+        "EXPO_PUBLIC_ENV": "production",
+        "EXPO_USE_PRECOMPILED_MODULES": "0"
       }
     }
   },

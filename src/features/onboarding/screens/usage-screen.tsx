@@ -18,10 +18,7 @@ export default function UsageFrequencyScreen() {
   return (
     <OnboardingScaffold flow={flow} ctaTitle={null}>
       <View style={styles.container}>
-        <TitleBlock
-          title={content.usage.title}
-          subtitle={content.usage.subtitle}
-        />
+        <TitleBlock title={content.usage.title} subtitle={content.usage.subtitle} />
         <View style={styles.topSpacer} />
         <GlassGroup spacing={22} style={styles.group}>
           {content.usage.options.map((option) => (
@@ -54,7 +51,9 @@ function UsageRow({
   selected: boolean;
   onPress: () => void;
 }) {
-  const scale = useDerivedValue(() => withSpring(selected ? 1.015 : 1, { damping: 15, stiffness: 220 }));
+  const scale = useDerivedValue(() =>
+    withSpring(selected ? 1.015 : 1, { damping: 15, stiffness: 220 }),
+  );
   const animatedStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
 
   return (
@@ -63,12 +62,17 @@ function UsageRow({
         <GlassSurface
           radius={layout.cardRadius}
           tintColor={selected ? colors.ink : withAlpha(colors.cardFill, 0.85)}
-          isInteractive>
+          isInteractive
+        >
           <View style={styles.row}>
             <DotClusterIcon dots={dots} />
             <View style={styles.textColumn}>
-              <Text style={[text.row, { color: selected ? colors.white : colors.ink }]}>{label}</Text>
-              <Text style={[text.caption, { color: selected ? colors.white : colors.ink }]}>{caption}</Text>
+              <Text style={[text.row, { color: selected ? colors.white : colors.ink }]}>
+                {label}
+              </Text>
+              <Text style={[text.caption, { color: selected ? colors.white : colors.ink }]}>
+                {caption}
+              </Text>
             </View>
           </View>
         </GlassSurface>

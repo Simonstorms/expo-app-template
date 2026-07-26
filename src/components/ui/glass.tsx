@@ -3,12 +3,16 @@ import { GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
 import type { ReactNode } from 'react';
 import { type StyleProp, StyleSheet, View, type ViewStyle } from 'react-native';
 
+import { colors, withAlpha } from '@/constants/theme';
+
 let glassAvailable = false;
 try {
   glassAvailable = isLiquidGlassAvailable() && Device.isDevice;
 } catch {
   glassAvailable = false;
 }
+
+const opaqueFallback = withAlpha(colors.cardFill, 0.94);
 
 type GlassProps = {
   style?: StyleProp<ViewStyle>;
@@ -33,13 +37,14 @@ function Glass({
         style={style}
         tintColor={tintColor}
         glassEffectStyle={glassEffectStyle}
-        isInteractive={isInteractive}>
+        isInteractive={isInteractive}
+      >
         {children}
       </GlassView>
     );
   }
   return (
-    <View style={[style, { backgroundColor: fallbackColor ?? tintColor ?? 'rgba(249, 248, 253, 0.94)' }]}>
+    <View style={[style, { backgroundColor: fallbackColor ?? tintColor ?? opaqueFallback }]}>
       {children}
     </View>
   );

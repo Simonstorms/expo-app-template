@@ -1,16 +1,20 @@
-import { type Href, useRouter } from 'expo-router';
+import { usePathname, useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, { Easing, Keyframe } from 'react-native-reanimated';
 
 import { Icon } from '@/components/ui/icon';
+import { brand } from '@/constants/brand';
 import { hasSupabase } from '@/constants/config';
+import { colors } from '@/constants/theme';
 import { useSession } from '@/features/auth/hooks/use-session';
+import { usePersistHydrated } from '@/hooks/use-persist-hydrated';
 import { getOnboardingComplete } from '@/lib/storage';
 import { OnboardingScaffold } from '../components/onboarding-scaffold';
-import { colors } from '@/constants/theme';
-import { brand } from '@/constants/brand';
 import { useFlow } from '../hooks/use-flow';
+import { useOnboarding } from '../store';
+
+const HERO_DELAY_MS = 1400;
 
 const enter = new Keyframe({
   0: { opacity: 0, transform: [{ scale: 0.94 }] },
@@ -20,6 +24,8 @@ const enter = new Keyframe({
 export default function SplashScreen() {
   const flow = useFlow('index');
   const router = useRouter();
+  const pathname = usePathname();
+  const hydrated = usePersistHydrated(useOnboarding);
   const { isSignedIn, isLoading: sessionLoading } = useSession();
   const navigated = useRef(false);
   const [onboardingDone, setOnboardingDone] = useState<boolean | null>(null);
@@ -29,22 +35,27 @@ export default function SplashScreen() {
     getOnboardingComplete()
       .then(setOnboardingDone)
       .catch(() => setOnboardingDone(false));
-    const timer = setTimeout(() => setDelayDone(true), 1400);
+    const timer = setTimeout(() => setDelayDone(true), HERO_DELAY_MS);
     return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
-    if (navigated.current || !delayDone || onboardingDone === null) return;
+    if (navigated.current || !hydrated || onboardingDone === null) return;
+    if (pathname !== '/') return;
     if (!onboardingDone) {
+      if (!delayDone) return;
       navigated.current = true;
-      router.replace('/welcome' as Href);
+      router.replace('/welcome');
       return;
     }
     if (sessionLoading) return;
     navigated.current = true;
-    const target: string = hasSupabase && !isSignedIn ? '/sign-in' : '/home';
-    router.replace(target as Href);
-  }, [router, delayDone, onboardingDone, sessionLoading, isSignedIn]);
+    router.replace(hasSupabase && !isSignedIn ? '/sign-in' : '/home');
+  }, [router, pathname, hydrated, delayDone, onboardingDone, sessionLoading, isSignedIn]);
+
+  if (!hydrated || onboardingDone !== false) {
+    return <View style={styles.placeholder} />;
+  }
 
   return (
     <OnboardingScaffold flow={flow} ctaTitle={null}>
@@ -61,6 +72,10 @@ export default function SplashScreen() {
 }
 
 const styles = StyleSheet.create({
+  placeholder: {
+    flex: 1,
+    backgroundColor: colors.white,
+  },
   center: {
     flex: 1,
     alignItems: 'center',
