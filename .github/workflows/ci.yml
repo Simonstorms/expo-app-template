@@ -13,6 +13,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  LEFTHOOK: 0
+
 jobs:
   check:
     runs-on: ubuntu-latest
@@ -29,6 +32,11 @@ jobs:
         run: bun run lint
       - name: Format
         run: bun run format:check
+      - name: Dead code and dependencies
+        run: bun run knip
+      - name: Expo SDK version drift
+        run: bunx expo install --check
+        continue-on-error: true
       - name: Dependency health
         run: bunx expo-doctor
         continue-on-error: true

@@ -1,11 +1,25 @@
 {
   "name": "expo-app-template",
+  "version": "1.0.0",
+  "private": true,
   "description": "Production-ready, feature-based Expo (SDK 57) starter with onboarding, auth, paywall, home and settings.",
   "license": "MIT",
   "main": "expo-router/entry",
-  "version": "1.0.0",
-  "engines": {
-    "node": ">=20"
+  "scripts": {
+    "dev": "expo start --dev-client",
+    "start": "expo start",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "typecheck": "tsc --noEmit",
+    "lint": "oxlint --type-aware",
+    "lint:fix": "oxlint --type-aware --fix",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check",
+    "knip": "knip",
+    "check": "bun run typecheck && bun run lint && bun run format:check && bun run knip",
+    "prepare": "lefthook install",
+    "analyze": "EXPO_ATLAS=1 expo export --platform ios",
+    "export:size": "EXPO_UNSTABLE_METRO_OPTIMIZE_GRAPH=1 EXPO_UNSTABLE_TREE_SHAKING=1 expo export --platform ios"
   },
   "dependencies": {
     "@posthog/react-native-plugin": "^2.6.0",
@@ -54,23 +68,22 @@
   },
   "devDependencies": {
     "@types/react": "~19.2.2",
-    "eslint": "^9.39.5",
-    "eslint-config-expo": "~57.0.2",
+    "eslint-plugin-expo": "^1.1.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-native": "^5.0.0",
+    "eslint-plugin-react-native-a11y": "^3.5.1",
     "expo-atlas": "^0.4.0",
-    "prettier": "^3.6.2",
-    "typescript": "~6.0.3"
+    "knip": "^6.35.1",
+    "lefthook": "^2.1.12",
+    "oxfmt": "0.67.0",
+    "oxlint": "1.82.0",
+    "oxlint-plugin-react-doctor": "^0.9.13",
+    "oxlint-tsgolint": "7.0.2001",
+    "typescript": "~6.0.3",
+    "ultracite": "7.11.1"
   },
-  "scripts": {
-    "dev": "expo start --dev-client",
-    "start": "expo start",
-    "android": "expo run:android",
-    "ios": "expo run:ios",
-    "lint": "eslint . --cache --cache-location .expo/cache/eslint/",
-    "typecheck": "tsc --noEmit",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
-    "analyze": "EXPO_ATLAS=1 expo export --platform ios",
-    "export:size": "EXPO_UNSTABLE_METRO_OPTIMIZE_GRAPH=1 EXPO_UNSTABLE_TREE_SHAKING=1 expo export --platform ios"
+  "engines": {
+    "node": ">=20"
   },
   "expo": {
     "install": {
@@ -85,6 +98,5 @@
         "react-native-gesture-handler"
       ]
     }
-  },
-  "private": true
+  }
 }

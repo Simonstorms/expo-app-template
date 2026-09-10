@@ -1,0 +1,15 @@
+pre-commit:
+  jobs:
+    - name: oxlint
+      glob: '*.{js,jsx,ts,tsx,mts}'
+      run: bunx oxlint --type-aware --fix {staged_files}
+      stage_fixed: true
+    - name: oxfmt
+      glob: '*.{js,jsx,ts,tsx,mts,json,jsonc,md,yml,yaml}'
+      run: bunx oxfmt {staged_files}
+      stage_fixed: true
+
+pre-push:
+  jobs:
+    - name: typecheck
+      run: bun run typecheck

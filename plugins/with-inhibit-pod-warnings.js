@@ -1,17 +1,17 @@
-const { withDangerousMod } = require('@expo/config-plugins');
-const fs = require('fs');
-const path = require('path');
+const { withDangerousMod } = require('expo/config-plugins');
+const fs = require('node:fs');
+const path = require('node:path');
 
 module.exports = function withInhibitPodWarnings(config) {
   return withDangerousMod(config, [
     'ios',
     (cfg) => {
       const podfile = path.join(cfg.modRequest.platformProjectRoot, 'Podfile');
-      let contents = fs.readFileSync(podfile, 'utf8');
+      let contents = fs.readFileSync(podfile, 'utf-8');
       if (!contents.includes('inhibit_all_warnings!')) {
         contents = contents.replace(
-          /(target\s+['"][^'"]+['"]\s+do\r?\n)/,
-          '$1  inhibit_all_warnings!\n',
+          /(?<targetLine>target\s+['"][^'"]+['"]\s+do\r?\n)/u,
+          '$<targetLine>  inhibit_all_warnings!\n',
         );
         fs.writeFileSync(podfile, contents);
       }
