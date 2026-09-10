@@ -90,7 +90,13 @@ function TypeToggle({ isLoose, onToggle }: { isLoose: boolean; onToggle: () => v
   const borderStyle = useAnimatedStyle(() => ({ opacity: 1 - progress.value }));
 
   return (
-    <Pressable style={styles.toggle} onPress={onToggle}>
+    <Pressable
+      style={styles.toggle}
+      onPress={onToggle}
+      accessibilityRole="switch"
+      accessibilityLabel={`${content.habits.typePouches} / ${content.habits.typeLoose}`}
+      accessibilityState={{ checked: isLoose }}
+    >
       <Animated.Text style={[styles.toggleLabel, styles.pouchesLabel, pouchesStyle]}>
         {content.habits.typePouches}
       </Animated.Text>

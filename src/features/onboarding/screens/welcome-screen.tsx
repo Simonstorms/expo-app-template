@@ -31,7 +31,12 @@ export default function WelcomeScreen() {
           <View style={{ height: 50 }} />
           <Text style={styles.title}>{content.welcome.tagline}</Text>
           <View style={{ height: 11 }} />
-          <Pressable style={styles.getStartedWrap} onPress={advance}>
+          <Pressable
+            style={styles.getStartedWrap}
+            onPress={advance}
+            accessibilityRole="button"
+            accessibilityLabel={content.welcome.getStarted}
+          >
             <GlassSurface
               radius={layout.ctaHeight / 2}
               tintColor={colors.ink}
@@ -43,7 +48,11 @@ export default function WelcomeScreen() {
             </GlassSurface>
           </Pressable>
           <View style={{ height: 12 }} />
-          <Pressable onPress={() => goTo('sign-in')}>
+          <Pressable
+            onPress={() => goTo('sign-in')}
+            accessibilityRole="button"
+            accessibilityLabel={`${content.welcome.signInPrompt}${content.welcome.signInAction}`}
+          >
             <Text style={styles.signIn}>
               {content.welcome.signInPrompt}
               <Text style={styles.signInBold}>{content.welcome.signInAction}</Text>

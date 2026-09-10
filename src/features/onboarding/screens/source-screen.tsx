@@ -64,7 +64,12 @@ function SourceRow({
 
   return (
     <Animated.View style={animatedStyle}>
-      <Pressable onPress={onPress}>
+      <Pressable
+        onPress={onPress}
+        accessibilityRole="button"
+        accessibilityLabel={label}
+        accessibilityState={{ selected }}
+      >
         <GlassSurface
           radius={layout.cardRadius}
           tintColor={selected ? colors.ink : withAlpha(colors.cardFill, 0.85)}
