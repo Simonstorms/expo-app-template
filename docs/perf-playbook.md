@@ -137,8 +137,9 @@ hottest screens with zero memo slots each while every other screen got over a hu
   or check for `finally` in component bodies (`grep -rn finally src/`). At the time of writing this
   template has none.
 - Prevention: `eslint-plugin-react-hooks` ships an `unsupported-syntax` rule that reports exactly
-  this. `eslint.config.js` here only spreads `eslint-config-expo/flat`, which does not enable it, so
-  enable it explicitly if you want the guarantee.
+  this. `eslint-config-expo/flat` already enables it, but at `warn`, and a warning does not fail
+  `bun run lint`. This template now raises it to `error` in `eslint.config.js`, which is what makes
+  it a guarantee rather than a note in the output.
 - The fix is to hoist the `try`/`catch`/`finally` out of the component body into a plain async
   function or a hook, not to delete the `finally`.
 - Sequencing warning: fixing a bailout memoizes that screen for the first time, which is exactly
@@ -165,10 +166,17 @@ const onToggle = () => {
 const style = useAnimatedStyle(() => ({ opacity: progress.get() }));
 ```
 
-Two places in this template still inline the animation in the style worklet:
-`src/features/onboarding/components/step-check.tsx` and the knob style in
-`src/components/ui/frost-toggle.tsx`. Both are driven by a boolean prop today, so they behave. Fix
-them before either one starts being driven by a continuous value.
+Eight places in this template still inline the animation in the style worklet:
+
+- `src/components/ui/selection-row.tsx`, plus byte-for-byte copies of the same selection scale in
+  `usage-screen.tsx`, `obstacles-screen.tsx`, `source-screen.tsx` and `tried-before-screen.tsx`
+- `src/components/ui/frost-toggle.tsx` (knob style) and `habits-screen.tsx` (the same toggle)
+- `src/features/onboarding/components/step-check.tsx`, which inlines `withTiming` inside
+  `useAnimatedStyle` rather than `useDerivedValue`
+
+All are driven by a boolean prop today, so they behave. The four duplicated selection rows should
+collapse onto `SelectionRow` first; that turns eight sites into four and removes four copies of the
+same spring. Fix the rest before any of them starts being driven by a continuous value.
 
 **Animate transforms and opacity, not layout.** Animating `width`, `height`, `margin` or `padding`
 runs a full Yoga layout pass plus a mount-instruction diff every frame. Use `scaleX`/`scaleY` and
@@ -250,7 +258,7 @@ a daily false alarm. Add gates once you have your own baseline:
   comments the delta on the pull request. Report first, fail later, once you know the normal noise.
 - A budget check that fails only on a large jump (for example more than 3% bytecode growth in one
   pull request), not on every increase.
-- `eslint-plugin-react-hooks`' `unsupported-syntax` rule, so a `try`/`finally` can never silently
-  un-memoize a screen again.
+- `eslint-plugin-react-hooks`' `unsupported-syntax` rule at `error` (already wired in
+  `eslint.config.js`), so a `try`/`finally` can never silently un-memoize a screen again.
 - Runtime budgets, once you have numbers from the oldest device you support: cold start to first
   render, navigation p95, and no memory drift across repeated runs of your core loop.

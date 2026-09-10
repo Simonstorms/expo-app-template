@@ -17,6 +17,15 @@ Nothing in the app requires these functions. With an empty `.env` the app never 
    a real round trip before you have a vendor. Set `UPSTREAM_URL` (or replace `runAction`) and the
    same handler forwards the call with the secret attached.
 
+## Before you ship this
+
+The function verifies the caller and caps the request body at 32 KB, but it does **not** rate limit.
+Any signed-in user can drive unlimited billed upstream calls. Add a per-user quota (a counter table
+with an RLS-protected upsert is enough) before pointing `UPSTREAM_URL` at anything that costs money.
+
+`Access-Control-Allow-Origin` is `*`. That is fine for a native client, which does not enforce CORS,
+but tighten it to your own origin if you also call this function from the web build.
+
 ## Deploy
 
 ```bash
