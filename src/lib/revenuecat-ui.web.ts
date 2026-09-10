@@ -1,3 +1,3 @@
-export async function presentCustomerCenter(): Promise<void> {
-  return undefined;
+export function presentCustomerCenter(): Promise<void> {
+  return Promise.resolve();
 }

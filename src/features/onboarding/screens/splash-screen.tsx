@@ -10,11 +10,20 @@ import { colors } from '@/constants/theme';
 import { useSession } from '@/features/auth/hooks/use-session';
 import { usePersistHydrated } from '@/hooks/use-persist-hydrated';
 import { getOnboardingComplete } from '@/lib/storage';
+
 import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { useFlow } from '../hooks/use-flow';
 import { useOnboarding } from '../store';
 
 const HERO_DELAY_MS = 1400;
+
+async function readOnboardingDone(): Promise<boolean> {
+  try {
+    return await getOnboardingComplete();
+  } catch {
+    return false;
+  }
+}
 
 const enter = new Keyframe({
   0: { opacity: 0, transform: [{ scale: 0.94 }] },
@@ -32,23 +41,32 @@ export default function SplashScreen() {
   const [delayDone, setDelayDone] = useState(false);
 
   useEffect(() => {
-    getOnboardingComplete()
-      .then(setOnboardingDone)
-      .catch(() => setOnboardingDone(false));
+    const load = async () => {
+      setOnboardingDone(await readOnboardingDone());
+    };
+    void load();
     const timer = setTimeout(() => setDelayDone(true), HERO_DELAY_MS);
     return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
-    if (navigated.current || !hydrated || onboardingDone === null) return;
-    if (pathname !== '/') return;
+    if (navigated.current || !hydrated || onboardingDone === null) {
+      return;
+    }
+    if (pathname !== '/') {
+      return;
+    }
     if (!onboardingDone) {
-      if (!delayDone) return;
+      if (!delayDone) {
+        return;
+      }
       navigated.current = true;
       router.replace('/welcome');
       return;
     }
-    if (sessionLoading) return;
+    if (sessionLoading) {
+      return;
+    }
     navigated.current = true;
     router.replace(hasSupabase && !isSignedIn ? '/sign-in' : '/home');
   }, [router, pathname, hydrated, delayDone, onboardingDone, sessionLoading, isSignedIn]);

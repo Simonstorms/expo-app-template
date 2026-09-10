@@ -2,6 +2,7 @@ import { StyleSheet } from 'react-native';
 
 import { GlassSurface } from '@/components/ui/glass';
 import { Icon } from '@/components/ui/icon';
+import type { IconName } from '@/components/ui/icon';
 import { PressableScale } from '@/components/ui/pressable-scale';
 import { colors, shadow, withAlpha } from '@/constants/theme';
 
@@ -13,7 +14,7 @@ export function GlassIconButton({
   iconSize = 19,
   iconColor = colors.ink,
 }: {
-  icon: string;
+  icon: IconName;
   onPress: () => void;
   accessibilityLabel: string;
   size?: number;

@@ -3,9 +3,10 @@ import { StyleSheet, Text, View } from 'react-native';
 import { GlassSurface } from '@/components/ui/glass';
 import { GradientRing } from '@/components/ui/gradient-ring';
 import { Icon } from '@/components/ui/icon';
-import { OnboardingScaffold } from '../components/onboarding-scaffold';
-import { colors, layout, withAlpha } from '@/constants/theme';
 import { content } from '@/constants/content';
+import { colors, layout, withAlpha } from '@/constants/theme';
+
+import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { useFlow } from '../hooks/use-flow';
 
 type ConfettiMark = {
@@ -128,7 +129,7 @@ const styles = StyleSheet.create({
     width: 3,
     height: 3,
     borderRadius: 0.8,
-    backgroundColor: '#0F0E12',
+    backgroundColor: colors.ctaFill,
   },
   titleWrap: {
     marginTop: 57,
@@ -140,13 +141,13 @@ const styles = StyleSheet.create({
     fontSize: 34,
     fontWeight: '700',
     letterSpacing: -0.5,
-    color: '#17151D',
+    color: colors.ctaFill,
     textAlign: 'center',
   },
   titleSubtitle: {
     fontSize: 16,
     fontWeight: '400',
-    color: '#8D8D8E',
+    color: colors.secondaryText,
     textAlign: 'center',
   },
   cardOuter: {
@@ -171,13 +172,13 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#15131A',
+    color: colors.ctaFill,
     textAlign: 'center',
   },
   cardCaption: {
     fontSize: 13,
     fontWeight: '400',
-    color: '#0A0A0A',
+    color: colors.ink,
     textAlign: 'center',
   },
   badgeWrap: {
@@ -190,10 +191,7 @@ const styles = StyleSheet.create({
   badge: {
     width: 49,
     height: 49,
-    shadowColor: '#000000',
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 2 },
+    boxShadow: `0px 2px 12px ${withAlpha(colors.ink, 0.08)}`,
   },
   badgeIconOuter: {
     position: 'absolute',

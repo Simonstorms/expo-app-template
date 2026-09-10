@@ -1,17 +1,20 @@
-import { useCallback, useMemo, useState } from 'react';
-import { type LayoutChangeEvent, StyleSheet, Text, View } from 'react-native';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import { runOnJS, useSharedValue } from 'react-native-reanimated';
+import { useState } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import type { LayoutChangeEvent } from 'react-native';
+import { GestureDetector, usePanGesture } from 'react-native-gesture-handler';
+import { useSharedValue } from 'react-native-reanimated';
 import Svg, { Rect } from 'react-native-svg';
+import { scheduleOnRN } from 'react-native-worklets';
 
 import { GlassSurface } from '@/components/ui/glass';
-import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { TitleBlock } from '@/components/ui/title-block';
-import { useOnboarding } from '../store';
 import { formatMoney } from '@/constants/brand';
-import { colors, withAlpha } from '@/constants/theme';
 import { content } from '@/constants/content';
+import { colors, withAlpha } from '@/constants/theme';
+
+import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { useFlow } from '../hooks/use-flow';
+import { useOnboarding } from '../store';
 
 const RANGE_MIN = 0;
 const RANGE_MAX = 200;
@@ -33,7 +36,9 @@ type Tick = {
 };
 
 function buildTicks(width: number, value: number): Tick[] {
-  if (width <= 0) return [];
+  if (width <= 0) {
+    return [];
+  }
   const centerX = width / 2;
   const halfSpan = (centerX + STEP_SPACING) / POINTS_PER_UNIT;
   const lowestVisible = Math.max(RANGE_MIN, value - halfSpan);
@@ -64,7 +69,9 @@ export default function WeeklySpendScreen() {
   const flow = useFlow('weekly-spend');
   const { selectHaptic } = flow;
 
-  const commit = useCallback((value: number) => set('weeklySpend', value), [set]);
+  const commit = (value: number) => {
+    set('weeklySpend', value);
+  };
 
   return (
     <OnboardingScaffold flow={flow} ctaTitle={content.common.continue}>
@@ -97,13 +104,10 @@ function SpendRuler({
   const current = useSharedValue(value);
   const dragBase = useSharedValue(0);
 
-  const commit = useCallback(
-    (next: number) => {
-      onChange(next);
-      onSelectHaptic();
-    },
-    [onChange, onSelectHaptic],
-  );
+  const commit = (next: number) => {
+    onChange(next);
+    onSelectHaptic();
+  };
 
   const beginDrag = () => {
     'worklet';
@@ -119,25 +123,26 @@ function SpendRuler({
       return;
     }
     current.value = stepped;
-    runOnJS(commit)(stepped);
+    scheduleOnRN(commit, stepped);
   };
 
-  const pan = Gesture.Pan()
-    .minDistance(1)
-    .onBegin(() => {
+  const pan = usePanGesture({
+    minDistance: 1,
+    onBegin: () => {
       'worklet';
       beginDrag();
-    })
-    .onChange((event) => {
+    },
+    onUpdate: (event) => {
       'worklet';
       applyDrag(event.translationX);
-    });
+    },
+  });
 
-  const onLayout = useCallback((event: LayoutChangeEvent) => {
+  const onLayout = (event: LayoutChangeEvent) => {
     setWidth(event.nativeEvent.layout.width);
-  }, []);
+  };
 
-  const ticks = useMemo(() => buildTicks(width, value), [width, value]);
+  const ticks = buildTicks(width, value);
   const centerX = width / 2;
 
   return (

@@ -4,6 +4,7 @@ import Animated, { useAnimatedStyle, useDerivedValue, withSpring } from 'react-n
 
 import { GlassSurface } from '@/components/ui/glass';
 import { Icon } from '@/components/ui/icon';
+import type { IconName } from '@/components/ui/icon';
 import { colors, layout, text, withAlpha } from '@/constants/theme';
 
 export function SelectionRow({
@@ -22,7 +23,7 @@ export function SelectionRow({
 }: {
   title: string;
   caption?: string;
-  symbol?: string;
+  symbol?: IconName;
   emoji?: string;
   leading?: ReactNode;
   trailing?: ReactNode;
@@ -56,32 +57,29 @@ export function SelectionRow({
           <View
             style={[
               styles.content,
-              { minHeight: height, justifyContent: centered ? 'center' : 'flex-start' },
+              centered ? styles.contentCentered : styles.contentLeading,
+              { minHeight: height },
             ]}
           >
-            {leading ?? null}
-            {!leading && emoji ? <Text style={styles.emoji}>{emoji}</Text> : null}
-            {!leading && !emoji && symbol ? (
-              <IconCircle symbol={symbol} size={iconCircleSize} selected={selected} />
-            ) : null}
+            <RowLeading
+              leading={leading}
+              emoji={emoji}
+              symbol={symbol}
+              iconCircleSize={iconCircleSize}
+              selected={selected}
+            />
             <View
               style={[
-                { alignItems: centered ? 'center' : 'flex-start', gap: 5 },
+                styles.textBlock,
+                centered ? styles.textCentered : styles.textLeading,
                 stretch ? styles.stretch : null,
               ]}
             >
-              <Text style={[text.row, { color: selected ? colors.white : colors.ink }]}>
+              <Text style={[text.row, selected ? styles.titleSelected : styles.title]}>
                 {title}
               </Text>
               {caption ? (
-                <Text
-                  style={[
-                    text.caption,
-                    {
-                      color: selected ? withAlpha(colors.white, 0.75) : withAlpha(colors.ink, 0.8),
-                    },
-                  ]}
-                >
+                <Text style={[text.caption, selected ? styles.captionSelected : styles.caption]}>
                   {caption}
                 </Text>
               ) : null}
@@ -95,16 +93,34 @@ export function SelectionRow({
   );
 }
 
+function RowLeading({
+  leading,
+  emoji,
+  symbol,
+  iconCircleSize,
+  selected,
+}: {
+  leading?: ReactNode;
+  emoji?: string;
+  symbol?: IconName;
+  iconCircleSize: number;
+  selected: boolean;
+}) {
+  if (leading) {
+    return leading;
+  }
+  if (emoji) {
+    return <Text style={styles.emoji}>{emoji}</Text>;
+  }
+  if (symbol) {
+    return <IconCircle symbol={symbol} size={iconCircleSize} selected={selected} />;
+  }
+  return null;
+}
+
 function Radio({ selected }: { selected: boolean }) {
   return (
-    <View
-      style={[
-        styles.radio,
-        selected
-          ? { backgroundColor: colors.white, borderColor: colors.white }
-          : { backgroundColor: 'transparent', borderColor: colors.ring },
-      ]}
-    >
+    <View style={[styles.radio, selected ? styles.radioOn : styles.radioOff]}>
       {selected ? <Icon name="checkmark" size={12} weight="bold" color={colors.ink} /> : null}
     </View>
   );
@@ -115,20 +131,17 @@ function IconCircle({
   size,
   selected,
 }: {
-  symbol: string;
+  symbol: IconName;
   size: number;
   selected: boolean;
 }) {
   return (
     <View
-      style={{
-        width: size,
-        height: size,
-        borderRadius: size / 2,
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: selected ? colors.white : colors.ink,
-      }}
+      style={[
+        styles.iconCircle,
+        selected ? styles.iconCircleSelected : styles.iconCircleDefault,
+        { width: size, height: size, borderRadius: size / 2 },
+      ]}
     >
       <Icon
         name={symbol}
@@ -148,8 +161,35 @@ const styles = StyleSheet.create({
     gap: 11,
     paddingHorizontal: 16,
   },
+  contentCentered: {
+    justifyContent: 'center',
+  },
+  contentLeading: {
+    justifyContent: 'flex-start',
+  },
+  textBlock: {
+    gap: 5,
+  },
+  textCentered: {
+    alignItems: 'center',
+  },
+  textLeading: {
+    alignItems: 'flex-start',
+  },
   stretch: {
     flex: 1,
+  },
+  title: {
+    color: colors.ink,
+  },
+  titleSelected: {
+    color: colors.white,
+  },
+  caption: {
+    color: withAlpha(colors.ink, 0.8),
+  },
+  captionSelected: {
+    color: withAlpha(colors.white, 0.75),
   },
   emoji: {
     fontSize: 22,
@@ -163,5 +203,23 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  radioOn: {
+    backgroundColor: colors.white,
+    borderColor: colors.white,
+  },
+  radioOff: {
+    backgroundColor: colors.transparent,
+    borderColor: colors.ring,
+  },
+  iconCircle: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconCircleSelected: {
+    backgroundColor: colors.white,
+  },
+  iconCircleDefault: {
+    backgroundColor: colors.ink,
   },
 });

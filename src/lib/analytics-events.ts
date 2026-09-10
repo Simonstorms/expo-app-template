@@ -49,6 +49,7 @@ export type AnalyticsEvents = {
   notification_opened: { url: string };
   analytics_opt_out_toggled: { opted_out: boolean };
   app_error_boundary: { message: string };
+  home_cta_pressed: undefined;
 };
 
 export type AnalyticsEventName = keyof AnalyticsEvents;

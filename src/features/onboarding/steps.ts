@@ -43,16 +43,20 @@ export function showsChrome(step: Step): boolean {
 
 export function progressFor(step: Step): number {
   const index = PROGRESS_STEPS.indexOf(step);
-  if (index < 0) return 0;
+  if (index === -1) {
+    return 0;
+  }
   return (index + 1) / PROGRESS_STEPS.length;
 }
 
 export function routePath(step: Step): Href {
-  return step === 'index' ? '/' : (`/${step}` as Href);
+  return step === 'index' ? '/' : `/${step}`;
 }
 
 export function nextStep(step: Step): Step | undefined {
   const index = STEPS.indexOf(step);
-  if (index < 0 || index + 1 >= STEPS.length) return undefined;
+  if (index === -1 || index + 1 >= STEPS.length) {
+    return undefined;
+  }
   return STEPS[index + 1];
 }

@@ -3,12 +3,14 @@ import Animated, { useAnimatedStyle, useDerivedValue, withSpring } from 'react-n
 
 import { GlassGroup, GlassSurface } from '@/components/ui/glass';
 import { Icon } from '@/components/ui/icon';
-import { OnboardingScaffold } from '../components/onboarding-scaffold';
+import type { IconName } from '@/components/ui/icon';
 import { TitleBlock } from '@/components/ui/title-block';
-import { useOnboarding } from '../store';
 import { content } from '@/constants/content';
 import { colors, layout, text, withAlpha } from '@/constants/theme';
+
+import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { useFlow } from '../hooks/use-flow';
+import { useOnboarding } from '../store';
 
 export default function TriedBeforeScreen() {
   const triedBefore = useOnboarding((state) => state.triedBefore);
@@ -48,7 +50,7 @@ function ThumbChoiceRow({
   onPress,
 }: {
   title: string;
-  symbol: string;
+  symbol: IconName;
   selected: boolean;
   onPress: () => void;
 }) {

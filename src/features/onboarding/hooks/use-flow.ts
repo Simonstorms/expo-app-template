@@ -1,14 +1,17 @@
 import * as Haptics from 'expo-haptics';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { useCallback, useRef } from 'react';
+import { useRef } from 'react';
 import { Platform } from 'react-native';
 
 import { captureEvent, setPersonProperties } from '@/lib/analytics';
+import { toJson } from '@/lib/json';
 import { setOnboardingComplete } from '@/lib/storage';
-import type { Json } from '@/types/database';
+import { attempt, runInBackground } from '@/lib/tasks';
+
 import { syncOnboarding } from '../api';
+import { nextStep, progressFor, routePath, showsChrome, STEPS } from '../steps';
+import type { Step } from '../steps';
 import { onboardingAnswers } from '../store';
-import { nextStep, progressFor, routePath, showsChrome, STEPS, type Step } from '../steps';
 
 const ADVANCE_DELAY_MS = 140;
 
@@ -25,9 +28,19 @@ function describeValue(value: unknown): AnswerValue {
 
 function answerFromDiff(before: Answers, after: Answers): AnswerValue | undefined {
   const changed = Object.keys(after).filter((key) => !Object.is(before[key], after[key]));
-  if (changed.length === 0) return undefined;
-  if (changed.length === 1) return describeValue(after[changed[0]]);
+  if (changed.length === 0) {
+    return undefined;
+  }
+  if (changed.length === 1) {
+    return describeValue(after[changed[0]]);
+  }
   return changed.map((key) => `${key}=${describeValue(after[key])}`).join(',');
+}
+
+function selectHaptic(): void {
+  if (Platform.OS !== 'web') {
+    void runInBackground(Haptics.selectionAsync());
+  }
 }
 
 export type OnboardingFlow = {
@@ -46,76 +59,68 @@ export type OnboardingFlow = {
 export function useFlow(step: Step): OnboardingFlow {
   const router = useRouter();
   const advancing = useRef(false);
-  const answersOnEntry = useRef<Answers>(onboardingAnswers());
+  const answersOnEntry = useRef<Answers>({});
 
-  useFocusEffect(
-    useCallback(() => {
-      advancing.current = false;
-      answersOnEntry.current = onboardingAnswers();
-    }, []),
-  );
+  useFocusEffect(() => {
+    advancing.current = false;
+    answersOnEntry.current = onboardingAnswers();
+  });
 
-  const trackStepCompleted = useCallback(() => {
+  const trackStepCompleted = () => {
     captureEvent('onboarding_step_completed', {
       step,
       step_index: STEPS.indexOf(step),
       answer: answerFromDiff(answersOnEntry.current, onboardingAnswers()),
     });
-  }, [step]);
+  };
 
-  const advance = useCallback(() => {
+  const advance = () => {
     const next = nextStep(step);
-    if (!next) return;
+    if (!next) {
+      return;
+    }
     trackStepCompleted();
     router.push(routePath(next));
-  }, [router, step, trackStepCompleted]);
+  };
 
-  const replaceAdvance = useCallback(() => {
+  const replaceAdvance = () => {
     const next = nextStep(step);
-    if (!next) return;
+    if (!next) {
+      return;
+    }
     trackStepCompleted();
     router.replace(routePath(next));
-  }, [router, step, trackStepCompleted]);
+  };
 
-  const goTo = useCallback(
-    (target: Step) => {
-      router.push(routePath(target));
-    },
-    [router],
-  );
+  const goTo = (target: Step) => {
+    router.push(routePath(target));
+  };
 
-  const back = useCallback(() => {
+  const back = () => {
     router.back();
-  }, [router]);
+  };
 
-  const selectHaptic = useCallback(() => {
-    if (Platform.OS !== 'web') {
-      Haptics.selectionAsync().catch(() => {});
+  const selectAndAdvance = (mutate: () => void) => {
+    if (advancing.current) {
+      return;
     }
-  }, []);
+    advancing.current = true;
+    mutate();
+    selectHaptic();
+    setTimeout(advance, ADVANCE_DELAY_MS);
+  };
 
-  const selectAndAdvance = useCallback(
-    (mutate: () => void) => {
-      if (advancing.current) return;
-      advancing.current = true;
-      mutate();
-      selectHaptic();
-      setTimeout(advance, ADVANCE_DELAY_MS);
-    },
-    [advance, selectHaptic],
-  );
-
-  const finish = useCallback(async () => {
-    const values = onboardingAnswers() as Json;
+  const finish = async () => {
+    const values = toJson(onboardingAnswers());
     captureEvent('onboarding_completed', { steps_total: STEPS.length });
     setPersonProperties({ has_completed_onboarding: true });
-    await syncOnboarding(values).catch(() => undefined);
-    await setOnboardingComplete(true).catch(() => undefined);
+    await attempt(syncOnboarding(values));
+    await attempt(setOnboardingComplete(true));
     if (router.canDismiss()) {
       router.dismissAll();
     }
     router.replace('/home');
-  }, [router]);
+  };
 
   return {
     advance,

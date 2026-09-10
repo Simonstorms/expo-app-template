@@ -1,10 +1,13 @@
 import { LinearGradient } from 'expo-linear-gradient';
-import { StyleSheet, Text, View, type ViewStyle } from 'react-native';
-import Animated, { type AnimatedStyle } from 'react-native-reanimated';
+import { StyleSheet, Text, View } from 'react-native';
+import type { ViewStyle } from 'react-native';
+import { createAnimatedComponent } from 'react-native-reanimated';
+import type { AnimatedStyle } from 'react-native-reanimated';
 
 import { GlassSurface } from '@/components/ui/glass';
 import { content } from '@/constants/content';
 import { colors, layout, withAlpha } from '@/constants/theme';
+
 import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { useFlow } from '../hooks/use-flow';
 import { useStagedProgress } from '../hooks/use-staged-progress';
@@ -13,7 +16,7 @@ const CARD_INK = '#1C1B22';
 const TRACK_COLOR = '#DDDDDD';
 const FILL_GRADIENT = ['#DC6A6C', '#9D8DB5', '#6F99DB'] as const;
 
-const AnimatedGradient = Animated.createAnimatedComponent(LinearGradient);
+const AnimatedGradient = createAnimatedComponent(LinearGradient);
 
 export default function GeneratingPlanScreen() {
   const flow = useFlow('generating');

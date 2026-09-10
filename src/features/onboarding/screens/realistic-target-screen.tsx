@@ -1,8 +1,9 @@
 import { StyleSheet, Text, View } from 'react-native';
 
-import { OnboardingScaffold } from '../components/onboarding-scaffold';
-import { colors, text } from '@/constants/theme';
 import { content } from '@/constants/content';
+import { colors, text } from '@/constants/theme';
+
+import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { useFlow } from '../hooks/use-flow';
 
 export default function RealisticTargetScreen() {

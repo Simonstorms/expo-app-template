@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
-import { type StyleProp, View, type ViewStyle } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import type { StyleProp, ViewStyle } from 'react-native';
 
 import { colors, shadow, withAlpha } from '@/constants/theme';
 
@@ -31,44 +32,55 @@ export function PhoneMockup({
     <View
       style={[
         shadow.card,
-        {
-          width,
-          height,
-          borderRadius: frameRadius,
-          borderCurve: 'continuous',
-          backgroundColor: frameColor,
-          borderWidth: 1,
-          borderColor: withAlpha(colors.white, 0.22),
-        },
+        styles.frame,
+        { width, height, borderRadius: frameRadius, backgroundColor: frameColor },
         style,
       ]}
     >
       <View
-        style={{
-          position: 'absolute',
-          left: bezel,
-          top: bezel,
-          right: bezel,
-          bottom: bezel,
-          borderRadius: screenRadius,
-          borderCurve: 'continuous',
-          overflow: 'hidden',
-          backgroundColor: screenColor,
-        }}
+        style={[
+          styles.screen,
+          {
+            left: bezel,
+            top: bezel,
+            right: bezel,
+            bottom: bezel,
+            borderRadius: screenRadius,
+            backgroundColor: screenColor,
+          },
+        ]}
       >
         {children}
       </View>
       <View
-        style={{
-          position: 'absolute',
-          alignSelf: 'center',
-          top: bezel + islandHeight * 0.55,
-          width: islandWidth,
-          height: islandHeight,
-          borderRadius: islandHeight / 2,
-          backgroundColor: frameColor,
-        }}
+        style={[
+          styles.island,
+          {
+            top: bezel + islandHeight * 0.55,
+            width: islandWidth,
+            height: islandHeight,
+            borderRadius: islandHeight / 2,
+            backgroundColor: frameColor,
+          },
+        ]}
       />
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  frame: {
+    borderCurve: 'continuous',
+    borderWidth: 1,
+    borderColor: withAlpha(colors.white, 0.22),
+  },
+  screen: {
+    position: 'absolute',
+    borderCurve: 'continuous',
+    overflow: 'hidden',
+  },
+  island: {
+    position: 'absolute',
+    alignSelf: 'center',
+  },
+});

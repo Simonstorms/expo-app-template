@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { Icon } from '@/components/ui/icon';
+import type { IconName } from '@/components/ui/icon';
 import { colors, font, shadow } from '@/constants/theme';
 
 export function NotificationPreview({
@@ -15,7 +16,7 @@ export function NotificationPreview({
   title: string;
   body: string;
   time?: string;
-  symbol?: string;
+  symbol?: IconName;
   iconColor?: string;
   icon?: ReactNode;
 }) {

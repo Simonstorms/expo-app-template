@@ -1,9 +1,11 @@
 import { usePathname } from 'expo-router';
 import PostHog, { PostHogProvider } from 'posthog-react-native';
-import { type ReactNode, useEffect } from 'react';
+import { useEffect } from 'react';
+import type { ReactNode } from 'react';
 
 import { config, hasPostHog } from '@/constants/config';
 import type { AnalyticsEventName, AnalyticsEvents } from '@/lib/analytics-events';
+import { runInBackground } from '@/lib/tasks';
 
 type PersonProperties = Record<string, string | number | boolean | null>;
 
@@ -41,7 +43,9 @@ export const posthog = hasPostHog
 void posthog?.register({ env: config.env });
 
 export function AnalyticsProvider({ children }: { children: ReactNode }) {
-  if (!posthog) return <>{children}</>;
+  if (!posthog) {
+    return children;
+  }
   return (
     <PostHogProvider client={posthog} autocapture={{ captureTouches: true, captureScreens: false }}>
       {children}
@@ -53,7 +57,7 @@ export function ScreenTracker() {
   const pathname = usePathname();
 
   useEffect(() => {
-    posthog?.screen(pathname);
+    void posthog?.screen(pathname);
   }, [pathname]);
 
   return null;
@@ -97,7 +101,10 @@ export function setPersonPropertiesOnce(properties: PersonProperties): void {
 }
 
 export function flushAnalytics(): void {
-  void posthog?.flush().catch(() => undefined);
+  if (!posthog) {
+    return;
+  }
+  void runInBackground(posthog.flush());
 }
 
 export function analyticsDistinctId(): string | undefined {
@@ -109,10 +116,12 @@ export function analyticsOptedOut(): boolean {
 }
 
 export async function setAnalyticsOptOut(optedOut: boolean): Promise<void> {
-  if (!posthog) return;
+  if (!posthog) {
+    return;
+  }
   if (optedOut) {
     posthog.capture('analytics_opt_out_toggled', { opted_out: true });
-    await posthog.flush().catch(() => undefined);
+    await runInBackground(posthog.flush());
     await posthog.optOut();
     return;
   }

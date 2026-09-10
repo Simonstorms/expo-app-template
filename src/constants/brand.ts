@@ -1,6 +1,8 @@
+import type { IconName } from '@/components/ui/icon';
+
 type Currency = {
   symbol: string;
-  icon: string;
+  icon: IconName;
   position: 'prefix' | 'suffix';
   decimalSeparator: string;
 };

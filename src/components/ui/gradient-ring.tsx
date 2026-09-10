@@ -18,13 +18,18 @@ const STOPS: Stop[] = [
   { at: 1, color: PINK },
 ];
 
+const SEGMENTS = 90;
+
 function ringColor(t: number): string {
-  let lower = STOPS[0];
-  let upper = STOPS[STOPS.length - 1];
-  for (let i = 0; i < STOPS.length - 1; i++) {
-    if (t >= STOPS[i].at && t <= STOPS[i + 1].at) {
-      lower = STOPS[i];
-      upper = STOPS[i + 1];
+  const [firstStop] = STOPS;
+  let lower = firstStop;
+  let upper = STOPS.at(-1) ?? firstStop;
+  for (let i = 0; i < STOPS.length - 1; i += 1) {
+    const current = STOPS[i];
+    const following = STOPS[i + 1];
+    if (t >= current.at && t <= following.at) {
+      lower = current;
+      upper = following;
       break;
     }
   }
@@ -34,6 +39,18 @@ function ringColor(t: number): string {
   const g = Math.round(lower.color[1] + (upper.color[1] - lower.color[1]) * f);
   const b = Math.round(lower.color[2] + (upper.color[2] - lower.color[2]) * f);
   return `rgb(${r}, ${g}, ${b})`;
+}
+
+function segmentPath(index: number, cx: number, cy: number, radius: number): string {
+  const t0 = index / SEGMENTS;
+  const t1 = (index + 1) / SEGMENTS;
+  const a0 = t0 * 2 * Math.PI - Math.PI / 2;
+  const a1 = t1 * 2 * Math.PI - Math.PI / 2 + 0.012;
+  const x0 = cx + radius * Math.cos(a0);
+  const y0 = cy + radius * Math.sin(a0);
+  const x1 = cx + radius * Math.cos(a1);
+  const y1 = cy + radius * Math.sin(a1);
+  return `M ${x0} ${y0} A ${radius} ${radius} 0 0 1 ${x1} ${y1}`;
 }
 
 export function GradientRing({
@@ -48,47 +65,36 @@ export function GradientRing({
   const radius = (diameter - ringWidth) / 2;
   const cx = diameter / 2;
   const cy = diameter / 2;
-  const segments = 90;
   const innerSize = diameter - ringWidth;
 
-  const paths = [];
-  for (let i = 0; i < segments; i++) {
-    const t0 = i / segments;
-    const t1 = (i + 1) / segments;
-    const a0 = t0 * 2 * Math.PI - Math.PI / 2;
-    const a1 = t1 * 2 * Math.PI - Math.PI / 2 + 0.012;
-    const x0 = cx + radius * Math.cos(a0);
-    const y0 = cy + radius * Math.sin(a0);
-    const x1 = cx + radius * Math.cos(a1);
-    const y1 = cy + radius * Math.sin(a1);
-    paths.push(
-      <Path
-        key={i}
-        d={`M ${x0} ${y0} A ${radius} ${radius} 0 0 1 ${x1} ${y1}`}
-        stroke={ringColor(t0)}
-        strokeWidth={ringWidth}
-        fill="none"
-      />,
-    );
-  }
-
   return (
-    <View
-      style={{ width: diameter, height: diameter, alignItems: 'center', justifyContent: 'center' }}
-    >
+    <View style={[styles.ring, { width: diameter, height: diameter }]}>
       <Svg width={diameter} height={diameter} style={StyleSheet.absoluteFill}>
-        {paths}
+        {Array.from({ length: SEGMENTS }, (_, index) => (
+          <Path
+            key={index}
+            d={segmentPath(index, cx, cy, radius)}
+            stroke={ringColor(index / SEGMENTS)}
+            strokeWidth={ringWidth}
+            fill="none"
+          />
+        ))}
       </Svg>
       <View
-        style={{
-          position: 'absolute',
-          width: innerSize,
-          height: innerSize,
-          borderRadius: innerSize / 2,
-          backgroundColor: colors.white,
-        }}
+        style={[styles.inner, { width: innerSize, height: innerSize, borderRadius: innerSize / 2 }]}
       />
       {children}
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  ring: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  inner: {
+    position: 'absolute',
+    backgroundColor: colors.white,
+  },
+});

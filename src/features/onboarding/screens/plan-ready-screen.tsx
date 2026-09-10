@@ -5,10 +5,12 @@ import Svg, { Circle } from 'react-native-svg';
 
 import { GlassSurface } from '@/components/ui/glass';
 import { Icon } from '@/components/ui/icon';
-import { OnboardingScaffold } from '../components/onboarding-scaffold';
+import type { IconName } from '@/components/ui/icon';
 import { PrimaryCTA } from '@/components/ui/primary-cta';
 import { content } from '@/constants/content';
 import { colors, layout, withAlpha } from '@/constants/theme';
+
+import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { useFlow } from '../hooks/use-flow';
 import { usePlan } from '../hooks/use-plan';
 
@@ -16,9 +18,6 @@ const nearInk = '#0A0A0A';
 const subtitleGray = '#959499';
 const chipFill = '#F7F7FB';
 const ringTrack = '#EFF1F5';
-const ringOrange = '#DE9B6C';
-const ringRed = '#DC6868';
-const ringBlue = '#6996DA';
 const badgeFill = '#050505';
 
 const RING_SIZE = 64.3;
@@ -67,26 +66,26 @@ export default function PlanReadyScreen() {
                 />
                 <MetricTile
                   symbol="banknote.fill"
-                  iconTint={ringOrange}
+                  iconTint={colors.orange}
                   label={content.planReady.metricMoneySavedLabel}
                   value={moneySaved}
-                  ringColor={ringOrange}
+                  ringColor={colors.orange}
                 />
               </View>
               <View style={styles.tileRow}>
                 <MetricTile
                   symbol="brain.fill"
-                  iconTint={ringRed}
+                  iconTint={colors.dangerText}
                   label={content.planReady.metricCravingLabel}
                   value={content.planReady.metricCravingValue}
-                  ringColor={ringRed}
+                  ringColor={colors.dangerText}
                 />
                 <MetricTile
                   symbol="heart.fill"
-                  iconTint={ringBlue}
+                  iconTint={colors.blue}
                   label={content.planReady.metricHealthLabel}
                   value={content.planReady.metricHealthValue}
-                  ringColor={ringBlue}
+                  ringColor={colors.blue}
                 />
               </View>
             </View>
@@ -117,7 +116,7 @@ function MetricTile({
   unit,
   ringColor,
 }: {
-  symbol: string;
+  symbol: IconName;
   iconTint: string;
   label: string;
   value: string;
@@ -159,9 +158,7 @@ function MetricTile({
               strokeLinecap="butt"
               fill="none"
               strokeDasharray={[RING_CIRCUMFERENCE * 0.5, RING_CIRCUMFERENCE]}
-              originX={RING_CENTER}
-              originY={RING_CENTER}
-              rotation={-90}
+              transform={`rotate(-90 ${RING_CENTER} ${RING_CENTER})`}
             />
           </Svg>
           <View style={styles.ringCenter}>

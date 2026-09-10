@@ -12,7 +12,9 @@ export function useRevenueCatSync(): void {
   }, []);
 
   useEffect(() => {
-    if (isLoading) return;
+    if (isLoading) {
+      return;
+    }
     if (user?.id) {
       lastSignedInId.current = user.id;
       void identifyRevenueCatUser(user.id);

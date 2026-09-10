@@ -10,13 +10,14 @@ import {
 } from '@/components/ui/brand-logos';
 import { GlassGroup, GlassSurface } from '@/components/ui/glass';
 import { Icon } from '@/components/ui/icon';
-import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { TitleBlock } from '@/components/ui/title-block';
-import { useOnboarding } from '../store';
 import { content } from '@/constants/content';
 import { colors, layout, text, withAlpha } from '@/constants/theme';
-import { type DiscoverySource } from '../types';
+
+import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { useFlow } from '../hooks/use-flow';
+import { useOnboarding } from '../store';
+import type { DiscoverySource } from '../types';
 
 export default function DiscoverySourceScreen() {
   const source = useOnboarding((state) => state.discoverySource);
@@ -89,20 +90,30 @@ function SourceRow({
 
 function SourceGlyph({ source }: { source: DiscoverySource }) {
   switch (source) {
-    case 'instagram':
+    case 'instagram': {
       return <InstagramLogo size={23} />;
-    case 'tiktok':
+    }
+    case 'tiktok': {
       return <TikTokLogo size={23} />;
-    case 'facebook':
+    }
+    case 'facebook': {
       return <FacebookLogo size={24} />;
-    case 'youtube':
+    }
+    case 'youtube': {
       return <YouTubeLogo size={26} />;
-    case 'google':
+    }
+    case 'google': {
       return <GoogleLogo size={23} />;
-    case 'tv':
+    }
+    case 'tv': {
       return <Icon name="tv" size={17} weight="semibold" color={colors.ink} />;
-    case 'friends':
+    }
+    case 'friends': {
       return <Icon name="person.3.fill" size={13} color={colors.ctaFill} />;
+    }
+    default: {
+      return null;
+    }
   }
 }
 

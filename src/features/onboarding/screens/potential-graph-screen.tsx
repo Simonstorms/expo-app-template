@@ -1,13 +1,15 @@
 import { useState } from 'react';
-import { type LayoutChangeEvent, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+import type { LayoutChangeEvent } from 'react-native';
 import Svg, { Circle, Defs, Line, LinearGradient, Path, Stop } from 'react-native-svg';
 
 import { GlassSurface } from '@/components/ui/glass';
 import { Icon } from '@/components/ui/icon';
-import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { TitleBlock } from '@/components/ui/title-block';
-import { colors, layout, withAlpha } from '@/constants/theme';
 import { content } from '@/constants/content';
+import { colors, layout, withAlpha } from '@/constants/theme';
+
+import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { useFlow } from '../hooks/use-flow';
 
 const PLOT_HEIGHT = 176;
@@ -53,8 +55,8 @@ const AXIS_LABEL_POSITIONS = [0.1296, 0.3981, 0.7666] as const;
 
 function buildCurvePath(width: number): string {
   const mapped = CURVE_POINTS.map(([fx, y]): Point => [fx * width, y]);
-  const first = mapped[0];
-  const last = mapped[mapped.length - 1];
+  const [first] = mapped;
+  const last = mapped.at(-1) ?? first;
   let d = `M ${first[0]} ${first[1]}`;
   for (let index = 1; index < mapped.length - 1; index += 1) {
     const current = mapped[index];
@@ -68,8 +70,8 @@ function buildCurvePath(width: number): string {
 }
 
 function buildAreaPath(width: number): string {
-  const first = CURVE_POINTS[0];
-  const last = CURVE_POINTS[CURVE_POINTS.length - 1];
+  const [first] = CURVE_POINTS;
+  const last = CURVE_POINTS.at(-1) ?? first;
   return `${buildCurvePath(width)} L ${last[0] * width} ${PLOT_HEIGHT} L ${first[0] * width} ${PLOT_HEIGHT} Z`;
 }
 
@@ -189,7 +191,7 @@ export default function PotentialGraphScreen() {
                     </Svg>
                   ) : null}
                   {plotWidth > 0 ? (
-                    <View style={[styles.point, { left: 0.9831 * plotWidth, top: 24.7 }]}>
+                    <View style={[styles.point, styles.trophyPoint, { left: 0.9831 * plotWidth }]}>
                       <View style={styles.trophyOuter}>
                         <View style={styles.trophyInner}>
                           <Icon name="trophy.fill" size={13} weight="medium" color={colors.white} />
@@ -206,7 +208,8 @@ export default function PotentialGraphScreen() {
                           key={label}
                           style={[
                             styles.point,
-                            { left: AXIS_LABEL_POSITIONS[index] * plotWidth, top: 20 },
+                            styles.axisPoint,
+                            { left: AXIS_LABEL_POSITIONS[index] * plotWidth },
                           ]}
                         >
                           <Text style={styles.axisLabel}>{label}</Text>
@@ -246,7 +249,7 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#111113',
+    color: colors.ink,
     paddingLeft: 13.7,
     paddingTop: 27,
   },
@@ -263,7 +266,7 @@ const styles = StyleSheet.create({
   },
   baseline: {
     height: 1,
-    backgroundColor: '#1D191F',
+    backgroundColor: colors.ctaFill,
   },
   axisRow: {
     height: 32,
@@ -275,10 +278,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  trophyPoint: {
+    top: 24.7,
+  },
+  axisPoint: {
+    top: 20,
+  },
   axisLabel: {
     fontSize: 15,
     fontWeight: '500',
-    color: '#111116',
+    color: colors.ink,
   },
   trophyOuter: {
     width: 35,
@@ -292,7 +301,7 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
     borderRadius: 15,
-    backgroundColor: '#DF9B68',
+    backgroundColor: colors.orange,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -306,7 +315,7 @@ const styles = StyleSheet.create({
     maxWidth: 306,
     fontSize: 16,
     fontWeight: '400',
-    color: '#4D4D4D',
+    color: colors.inkSoft,
     textAlign: 'center',
     lineHeight: 18,
   },

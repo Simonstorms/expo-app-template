@@ -1,9 +1,12 @@
-import { type TextStyle, type ViewStyle } from 'react-native';
+import type { TextStyle, ViewStyle } from 'react-native';
 
 export const colors = {
   ink: '#000000',
+  inkSoft: '#4D4D4D',
   ctaFill: '#1E1A24',
   cardFill: '#F9F8FD',
+  surfaceMuted: '#F2F2F2',
+  slate: '#6F7C8B',
   secondaryText: '#706F72',
   tertiaryText: '#B0B5BC',
   disabledFill: '#BABABC',
@@ -16,9 +19,14 @@ export const colors = {
   success: '#33C15B',
   danger: '#E24C4C',
   orange: '#DE9B68',
+  blue: '#6996DA',
   gradientPink: '#F2BCD4',
   gradientBlue: '#B6C6F5',
+  dangerText: '#DC6868',
+  shadowBlue: '#14284C',
+  shadowInk: '#28282D',
   white: '#FFFFFF',
+  transparent: 'transparent',
 } as const;
 
 export const layout = {
@@ -86,33 +94,21 @@ export const text = {
 
 export const shadow = {
   card: {
-    shadowColor: '#14284C',
-    shadowOpacity: 0.1,
-    shadowRadius: 22,
-    shadowOffset: { width: 0, height: 12 },
-    elevation: 4,
+    boxShadow: `0px 12px 44px ${withAlpha(colors.shadowBlue, 0.1)}`,
   },
   soft: {
-    shadowColor: '#14284C',
-    shadowOpacity: 0.06,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 2,
+    boxShadow: `0px 6px 24px ${withAlpha(colors.shadowBlue, 0.06)}`,
   },
   cta: {
-    shadowColor: '#28282D',
-    shadowOpacity: 0.22,
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: 9 },
-    elevation: 5,
+    boxShadow: `0px 9px 36px ${withAlpha(colors.shadowInk, 0.22)}`,
   },
 } satisfies Record<string, ViewStyle>;
 
 export function withAlpha(hex: string, alpha: number): string {
   'worklet';
   const value = hex.replace('#', '');
-  const r = parseInt(value.slice(0, 2), 16);
-  const g = parseInt(value.slice(2, 4), 16);
-  const b = parseInt(value.slice(4, 6), 16);
+  const r = Number.parseInt(value.slice(0, 2), 16);
+  const g = Number.parseInt(value.slice(2, 4), 16);
+  const b = Number.parseInt(value.slice(4, 6), 16);
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }

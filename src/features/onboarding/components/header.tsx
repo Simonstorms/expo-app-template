@@ -1,5 +1,6 @@
 import { getLocales } from 'expo-localization';
-import { type LayoutChangeEvent, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import type { LayoutChangeEvent } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
 import { GlassSurface } from '@/components/ui/glass';
@@ -10,15 +11,20 @@ import { colors, layout, withAlpha } from '@/constants/theme';
 export type ChipTone = 'light' | 'translucent';
 
 const MIN_FILL_WIDTH = 7;
-const REGIONAL_INDICATOR_BASE = 0x1f1e6;
+const REGIONAL_INDICATOR_BASE = 0x1_f1_e6;
 const LETTER_A = 'A'.codePointAt(0) ?? 65;
 
 function regionFlag(regionCode: string | null): string {
-  if (regionCode === null || regionCode.length !== 2) return '🌐';
-  const points = [...regionCode.toUpperCase()].map(
-    (letter) => REGIONAL_INDICATOR_BASE + ((letter.codePointAt(0) ?? LETTER_A) - LETTER_A),
+  if (regionCode === null || regionCode.length !== 2) {
+    return '🌐';
+  }
+  const upper = regionCode.toUpperCase();
+  const first = upper.codePointAt(0) ?? LETTER_A;
+  const second = upper.codePointAt(1) ?? LETTER_A;
+  return String.fromCodePoint(
+    REGIONAL_INDICATOR_BASE + (first - LETTER_A),
+    REGIONAL_INDICATOR_BASE + (second - LETTER_A),
   );
-  return String.fromCodePoint(...points);
 }
 
 let lastProgress = 0;
@@ -90,7 +96,7 @@ export function SkipLink({ onPress, label }: { onPress: () => void; label: strin
 }
 
 export function LanguagePill() {
-  const locale = getLocales()[0];
+  const [locale] = getLocales();
   const flag = regionFlag(locale?.regionCode ?? null);
   const language = (locale?.languageCode ?? 'en').toUpperCase();
 

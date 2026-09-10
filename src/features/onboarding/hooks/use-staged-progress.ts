@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import {
   cancelAnimation,
   Easing,
-  runOnJS,
   useAnimatedReaction,
   useAnimatedStyle,
   useSharedValue,
@@ -10,6 +9,7 @@ import {
   withSequence,
   withTiming,
 } from 'react-native-reanimated';
+import { scheduleOnRN } from 'react-native-worklets';
 
 type Stage = {
   to: number;
@@ -47,7 +47,7 @@ export function useStagedProgress(onComplete: () => void, holdMs = 450) {
       holdMs,
       withTiming(100, { duration: 1 }, (finished) => {
         if (finished) {
-          runOnJS(onComplete)();
+          scheduleOnRN(onComplete);
         }
       }),
     );
@@ -56,14 +56,14 @@ export function useStagedProgress(onComplete: () => void, holdMs = 450) {
   }, [holdMs, onComplete, progress]);
 
   const barStyle = useAnimatedStyle(() => ({
-    width: `${Math.min(100, progress.value)}%` as `${number}%`,
+    width: `${Math.min(100, progress.value)}%`,
   }));
 
   useAnimatedReaction(
     () => Math.min(100, Math.round(progress.value)),
     (current, previous) => {
       if (current !== previous) {
-        runOnJS(setValue)(current);
+        scheduleOnRN(setValue, current);
       }
     },
   );

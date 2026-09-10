@@ -1,7 +1,8 @@
 import { formatMoney } from '@/constants/brand';
 import { content } from '@/constants/content';
 
-import { projectPlan, type Projection } from '../projection';
+import { projectPlan } from '../projection';
+import type { Projection } from '../projection';
 import { useOnboarding } from '../store';
 
 type Plan = {

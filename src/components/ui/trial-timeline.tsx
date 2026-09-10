@@ -1,12 +1,13 @@
 import { StyleSheet, Text, View } from 'react-native';
 
 import { Icon } from '@/components/ui/icon';
+import type { IconName } from '@/components/ui/icon';
 import { colors, font, withAlpha } from '@/constants/theme';
 
 export type TimelineStep = {
   title: string;
   caption?: string;
-  symbol?: string;
+  symbol?: IconName;
   color?: string;
 };
 
@@ -36,9 +37,9 @@ export function TrialTimeline({
                   <View style={styles.dot} />
                 )}
               </View>
-              {!isLast ? (
+              {isLast ? null : (
                 <View style={[styles.line, { backgroundColor: withAlpha(nodeColor, 0.45) }]} />
-              ) : null}
+              )}
             </View>
             <View style={styles.body}>
               <Text style={[styles.title, { color: titleColor }]}>{step.title}</Text>
