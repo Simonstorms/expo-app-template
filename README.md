@@ -75,6 +75,15 @@ review silently.
 | OTA updates               | `expo-updates`                                                                                                            |
 | Design                    | `expo-glass-effect` (Liquid Glass), `expo-symbols`, `react-native-reanimated`, `react-native-svg`, `expo-linear-gradient` |
 
+### Packages that run ahead of the SDK
+
+`expo.install.exclude` in `package.json` exempts eight packages from `expo install --check`. Six are
+harmless patch drift. Two are a full major ahead of what SDK 57 bundles and are excluded on purpose:
+`@react-native-async-storage/async-storage` 3.x (SDK pins 2.2.0) and `react-native-gesture-handler`
+3.x (SDK pins 2.32). Both are autolinked native modules, so re-verify them on every SDK upgrade and
+drop the exclusion once the SDK catches up. Everything else in the list should be removed the next
+time it stops being needed, not left there by habit.
+
 ## Architecture
 
 Feature-based, not type-based. Each feature owns its screens, components, hooks, data access and
