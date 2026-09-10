@@ -34,8 +34,8 @@ export async function identifyRevenueCatUser(userId: string): Promise<void> {
 }
 
 export async function resetRevenueCatUser(): Promise<void> {
-  await clearLastKnownEntitlement().catch(() => undefined);
   if (!configured) return;
+  await clearLastKnownEntitlement().catch(() => undefined);
   const anonymous = await Purchases.isAnonymous();
   if (anonymous) return;
   await Purchases.logOut();

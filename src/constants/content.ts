@@ -427,4 +427,10 @@ export const content = {
     deleteErrorTitle: 'Could not delete account',
     deleteErrorBody: 'Something went wrong. Please try again.',
   },
+
+  errorBoundary: {
+    title: 'Something went wrong',
+    body: 'The app hit an unexpected error. Try again, and if it keeps happening, restart the app.',
+    retry: 'Try again',
+  },
 } as const;

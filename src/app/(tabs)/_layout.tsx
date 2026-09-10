@@ -1,4 +1,5 @@
 import { Redirect, Tabs } from 'expo-router';
+import { StyleSheet, View } from 'react-native';
 
 import { Icon } from '@/components/ui/icon';
 import { hasRevenueCat, hasSupabase } from '@/constants/config';
@@ -11,12 +12,16 @@ export default function TabsLayout() {
   const { isSignedIn, isLoading: sessionLoading } = useSession();
   const { isPro, isLoading: entitlementLoading } = useEntitlement();
 
-  if (hasSupabase && !sessionLoading && !isSignedIn) {
+  if ((hasSupabase && sessionLoading) || (hasRevenueCat && entitlementLoading)) {
+    return <View style={styles.gate} />;
+  }
+
+  if (hasSupabase && !isSignedIn) {
     return <Redirect href="/sign-in" />;
   }
 
-  if (hasRevenueCat && !entitlementLoading && !isPro) {
-    return <Redirect href="/paywall" />;
+  if (hasRevenueCat && !isPro) {
+    return <Redirect href={{ pathname: '/paywall', params: { context: 'gate' } }} />;
   }
 
   return (
@@ -48,3 +53,10 @@ export default function TabsLayout() {
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  gate: {
+    flex: 1,
+    backgroundColor: colors.white,
+  },
+});

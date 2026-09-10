@@ -41,6 +41,10 @@ export type OnboardingValues = Omit<OnboardingState, 'set' | 'reset'>;
 
 const PERSIST_KEY = 'onboarding';
 
+const PERSIST_VERSION = 1;
+
+let rehydrateRecovered = false;
+
 const ACTION_KEYS: ReadonlySet<string> = new Set(['set', 'reset']);
 
 function deviceLanguage(): string {
@@ -83,8 +87,18 @@ export const useOnboarding = create<OnboardingState>()(
     }),
     {
       name: PERSIST_KEY,
+      version: PERSIST_VERSION,
       storage: createJSONStorage(() => AsyncStorage),
       partialize: answersOf,
+      migrate: (persisted, version) =>
+        version === PERSIST_VERSION ? (persisted as OnboardingValues) : initialState,
+      onRehydrateStorage: () => (_state, error) => {
+        if (!error || rehydrateRecovered) return;
+        rehydrateRecovered = true;
+        void AsyncStorage.removeItem(PERSIST_KEY)
+          .then(() => useOnboarding.persist.rehydrate())
+          .catch(() => undefined);
+      },
     },
   ),
 );

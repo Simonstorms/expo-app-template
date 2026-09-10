@@ -20,15 +20,13 @@ import { OnboardingScaffold } from '@/features/onboarding/components/onboarding-
 import { useFlow } from '@/features/onboarding/hooks/use-flow';
 import { captureEvent, flushAnalytics, setPersonProperties } from '@/lib/analytics';
 import { cancelTrialReminder, scheduleTrialReminder } from '@/lib/notifications';
-import { getPaywallPackages, hasFreeTrial, purchaseProPackage, restorePurchases } from '../api';
+import { getPaywallPackages, hasFreeTrial, purchaseProPackage, runRestore } from '../api';
 import { useEntitlement } from '../hooks/use-entitlement';
 
 type PlanKey = 'yearly' | 'monthly';
 type DeclineReason = 'price' | 'unsure' | 'browsing';
 type SheetState = 'none' | 'reason' | 'reassure';
 type Placement = 'main' | 'offer' | 'reassure';
-type RestoreOutcome = 'restored' | 'none' | 'failed';
-
 const CLOSE_DELAY_MS = 3500;
 const PREVIEW_WIDTH = 172;
 const TRIAL_REMINDER_DAYS_BEFORE_END = 2;
@@ -60,14 +58,6 @@ function savingsPercent(
   const annualPerMonth = annualPrice / 12;
   if (annualPerMonth >= monthlyPrice) return null;
   return Math.round((1 - annualPerMonth / monthlyPrice) * 100);
-}
-
-async function runRestore(): Promise<RestoreOutcome> {
-  try {
-    return (await restorePurchases()) ? 'restored' : 'none';
-  } catch {
-    return 'failed';
-  }
 }
 
 function openUrl(url: string): void {
@@ -177,7 +167,9 @@ function PlanOption({
   );
 }
 
-export default function PaywallScreen({ fromHome = false }: { fromHome?: boolean }) {
+export type PaywallEntry = 'onboarding' | 'gate' | 'upsell';
+
+export default function PaywallScreen({ entry = 'onboarding' }: { entry?: PaywallEntry }) {
   const router = useRouter();
   const flow = useFlow('paywall');
   const { finish } = flow;
@@ -230,17 +222,29 @@ export default function PaywallScreen({ fromHome = false }: { fromHome?: boolean
   const offerDiscount = discountPercent(standard?.annual?.product.price, offerPkg?.product.price);
 
   const mainPrice = mainPlan === 'yearly' ? yearlyPrice : monthlyPrice;
-  const context = fromHome ? 'home' : 'onboarding';
+  const context = entry;
+  const fromOnboarding = entry === 'onboarding';
+  const dismissible = entry === 'upsell';
+  const showClose = dismissible || (fromOnboarding && hasOffer);
   const canDeleteAccount = hasSupabase && Boolean(user);
 
   const complete = () => {
     if (done.current) return;
     done.current = true;
-    if (fromHome) {
+    if (entry === 'upsell') {
       router.back();
       return;
     }
+    if (entry === 'gate') {
+      router.replace('/home');
+      return;
+    }
     void finish();
+  };
+
+  const dismiss = () => {
+    if (!dismissible) return;
+    router.back();
   };
 
   const selectPlan = (next: PlanKey, placement: 'main' | 'offer') => {
@@ -262,7 +266,7 @@ export default function PaywallScreen({ fromHome = false }: { fromHome?: boolean
       setSheet('reason');
       return;
     }
-    if (fromHome) complete();
+    dismiss();
   };
 
   const chooseReason = (reason: DeclineReason) => {
@@ -277,13 +281,13 @@ export default function PaywallScreen({ fromHome = false }: { fromHome?: boolean
       return;
     }
     setSheet('none');
-    if (fromHome) complete();
+    dismiss();
   };
 
   const onOfferClose = () => {
     captureEvent('paywall_dismissed', { view: 'offer', context });
-    if (fromHome) {
-      complete();
+    if (dismissible) {
+      dismiss();
       return;
     }
     setView('main');
@@ -512,8 +516,10 @@ export default function PaywallScreen({ fromHome = false }: { fromHome?: boolean
             showsVerticalScrollIndicator={false}
           >
             <View style={styles.topRow}>
-              {hasOffer || fromHome ? (
-                <Animated.View entering={FadeIn.delay(fromHome ? 0 : CLOSE_DELAY_MS).duration(420)}>
+              {showClose ? (
+                <Animated.View
+                  entering={FadeIn.delay(dismissible ? 0 : CLOSE_DELAY_MS).duration(420)}
+                >
                   <GlassIconButton
                     icon="xmark"
                     size={30}

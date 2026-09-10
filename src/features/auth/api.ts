@@ -5,6 +5,8 @@ import * as Linking from 'expo-linking';
 import * as WebBrowser from 'expo-web-browser';
 
 import { hasSupabase } from '@/constants/config';
+import { useOnboarding } from '@/features/onboarding/store';
+import { queryClient } from '@/lib/query-client';
 import { setOnboardingComplete } from '@/lib/storage';
 import { supabase } from '@/lib/supabase';
 
@@ -86,9 +88,16 @@ export async function signInWithGoogle(): Promise<void> {
   }
 }
 
+export async function clearLocalUserState(): Promise<void> {
+  useOnboarding.getState().reset();
+  await setOnboardingComplete(false).catch(() => undefined);
+  queryClient.clear();
+}
+
 export async function signOut(): Promise<void> {
   if (!hasSupabase) return;
   await supabase.auth.signOut();
+  await clearLocalUserState();
 }
 
 export async function deleteAccount(): Promise<void> {
@@ -96,5 +105,5 @@ export async function deleteAccount(): Promise<void> {
   const { error } = await supabase.rpc('delete_current_user');
   if (error) throw error;
   await supabase.auth.signOut({ scope: 'local' });
-  await setOnboardingComplete(false).catch(() => undefined);
+  await clearLocalUserState();
 }

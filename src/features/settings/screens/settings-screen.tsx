@@ -20,7 +20,7 @@ import { content } from '@/constants/content';
 import { colors, withAlpha } from '@/constants/theme';
 import { deleteAccount, signOut } from '@/features/auth/api';
 import { useSession } from '@/features/auth/hooks/use-session';
-import { restorePurchases } from '@/features/paywall/api';
+import { runRestore } from '@/features/paywall/api';
 import { useEntitlement } from '@/features/paywall/hooks/use-entitlement';
 import { analyticsOptedOut, captureEvent, setAnalyticsOptOut } from '@/lib/analytics';
 import { presentCustomerCenter } from '@/lib/revenuecat-ui';
@@ -52,6 +52,22 @@ export default function SettingsScreen() {
   const { user } = useSession();
   const { isPro } = useEntitlement();
   const [shareAnalytics, setShareAnalytics] = useState(() => !analyticsOptedOut());
+  const [restoring, setRestoring] = useState(false);
+
+  const onRestore = () => {
+    if (restoring) return;
+    setRestoring(true);
+    void runRestore().then((outcome) => {
+      setRestoring(false);
+      captureEvent('purchase_restore_result', { restored: outcome === 'restored' });
+      if (outcome === 'restored') return;
+      if (outcome === 'none') {
+        Alert.alert(content.paywall.restoreNoneTitle, content.paywall.restoreNoneBody);
+        return;
+      }
+      Alert.alert(content.paywall.restoreErrorTitle, content.paywall.restoreErrorBody);
+    });
+  };
 
   const toggleShareAnalytics = (next: boolean) => {
     setShareAnalytics(next);
@@ -117,9 +133,7 @@ export default function SettingsScreen() {
         {
           symbol: 'arrow.clockwise',
           label: content.settings.subRestore,
-          onPress: () => {
-            void restorePurchases();
-          },
+          onPress: onRestore,
         },
       ],
     },

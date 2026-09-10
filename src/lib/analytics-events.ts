@@ -48,6 +48,7 @@ export type AnalyticsEvents = {
   trial_reminder_scheduled: { days_before_end: number; days_from_now: number };
   notification_opened: { url: string };
   analytics_opt_out_toggled: { opted_out: boolean };
+  app_error_boundary: { message: string };
 };
 
 export type AnalyticsEventName = keyof AnalyticsEvents;

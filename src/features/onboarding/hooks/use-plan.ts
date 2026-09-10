@@ -30,7 +30,7 @@ export function usePlan(): Plan {
     quitDate,
     goalDate: `${content.birthdate.monthNames[quitDate.getMonth()]} ${quitDate.getDate()}`,
     dailyLimit: `${projection.dailyLimit}`,
-    moneySaved: formatMoney(projection.dailySpend),
+    moneySaved: formatMoney(projection.savedPerDay),
     projection,
   };
 }
