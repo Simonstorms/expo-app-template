@@ -2,6 +2,8 @@ import { createClient } from 'npm:@supabase/supabase-js@2';
 
 import { errorResponse, jsonResponse, preflightResponse } from '../_shared/cors.ts';
 
+const MAX_BODY_BYTES = 32 * 1024;
+
 type SecureCallRequest = {
   action: string;
   payload: Record<string, unknown>;
@@ -100,9 +102,18 @@ Deno.serve(async (request) => {
     return errorResponse('UPSTREAM_API_KEY not set', 500);
   }
 
+  const declaredLength = Number(request.headers.get('Content-Length') ?? '0');
+  if (Number.isFinite(declaredLength) && declaredLength > MAX_BODY_BYTES) {
+    return errorResponse('payload too large', 413);
+  }
+
   let rawBody: unknown;
   try {
-    rawBody = await request.json();
+    const raw = await request.text();
+    if (raw.length > MAX_BODY_BYTES) {
+      return errorResponse('payload too large', 413);
+    }
+    rawBody = JSON.parse(raw);
   } catch {
     return errorResponse('bad request', 400);
   }

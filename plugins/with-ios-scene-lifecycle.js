@@ -31,6 +31,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 function withSceneManifest(config) {
   return withInfoPlist(config, (cfg) => {
     cfg.modResults.UIApplicationSceneManifest = {
+      ...(cfg.modResults.UIApplicationSceneManifest ?? {}),
       UIApplicationSupportsMultipleScenes: false,
       UISceneConfigurations: {
         UIWindowSceneSessionRoleApplication: [
@@ -52,15 +53,23 @@ function withSceneAppDelegate(config) {
     }
     let contents = cfg.modResults.contents;
 
+    if (contents.includes('class SceneDelegate')) {
+      return cfg;
+    }
+
     if (!/^import UIKit$/m.test(contents)) {
       contents = contents.replace(/^import React$/m, 'import React\nimport UIKit');
     }
 
-    contents = contents.replace(/\n[ \t]*#if os\(iOS\) \|\| os\(tvOS\)[\s\S]*?#endif\n/, '\n');
-
-    if (!contents.includes('class SceneDelegate')) {
-      contents = `${contents.trimEnd()}\n${SCENE_DELEGATE}`;
+    const legacyLifecycle = /\n[ \t]*#if os\(iOS\) \|\| os\(tvOS\)[\s\S]*?#endif\n/;
+    if (!legacyLifecycle.test(contents)) {
+      throw new Error(
+        'with-ios-scene-lifecycle: expected an "#if os(iOS) || os(tvOS)" block in AppDelegate.swift and found none. The Expo template changed; re-verify this plugin against the current SDK.',
+      );
     }
+
+    contents = contents.replace(legacyLifecycle, '\n');
+    contents = `${contents.trimEnd()}\n${SCENE_DELEGATE}`;
 
     cfg.modResults.contents = contents;
     return cfg;

@@ -54,7 +54,20 @@ echo "==> Checking project link"
   echo "   this repo is not linked to an EAS project. Run: eas init"; exit 1;
 }
 
-val() { grep -E "^$1=" "$ENV_FILE" | head -n1 | cut -d= -f2- ; }
+val() {
+  local raw
+  raw="$(grep -E "^(export[[:space:]]+)?$1=" "$ENV_FILE" | head -n1 | cut -d= -f2-)"
+  raw="${raw%$'\r'}"
+  if [ ${#raw} -ge 2 ]; then
+    case "$raw" in
+      '"'*'"') raw="${raw:1:${#raw}-2}" ;;
+      "'"*"'") raw="${raw:1:${#raw}-2}" ;;
+    esac
+  fi
+  printf '%s' "$raw"
+}
+
+FAILURES=0
 
 upsert() {
   local name="$1" value="$2" env="$3"
@@ -65,7 +78,8 @@ upsert() {
       --environment "$env" --visibility plaintext --non-interactive >/dev/null 2>&1; then
     echo "   updated $name ($env)"
   else
-    echo "   FAILED  $name ($env) — check: eas env:list --environment $env"
+    echo "   FAILED  $name ($env), check: eas env:list --environment $env"
+    return 1
   fi
 }
 
@@ -77,8 +91,13 @@ for env in "${ENVIRONMENTS[@]}"; do
       echo "   skip    $name (empty in $ENV_FILE)"
       continue
     fi
-    upsert "$name" "$value" "$env"
+    upsert "$name" "$value" "$env" || FAILURES=$((FAILURES + 1))
   done
 done
+
+if [ "$FAILURES" -gt 0 ]; then
+  echo "==> $FAILURES variable(s) failed to sync."
+  exit 1
+fi
 
 echo "==> Done. Verify with: eas env:list --environment production"
