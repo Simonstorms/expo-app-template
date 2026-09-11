@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { type LayoutChangeEvent, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+import type { LayoutChangeEvent } from 'react-native';
 import Svg, {
   Circle,
   ClipPath,
@@ -13,10 +14,11 @@ import Svg, {
 
 import { GlassSurface } from '@/components/ui/glass';
 import { Icon } from '@/components/ui/icon';
-import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { TitleBlock } from '@/components/ui/title-block';
-import { colors, withAlpha } from '@/constants/theme';
 import { content } from '@/constants/content';
+import { colors, withAlpha } from '@/constants/theme';
+
+import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { useFlow } from '../hooks/use-flow';
 
 const graphInk = '#1E1B24';
@@ -70,9 +72,13 @@ const redPoints: Point[] = [
 ];
 
 function smoothPath(points: Point[]): string {
-  if (points.length === 0) return '';
+  if (points.length === 0) {
+    return '';
+  }
   let d = `M ${points[0].x} ${points[0].y}`;
-  if (points.length < 2) return d;
+  if (points.length < 2) {
+    return d;
+  }
   for (let index = 0; index < points.length - 1; index += 1) {
     const previous = points[Math.max(index - 1, 0)];
     const current = points[index];
@@ -209,13 +215,11 @@ function GraphCard() {
         </View>
       </View>
 
-      <Text style={[styles.curveLabel, { top: 83, right: width - sx(324.3) }]}>
+      <Text style={[styles.curveLabel, { right: width - sx(324.3) }]}>
         {content.resultsGraph.curveLabel}
       </Text>
-      <Text style={[styles.axisLabel, { top: 183.3, left: sx(20.6) }]}>
-        {content.resultsGraph.axisStart}
-      </Text>
-      <Text style={[styles.axisLabel, { top: 183.3, right: width - sx(323) }]}>
+      <Text style={[styles.axisLabel, { left: sx(20.6) }]}>{content.resultsGraph.axisStart}</Text>
+      <Text style={[styles.axisLabel, { right: width - sx(323) }]}>
         {content.resultsGraph.axisEnd}
       </Text>
 
@@ -278,12 +282,14 @@ const styles = StyleSheet.create({
   },
   curveLabel: {
     position: 'absolute',
+    top: 83,
     fontSize: 14,
     fontWeight: '500',
     color: curveLabelInk,
   },
   axisLabel: {
     position: 'absolute',
+    top: 183.3,
     fontSize: 14,
     fontWeight: '500',
     color: axisInk,

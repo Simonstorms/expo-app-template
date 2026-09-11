@@ -1,12 +1,13 @@
 import { Picker } from '@react-native-picker/picker';
 import { StyleSheet, Text, View } from 'react-native';
 
-import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { TitleBlock } from '@/components/ui/title-block';
-import { useOnboarding } from '../store';
-import { colors, layout, text } from '@/constants/theme';
 import { content } from '@/constants/content';
+import { colors, layout, text } from '@/constants/theme';
+
+import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { useFlow } from '../hooks/use-flow';
+import { useOnboarding } from '../store';
 
 type WheelItem = { label: string; value: number };
 
@@ -122,6 +123,6 @@ const styles = StyleSheet.create({
   },
   item: {
     fontSize: 17.5,
-    color: '#383838',
+    color: colors.inkSoft,
   },
 });

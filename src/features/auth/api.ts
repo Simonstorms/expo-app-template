@@ -5,8 +5,11 @@ import * as Linking from 'expo-linking';
 import * as WebBrowser from 'expo-web-browser';
 
 import { hasSupabase } from '@/constants/config';
+import { useOnboarding } from '@/features/onboarding/store';
+import { queryClient } from '@/lib/query-client';
 import { setOnboardingComplete } from '@/lib/storage';
 import { supabase } from '@/lib/supabase';
+import { attempt } from '@/lib/tasks';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -22,7 +25,7 @@ function isAppleCancellation(error: unknown): boolean {
     typeof error === 'object' &&
     error !== null &&
     'code' in error &&
-    (error as { code?: string }).code === 'ERR_REQUEST_CANCELED'
+    error.code === 'ERR_REQUEST_CANCELED'
   );
 }
 
@@ -33,13 +36,17 @@ async function requestAppleCredential(hashedNonce: string) {
       nonce: hashedNonce,
     });
   } catch (error) {
-    if (isAppleCancellation(error)) throw new AuthCancelledError();
+    if (isAppleCancellation(error)) {
+      throw new AuthCancelledError();
+    }
     throw error;
   }
 }
 
 export async function signInWithApple(): Promise<void> {
-  if (!hasSupabase) return;
+  if (!hasSupabase) {
+    return;
+  }
   const rawNonce = Crypto.randomUUID();
   const hashedNonce = await Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA256, rawNonce);
   const credential = await requestAppleCredential(hashedNonce);
@@ -51,7 +58,9 @@ export async function signInWithApple(): Promise<void> {
     token: credential.identityToken,
     nonce: rawNonce,
   });
-  if (error) throw error;
+  if (error) {
+    throw error;
+  }
 }
 
 export async function completeSessionFromUrl(url: string): Promise<Session | null> {
@@ -59,42 +68,65 @@ export async function completeSessionFromUrl(url: string): Promise<Session | nul
   const code = typeof queryParams?.code === 'string' ? queryParams.code : null;
   if (code) {
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
-    if (error) throw error;
+    if (error) {
+      throw error;
+    }
     return data.session;
   }
   return null;
 }
 
 export async function signInWithGoogle(): Promise<void> {
-  if (!hasSupabase) return;
+  if (!hasSupabase) {
+    return;
+  }
   const redirectTo = Linking.createURL('/');
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: { redirectTo, skipBrowserRedirect: true },
   });
-  if (error) throw error;
-  if (!data.url) throw new Error('Google sign-in could not be started.');
+  if (error) {
+    throw error;
+  }
+  if (!data.url) {
+    throw new Error('Google sign-in could not be started.');
+  }
   const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
   if (result.type !== 'success') {
     throw new AuthCancelledError();
   }
   const session = await completeSessionFromUrl(result.url).catch(() => null);
-  if (session) return;
+  if (session) {
+    return;
+  }
   const { data: existing } = await supabase.auth.getSession();
   if (!existing.session) {
     throw new Error('Google sign-in did not return a session.');
   }
 }
 
+export async function clearLocalUserState(): Promise<void> {
+  useOnboarding.getState().reset();
+  await attempt(setOnboardingComplete(false));
+  queryClient.clear();
+}
+
 export async function signOut(): Promise<void> {
-  if (!hasSupabase) return;
+  if (!hasSupabase) {
+    return;
+  }
   await supabase.auth.signOut();
+  await clearLocalUserState();
 }
 
 export async function deleteAccount(): Promise<void> {
-  if (!hasSupabase) return;
+  if (!hasSupabase) {
+    return;
+  }
   const { error } = await supabase.rpc('delete_current_user');
-  if (error) throw error;
+  if (error) {
+    throw error;
+  }
   await supabase.auth.signOut({ scope: 'local' });
-  await setOnboardingComplete(false).catch(() => undefined);
+  await clearLocalUserState();
 }

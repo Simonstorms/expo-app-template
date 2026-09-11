@@ -5,12 +5,13 @@ import Svg, { Circle, Path } from 'react-native-svg';
 import { ChoicePairButtons } from '@/components/ui/choice-pair-buttons';
 import { GlassGroup, GlassSurface } from '@/components/ui/glass';
 import { Icon } from '@/components/ui/icon';
-import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { TitleBlock } from '@/components/ui/title-block';
-import { useOnboarding } from '../store';
-import { colors, layout, withAlpha } from '@/constants/theme';
 import { content } from '@/constants/content';
+import { colors, layout, withAlpha } from '@/constants/theme';
+
+import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { useFlow } from '../hooks/use-flow';
+import { useOnboarding } from '../store';
 
 const ink = '#1E1A22';
 const blue = '#6D9BDC';
@@ -113,7 +114,7 @@ function DayCard({
 }) {
   return (
     <View style={[styles.cardShadow, { left, top, height }]}>
-      <GlassSurface radius={16} tintColor={withAlpha('#FFFFFF', 0.92)} style={styles.cardGlass}>
+      <GlassSurface radius={16} tintColor={withAlpha(colors.white, 0.92)} style={styles.cardGlass}>
         {children}
       </GlassSurface>
     </View>
@@ -133,7 +134,7 @@ function DayCardHeader({
     <View style={[styles.header, { backgroundColor: fill }]}>
       <Text style={[styles.headerTitle, { color: titleColor }]}>{title}</Text>
       <View style={styles.headerLeaf}>
-        <Icon name="leaf.fill" size={12.5} color="#000000" />
+        <Icon name="leaf.fill" size={12.5} color={colors.ink} />
       </View>
     </View>
   );
@@ -185,7 +186,7 @@ function MiniRing({
         <Circle cx={38} cy={38} r={21.65} fill={colors.cardFill} />
       </Svg>
       <View style={styles.miniRingLeaf}>
-        <Icon name="leaf.fill" size={13.5} color="#000000" />
+        <Icon name="leaf.fill" size={13.5} color={colors.ink} />
       </View>
     </View>
   );
@@ -214,10 +215,10 @@ function RolloverChip({ left, top }: { left: number; top: number }) {
   return (
     <View style={[styles.chip, { left, top }]}>
       <View style={styles.chipCircle}>
-        <Icon name="clock.arrow.circlepath" size={10} weight="semibold" color="#000000" />
+        <Icon name="clock.arrow.circlepath" size={10} weight="semibold" color={colors.ink} />
       </View>
       <Text style={styles.chipText}>
-        <Text style={{ color: '#FFFFFF' }}>+</Text>
+        <Text style={styles.chipPlus}>+</Text>
         <Text style={{ color: blue }}>2</Text>
       </Text>
     </View>
@@ -257,11 +258,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: 159.7,
     borderRadius: 16,
-    backgroundColor: '#FFFFFF',
-    shadowColor: '#000000',
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 3 },
+    backgroundColor: colors.white,
+    boxShadow: `0px 3px 20px ${withAlpha(colors.ink, 0.05)}`,
   },
   cardGlass: {
     flex: 1,
@@ -319,7 +317,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     height: 41.3,
     borderRadius: 10,
-    backgroundColor: '#000000',
+    backgroundColor: colors.ink,
     alignItems: 'center',
     justifyContent: 'center',
     gap: 1,
@@ -327,7 +325,7 @@ const styles = StyleSheet.create({
   badgeText: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: colors.white,
   },
   chip: {
     position: 'absolute',
@@ -344,13 +342,16 @@ const styles = StyleSheet.create({
     width: 20.7,
     height: 20.7,
     borderRadius: 10.35,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.white,
     alignItems: 'center',
     justifyContent: 'center',
   },
   chipText: {
     fontSize: 14,
     fontWeight: '600',
+  },
+  chipPlus: {
+    color: colors.white,
   },
   footer: {
     backgroundColor: footerFill,

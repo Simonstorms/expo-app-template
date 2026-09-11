@@ -1,3 +1,4 @@
+import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, {
@@ -6,7 +7,6 @@ import Animated, {
   withDelay,
   withSpring,
 } from 'react-native-reanimated';
-import { LinearGradient } from 'expo-linear-gradient';
 import Svg, {
   Defs,
   LinearGradient as SvgLinearGradient,
@@ -18,12 +18,13 @@ import Svg, {
 import { ChoicePairButtons } from '@/components/ui/choice-pair-buttons';
 import { GlassSurface } from '@/components/ui/glass';
 import { Icon } from '@/components/ui/icon';
-import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { TitleBlock } from '@/components/ui/title-block';
-import { useOnboarding } from '../store';
-import { colors, layout, withAlpha } from '@/constants/theme';
 import { content } from '@/constants/content';
+import { colors, layout, withAlpha } from '@/constants/theme';
+
+import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { useFlow } from '../hooks/use-flow';
+import { useOnboarding } from '../store';
 
 const HERO_WIDTH = 280;
 const HERO_HEIGHT = 329;
@@ -215,10 +216,7 @@ const styles = StyleSheet.create({
     left: 11,
     bottom: 11.3,
     borderRadius: layout.cardRadius,
-    shadowColor: colors.ink,
-    shadowOpacity: 0.07,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 3 },
+    boxShadow: `0px 3px 20px ${withAlpha(colors.ink, 0.07)}`,
   },
   statCard: {
     width: 155,

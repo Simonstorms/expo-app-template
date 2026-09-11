@@ -3,6 +3,9 @@ import { getLocales } from 'expo-localization';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
+import { isRecord } from '@/lib/guards';
+import { runInBackground } from '@/lib/tasks';
+
 import type {
   DiscoverySource,
   Gender,
@@ -41,15 +44,53 @@ export type OnboardingValues = Omit<OnboardingState, 'set' | 'reset'>;
 
 const PERSIST_KEY = 'onboarding';
 
-const ACTION_KEYS: ReadonlySet<string> = new Set(['set', 'reset']);
+const PERSIST_VERSION = 1;
+
+let rehydrateRecovered = false;
 
 function deviceLanguage(): string {
   return getLocales()[0]?.languageTag ?? 'en';
 }
 
 function answersOf(state: OnboardingState): OnboardingValues {
-  const entries = Object.entries(state).filter(([key]) => !ACTION_KEYS.has(key));
-  return Object.fromEntries(entries) as OnboardingValues;
+  return {
+    language: state.language,
+    gender: state.gender,
+    usageLevel: state.usageLevel,
+    discoverySource: state.discoverySource,
+    triedBefore: state.triedBefore,
+    variant: state.variant,
+    yearsOfUse: state.yearsOfUse,
+    pouchesPerDay: state.pouchesPerDay,
+    birthMonth: state.birthMonth,
+    birthDay: state.birthDay,
+    birthYear: state.birthYear,
+    goal: state.goal,
+    weeklySpend: state.weeklySpend,
+    reducePerWeek: state.reducePerWeek,
+    obstacle: state.obstacle,
+    healthConnected: state.healthConnected,
+    showSavings: state.showSavings,
+    rolloverPouches: state.rolloverPouches,
+    referralCode: state.referralCode,
+  };
+}
+
+function isOnboardingValues(value: unknown): value is OnboardingValues {
+  return (
+    isRecord(value) &&
+    typeof value.language === 'string' &&
+    typeof value.variant === 'string' &&
+    typeof value.yearsOfUse === 'number' &&
+    typeof value.pouchesPerDay === 'number' &&
+    typeof value.birthMonth === 'number' &&
+    typeof value.birthDay === 'number' &&
+    typeof value.birthYear === 'number' &&
+    typeof value.weeklySpend === 'number' &&
+    typeof value.reducePerWeek === 'number' &&
+    typeof value.healthConnected === 'boolean' &&
+    typeof value.referralCode === 'string'
+  );
 }
 
 const initialState: OnboardingValues = {
@@ -74,17 +115,36 @@ const initialState: OnboardingValues = {
   referralCode: '',
 };
 
+async function recoverPersistedState(): Promise<void> {
+  await AsyncStorage.removeItem(PERSIST_KEY);
+  await useOnboarding.persist.rehydrate();
+}
+
 export const useOnboarding = create<OnboardingState>()(
   persist(
     (setState) => ({
       ...initialState,
-      set: (key, value) => setState({ [key]: value } as Partial<OnboardingState>),
-      reset: () => setState(initialState),
+      set: (key, value) => {
+        setState((state) => ({ ...state, [key]: value }));
+      },
+      reset: () => {
+        setState(initialState);
+      },
     }),
     {
       name: PERSIST_KEY,
+      version: PERSIST_VERSION,
       storage: createJSONStorage(() => AsyncStorage),
       partialize: answersOf,
+      migrate: (persisted, version) =>
+        version === PERSIST_VERSION && isOnboardingValues(persisted) ? persisted : initialState,
+      onRehydrateStorage: () => (_state, error) => {
+        if (!error || rehydrateRecovered) {
+          return;
+        }
+        rehydrateRecovered = true;
+        void runInBackground(recoverPersistedState());
+      },
     },
   ),
 );

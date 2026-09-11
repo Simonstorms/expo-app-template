@@ -75,6 +75,15 @@ review silently.
 | OTA updates               | `expo-updates`                                                                                                            |
 | Design                    | `expo-glass-effect` (Liquid Glass), `expo-symbols`, `react-native-reanimated`, `react-native-svg`, `expo-linear-gradient` |
 
+### Packages that run ahead of the SDK
+
+`expo.install.exclude` in `package.json` exempts eight packages from `expo install --check`. Six are
+harmless patch drift. Two are a full major ahead of what SDK 57 bundles and are excluded on purpose:
+`@react-native-async-storage/async-storage` 3.x (SDK pins 2.2.0) and `react-native-gesture-handler`
+3.x (SDK pins 2.32). Both are autolinked native modules, so re-verify them on every SDK upgrade and
+drop the exclusion once the SDK catches up. Everything else in the list should be removed the next
+time it stops being needed, not left there by habit.
+
 ## Architecture
 
 Feature-based, not type-based. Each feature owns its screens, components, hooks, data access and
@@ -142,12 +151,17 @@ Scripts:
 | `bun run dev`                             | `expo start --dev-client`                                                |
 | `bun run ios` / `bun run android`         | native build, install, launch                                            |
 | `bun run typecheck`                       | `tsc --noEmit`                                                           |
-| `bun run lint`                            | `expo lint`                                                              |
-| `bun run format` / `bun run format:check` | Prettier                                                                 |
+| `bun run lint` / `bun run lint:fix`       | `oxlint --type-aware` (Ultracite + Expo, React Compiler, RN, a11y rules) |
+| `bun run format` / `bun run format:check` | `oxfmt`, one formatter for TS, JS, JSON, Markdown and YAML               |
+| `bun run knip`                            | dead files, unused exports and dependencies                              |
+| `bun run check`                           | typecheck + lint + format:check + knip, exactly what CI runs             |
 | `bun run analyze`                         | `EXPO_ATLAS=1 expo export --platform ios`, module graph for Expo Atlas   |
 | `bun run export:size`                     | export with tree shaking and graph optimisation, for honest size numbers |
 
-CI (`.github/workflows/ci.yml`) runs typecheck, lint and format:check on bun.
+CI (`.github/workflows/ci.yml`) runs `bun run check` plus advisory `expo install --check` and
+`expo-doctor` steps. A lefthook pre-commit hook lint-fixes and formats staged files (installed by
+`bun install` through the `prepare` script), and `renovate.json` keeps dependencies moving: one
+weekly PR for minor and patch bumps, Expo SDK managed packages held inside their declared range.
 
 ## Enable the backend (Supabase)
 
@@ -317,20 +331,17 @@ switch on, and App Store guideline 2.5.14 expects your privacy policy to disclos
 | Primitive                                                                            | What it is                                                                                                                  |
 | ------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------- |
 | `glass.tsx`                                                                          | `GlassSurface`, real Liquid Glass on capable hardware, solid fallback elsewhere. Capability is resolved once at module load |
-| `frost.tsx`                                                                          | Gradient frosted cards for scrolling surfaces, no blur, so no per-frame cost in lists                                       |
-| `frost-toggle.tsx`                                                                   | Reanimated switch driven by a derived shared value and `interpolateColor`                                                   |
 | `pressable-scale.tsx`                                                                | Press feedback with the shared `motion` timings, transform only                                                             |
 | `glass-icon-button.tsx`                                                              | Circular glass icon button built on `PressableScale`                                                                        |
 | `primary-cta.tsx`, `selection-row.tsx`, `choice-pair-buttons.tsx`, `title-block.tsx` | Onboarding building blocks                                                                                                  |
 | `phone-mockup.tsx`                                                                   | Brand-neutral device frame, ratio-derived bezel and corner radius, no image asset                                           |
 | `notification-preview.tsx`                                                           | Fake iOS notification banner for the permission-priming step                                                                |
 | `trial-timeline.tsx`                                                                 | Vertical "what happens when" trial timeline                                                                                 |
-| `confetti.tsx`                                                                       | Bounded celebration burst, unmounts itself when finished                                                                    |
 | `gradient-ring.tsx`, `screen-background.tsx`, `icon.tsx`, `brand-logos.tsx`          | Backgrounds, SF Symbols wrapper, attribution glyphs                                                                         |
 
 Feature-level pieces worth knowing: `onboarding-scaffold.tsx` (header, progress, footer for every
-step), `count-up-text.tsx`, `step-check.tsx`, `system-dialog-preview.tsx`, and
-`use-staged-progress.ts` for multi-stage progress animation.
+step) and `use-staged-progress.ts` for multi-stage progress animation. `bun run knip` keeps this
+list honest: a primitive nothing imports fails CI.
 
 ## Onboarding store and hydration gate
 

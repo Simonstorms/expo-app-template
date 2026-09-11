@@ -1,4 +1,4 @@
-import { Fragment, useState } from 'react';
+import { Fragment, useRef, useState } from 'react';
 import {
   Alert,
   Linking,
@@ -13,6 +13,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { GlassSurface } from '@/components/ui/glass';
 import { Icon } from '@/components/ui/icon';
+import type { IconName } from '@/components/ui/icon';
 import { ScreenBackground } from '@/components/ui/screen-background';
 import { brand } from '@/constants/brand';
 import { hasRevenueCat } from '@/constants/config';
@@ -20,12 +21,11 @@ import { content } from '@/constants/content';
 import { colors, withAlpha } from '@/constants/theme';
 import { deleteAccount, signOut } from '@/features/auth/api';
 import { useSession } from '@/features/auth/hooks/use-session';
-import { restorePurchases } from '@/features/paywall/api';
+import { runRestore } from '@/features/paywall/api';
 import { useEntitlement } from '@/features/paywall/hooks/use-entitlement';
 import { analyticsOptedOut, captureEvent, setAnalyticsOptOut } from '@/lib/analytics';
 import { presentCustomerCenter } from '@/lib/revenuecat-ui';
-
-const dangerRed = '#DC6868';
+import { attempt, runInBackground } from '@/lib/tasks';
 
 type Toggle = {
   value: boolean;
@@ -33,7 +33,7 @@ type Toggle = {
 };
 
 type Row = {
-  symbol: string;
+  symbol: IconName;
   label: string;
   value?: string;
   tint?: string;
@@ -47,39 +47,67 @@ type Section = {
   rows: Row[];
 };
 
+function openUrl(url: string): void {
+  void runInBackground(Linking.openURL(url));
+}
+
+function openSettings(): void {
+  void runInBackground(Linking.openSettings());
+}
+
+async function deleteAccountOrAlert(): Promise<void> {
+  captureEvent('account_deleted');
+  if (await attempt(deleteAccount())) {
+    return;
+  }
+  Alert.alert(content.settings.deleteErrorTitle, content.settings.deleteErrorBody);
+}
+
+function confirmDeleteAccount(): void {
+  Alert.alert(content.settings.deleteConfirmTitle, content.settings.deleteConfirmBody, [
+    { text: content.settings.deleteConfirmCancel, style: 'cancel' },
+    {
+      text: content.settings.deleteConfirmAction,
+      style: 'destructive',
+      onPress: () => {
+        void deleteAccountOrAlert();
+      },
+    },
+  ]);
+}
+
+async function restoreOrAlert(): Promise<void> {
+  const outcome = await runRestore();
+  captureEvent('purchase_restore_result', { restored: outcome === 'restored' });
+  if (outcome === 'restored') {
+    return;
+  }
+  if (outcome === 'none') {
+    Alert.alert(content.paywall.restoreNoneTitle, content.paywall.restoreNoneBody);
+    return;
+  }
+  Alert.alert(content.paywall.restoreErrorTitle, content.paywall.restoreErrorBody);
+}
+
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const { user } = useSession();
   const { isPro } = useEntitlement();
   const [shareAnalytics, setShareAnalytics] = useState(() => !analyticsOptedOut());
+  const restoring = useRef(false);
+
+  const onRestore = async () => {
+    if (restoring.current) {
+      return;
+    }
+    restoring.current = true;
+    await restoreOrAlert();
+    restoring.current = false;
+  };
 
   const toggleShareAnalytics = (next: boolean) => {
     setShareAnalytics(next);
-    void setAnalyticsOptOut(!next).catch(() => undefined);
-  };
-
-  const openUrl = (url: string) => {
-    void Linking.openURL(url).catch(() => {});
-  };
-
-  const openSettings = () => {
-    void Linking.openSettings().catch(() => {});
-  };
-
-  const confirmDeleteAccount = () => {
-    Alert.alert(content.settings.deleteConfirmTitle, content.settings.deleteConfirmBody, [
-      { text: content.settings.deleteConfirmCancel, style: 'cancel' },
-      {
-        text: content.settings.deleteConfirmAction,
-        style: 'destructive',
-        onPress: () => {
-          captureEvent('account_deleted');
-          deleteAccount().catch(() => {
-            Alert.alert(content.settings.deleteErrorTitle, content.settings.deleteErrorBody);
-          });
-        },
-      },
-    ]);
+    void runInBackground(setAnalyticsOptOut(!next));
   };
 
   const sections: Section[] = [
@@ -106,7 +134,7 @@ export default function SettingsScreen() {
         ...(hasRevenueCat
           ? [
               {
-                symbol: 'person.crop.circle',
+                symbol: 'person.crop.circle' as const,
                 label: content.settings.subManage,
                 onPress: () => {
                   void presentCustomerCenter();
@@ -118,7 +146,7 @@ export default function SettingsScreen() {
           symbol: 'arrow.clockwise',
           label: content.settings.subRestore,
           onPress: () => {
-            void restorePurchases();
+            void onRestore();
           },
         },
       ],
@@ -159,7 +187,7 @@ export default function SettingsScreen() {
         ...(brand.legal.appStoreUrl.length > 0
           ? [
               {
-                symbol: 'star.fill',
+                symbol: 'star.fill' as const,
                 label: content.settings.aboutRate,
                 onPress: () => openUrl(brand.legal.appStoreUrl),
               },
@@ -181,7 +209,7 @@ export default function SettingsScreen() {
         {
           symbol: 'trash.fill',
           label: content.settings.deleteAccount,
-          tint: dangerRed,
+          tint: colors.dangerText,
           onPress: confirmDeleteAccount,
         },
       ],
@@ -230,21 +258,19 @@ function SettingRow({ row }: { row: Row }) {
   );
 
   if (row.toggle) {
+    const { value, onValueChange } = row.toggle;
     return (
       <View style={styles.row}>
         {leading}
-        <Switch
-          value={row.toggle.value}
-          onValueChange={row.toggle.onValueChange}
-          accessibilityLabel={row.label}
-        />
+        <Switch value={value} onValueChange={onValueChange} accessibilityLabel={row.label} />
       </View>
     );
   }
 
   const label = row.value ? `${row.label}, ${row.value}` : row.label;
+  const { onPress } = row;
 
-  if (!row.onPress) {
+  if (!onPress) {
     return (
       <View accessible accessibilityLabel={label} style={styles.row}>
         {leading}
@@ -257,8 +283,8 @@ function SettingRow({ row }: { row: Row }) {
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={label}
-      onPress={row.onPress}
-      style={({ pressed }) => [styles.row, { opacity: pressed ? 0.6 : 1 }]}
+      onPress={onPress}
+      style={({ pressed }) => [styles.row, pressed ? styles.rowPressed : null]}
     >
       {leading}
       <View style={styles.rowRight}>
@@ -305,6 +331,9 @@ const styles = StyleSheet.create({
     gap: 13,
     paddingHorizontal: 14,
     height: 54,
+  },
+  rowPressed: {
+    opacity: 0.6,
   },
   rowIcon: {
     width: 30,

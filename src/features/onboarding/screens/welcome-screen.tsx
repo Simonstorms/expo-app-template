@@ -2,11 +2,12 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 
 import { GlassSurface } from '@/components/ui/glass';
-import { LanguagePill } from '../components/header';
 import { Icon } from '@/components/ui/icon';
-import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { content } from '@/constants/content';
 import { colors, layout } from '@/constants/theme';
+
+import { LanguagePill } from '../components/header';
+import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { useFlow } from '../hooks/use-flow';
 
 const FRAME_FILL = '#1A1A1A';
@@ -26,12 +27,17 @@ export default function WelcomeScreen() {
     <OnboardingScaffold flow={flow} ctaTitle={null}>
       <View style={styles.root}>
         <View style={styles.column}>
-          <View style={{ height: 36 }} />
+          <View style={styles.gapTop} />
           <PhoneMockup />
-          <View style={{ height: 50 }} />
+          <View style={styles.gapPhone} />
           <Text style={styles.title}>{content.welcome.tagline}</Text>
-          <View style={{ height: 11 }} />
-          <Pressable style={styles.getStartedWrap} onPress={advance}>
+          <View style={styles.gapTitle} />
+          <Pressable
+            style={styles.getStartedWrap}
+            onPress={advance}
+            accessibilityRole="button"
+            accessibilityLabel={content.welcome.getStarted}
+          >
             <GlassSurface
               radius={layout.ctaHeight / 2}
               tintColor={colors.ink}
@@ -42,14 +48,18 @@ export default function WelcomeScreen() {
               <Text style={styles.getStartedLabel}>{content.welcome.getStarted}</Text>
             </GlassSurface>
           </Pressable>
-          <View style={{ height: 12 }} />
-          <Pressable onPress={() => goTo('sign-in')}>
+          <View style={styles.gapCta} />
+          <Pressable
+            onPress={() => goTo('sign-in')}
+            accessibilityRole="button"
+            accessibilityLabel={`${content.welcome.signInPrompt}${content.welcome.signInAction}`}
+          >
             <Text style={styles.signIn}>
               {content.welcome.signInPrompt}
               <Text style={styles.signInBold}>{content.welcome.signInAction}</Text>
             </Text>
           </Pressable>
-          <View style={{ flex: 1 }} />
+          <View style={styles.grow} />
         </View>
         <View style={styles.languageWrap}>
           <LanguagePill />
@@ -62,9 +72,9 @@ export default function WelcomeScreen() {
 function PhoneMockup() {
   return (
     <View style={styles.phone}>
-      <View style={[styles.sideButton, { height: 28.7, left: -1.7, top: 82 }]} />
-      <View style={[styles.sideButton, { height: 28, left: -1.7, top: 120.7 }]} />
-      <View style={[styles.sideButton, { height: 53.3, left: 221, top: 148 }]} />
+      <View style={[styles.sideButton, styles.muteButton]} />
+      <View style={[styles.sideButton, styles.volumeButton]} />
+      <View style={[styles.sideButton, styles.powerButton]} />
       <View style={styles.phoneFrame} />
       <MockScreen />
     </View>
@@ -133,9 +143,7 @@ function StreakRing() {
           fill="none"
           strokeLinecap="round"
           strokeDasharray={[RING_CIRCUMFERENCE * RING_PROGRESS, RING_CIRCUMFERENCE]}
-          originX={55}
-          originY={55}
-          rotation={-90}
+          transform="rotate(-90 55 55)"
         />
       </Svg>
       <View style={styles.ringCenter}>
@@ -164,6 +172,21 @@ const styles = StyleSheet.create({
   column: {
     flex: 1,
     alignItems: 'center',
+  },
+  gapTop: {
+    height: 36,
+  },
+  gapPhone: {
+    height: 50,
+  },
+  gapTitle: {
+    height: 11,
+  },
+  gapCta: {
+    height: 12,
+  },
+  grow: {
+    flex: 1,
   },
   title: {
     fontSize: 35,
@@ -208,6 +231,21 @@ const styles = StyleSheet.create({
     width: 4,
     borderRadius: 2,
     backgroundColor: FRAME_FILL,
+  },
+  muteButton: {
+    height: 28.7,
+    left: -1.7,
+    top: 82,
+  },
+  volumeButton: {
+    height: 28,
+    left: -1.7,
+    top: 120.7,
+  },
+  powerButton: {
+    height: 53.3,
+    left: 221,
+    top: 148,
   },
   phoneFrame: {
     position: 'absolute',

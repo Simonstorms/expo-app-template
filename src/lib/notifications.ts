@@ -3,30 +3,36 @@ import * as Notifications from 'expo-notifications';
 import { brand } from '@/constants/brand';
 import { content } from '@/constants/content';
 import { captureEvent } from '@/lib/analytics';
+import { attempt } from '@/lib/tasks';
 
 const TRIAL_REMINDER_ID = 'trial-reminder';
 const REMINDER_HOUR = 9;
 
 Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowBanner: true,
-    shouldShowList: true,
-    shouldPlaySound: false,
-    shouldSetBadge: false,
-  }),
+  handleNotification: () =>
+    Promise.resolve({
+      shouldShowBanner: true,
+      shouldShowList: true,
+      shouldPlaySound: false,
+      shouldSetBadge: false,
+    }),
 });
 
 export async function scheduleTrialReminder(daysBeforeEnd: number): Promise<boolean> {
   const permissions = await Notifications.getPermissionsAsync();
-  if (!permissions.granted) return false;
+  if (!permissions.granted) {
+    return false;
+  }
 
   const daysFromNow = brand.trial.days - daysBeforeEnd;
-  if (daysFromNow <= 0) return false;
+  if (daysFromNow <= 0) {
+    return false;
+  }
 
   const date = new Date(Date.now() + daysFromNow * 24 * 60 * 60 * 1000);
   date.setHours(REMINDER_HOUR, 0, 0, 0);
 
-  await Notifications.cancelScheduledNotificationAsync(TRIAL_REMINDER_ID).catch(() => undefined);
+  await attempt(Notifications.cancelScheduledNotificationAsync(TRIAL_REMINDER_ID));
   await Notifications.scheduleNotificationAsync({
     identifier: TRIAL_REMINDER_ID,
     content: {
@@ -46,5 +52,5 @@ export async function scheduleTrialReminder(daysBeforeEnd: number): Promise<bool
 }
 
 export async function cancelTrialReminder(): Promise<void> {
-  await Notifications.cancelScheduledNotificationAsync(TRIAL_REMINDER_ID).catch(() => undefined);
+  await attempt(Notifications.cancelScheduledNotificationAsync(TRIAL_REMINDER_ID));
 }

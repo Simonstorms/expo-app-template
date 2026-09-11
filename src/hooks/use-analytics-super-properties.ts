@@ -21,13 +21,17 @@ export function useAnalyticsSuperProperties(): void {
   }, []);
 
   useEffect(() => {
-    if (isLoading) return;
+    if (isLoading) {
+      return;
+    }
     registerSuperProperties({ is_pro: isPro });
     setPersonProperties({ is_pro: isPro });
   }, [isPro, isLoading]);
 
   useEffect(() => {
-    if (onboarding.isLoading) return;
+    if (onboarding.isLoading) {
+      return;
+    }
     registerSuperProperties({ onboarding_completed: onboardingCompleted });
   }, [onboardingCompleted, onboarding.isLoading]);
 }

@@ -3,9 +3,10 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { GradientRing } from '@/components/ui/gradient-ring';
 import { Icon } from '@/components/ui/icon';
-import { OnboardingScaffold } from '../components/onboarding-scaffold';
-import { colors } from '@/constants/theme';
 import { content } from '@/constants/content';
+import { colors } from '@/constants/theme';
+
+import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { useFlow } from '../hooks/use-flow';
 
 type SparkleMark = {
@@ -106,7 +107,7 @@ const styles = StyleSheet.create({
     width: 4,
     height: 4,
     borderRadius: 0.8,
-    backgroundColor: '#1C1A25',
+    backgroundColor: colors.ctaFill,
   },
   doneRow: {
     marginTop: 30,
@@ -131,7 +132,7 @@ const styles = StyleSheet.create({
     fontSize: 34,
     fontWeight: '700',
     letterSpacing: -0.5,
-    color: '#1C1A25',
+    color: colors.ctaFill,
     textAlign: 'center',
   },
   spacer: {

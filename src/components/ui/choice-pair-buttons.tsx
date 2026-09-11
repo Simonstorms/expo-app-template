@@ -23,6 +23,7 @@ export function ChoicePairButtons({
 function ChoiceButton({ title, onPress }: { title: string; onPress: () => void }) {
   return (
     <Pressable
+      accessibilityRole="button"
       onPress={onPress}
       style={({ pressed }) => [styles.flex, { opacity: pressed ? 0.92 : 1 }]}
     >

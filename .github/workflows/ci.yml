@@ -6,14 +6,25 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  LEFTHOOK: 0
+
 jobs:
   check:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
         with:
-          bun-version: latest
+          bun-version: 1.3.5
       - run: bun install --frozen-lockfile
       - name: Typecheck
         run: bun run typecheck
@@ -21,3 +32,26 @@ jobs:
         run: bun run lint
       - name: Format
         run: bun run format:check
+      - name: Dead code and dependencies
+        run: bun run knip
+      - name: Expo SDK version drift
+        run: bunx expo install --check
+        continue-on-error: true
+      - name: Dependency health
+        run: bunx expo-doctor
+        continue-on-error: true
+
+  edge-functions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      DENO_NO_PACKAGE_JSON: '1'
+    steps:
+      - uses: actions/checkout@v7
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Typecheck edge functions
+        run: deno check supabase/functions/secure-call/index.ts
+      - name: Lint edge functions
+        run: deno lint supabase/functions

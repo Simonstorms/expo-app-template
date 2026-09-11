@@ -153,12 +153,27 @@ simulator.
   per-command policies in `supabase/migrations/`.
 - **Copy and brand values are data, not literals.** App name, legal URLs and pricing come from
   `src/constants/brand.ts`; screen copy comes from `src/constants/content.ts`; colours, layout and
-  type come from `src/constants/theme.ts`.
+  type come from `src/constants/theme.ts`. Style objects reference `colors.*`, never hex strings,
+  and static style values live in `StyleSheet.create`, not inline (`react-native/no-color-literals`
+  and `no-inline-styles` enforce both).
+- **Fire-and-forget promises go through `@/lib/tasks`.** `void runInBackground(promise)` when the
+  result does not matter (failures are logged in dev), `await attempt(promise)` when you need a
+  boolean. Never `.catch(() => {})`; `prefer-await-to-then` and `no-empty-function` reject it.
+- **Shadows use `boxShadow`**, not the legacy `shadowColor`/`shadowOffset`/`elevation` set
+  (`expo/prefer-box-shadow`). Presets live in `shadow` in `src/constants/theme.ts`.
+- **SF Symbol names are typed.** Anything rendered by `<Icon>` is an `IconName` (from
+  `@/components/ui/icon`), including data in `src/constants/`, so a typo fails `tsc`.
+- **No manual memoization.** The React Compiler is on; `useMemo`/`useCallback` are flagged by
+  `react-doctor`. Effects that need a stable function inline the logic instead.
 
 ## Checks before calling work done
 
 ```bash
-bun run typecheck   # tsc --noEmit
-bun run lint        # expo lint
-bun run format:check
+bun run check       # typecheck + lint + format:check + knip, exactly what CI runs
 ```
+
+Or individually: `bun run typecheck` (`tsc --noEmit`), `bun run lint` (`oxlint --type-aware`, config
+in `oxlint.config.mts`: Ultracite presets plus the Expo, React Compiler, React Native and RN a11y
+plugins), `bun run format:check` (`oxfmt`, config in `oxfmt.config.mts`, also formats Markdown and
+YAML), `bun run knip` (dead files, exports and dependencies). `bun run lint:fix` and
+`bun run format` apply fixes; the lefthook pre-commit hook does the same on staged files.

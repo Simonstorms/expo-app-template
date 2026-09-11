@@ -1,0 +1,13 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "entry": [
+    "src/app/**/*.{ts,tsx}",
+    "src/constants/config.ts",
+    "src/lib/analytics.tsx",
+    "plugins/*.js"
+  ],
+  "project": ["src/**/*.{ts,tsx}", "plugins/*.js"],
+  "ignore": ["src/types/database.ts"],
+  "ignoreExportsUsedInFile": true,
+  "ignoreDependencies": ["expo-atlas"]
+}

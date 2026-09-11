@@ -9,7 +9,9 @@ export function useAnalyticsIdentity(): void {
   const lastSignedInId = useRef<string | null>(null);
 
   useEffect(() => {
-    if (isLoading) return;
+    if (isLoading) {
+      return;
+    }
     if (user?.id) {
       lastSignedInId.current = user.id;
       identifyUser(user.id, user.email ? { email: user.email } : undefined);

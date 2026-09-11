@@ -1,4 +1,4 @@
-import { brand, formatMoney } from './brand';
+import type { IconName } from '@/components/ui/icon';
 import type {
   DiscoverySource,
   Gender,
@@ -6,6 +6,8 @@ import type {
   QuitGoal,
   UsageLevel,
 } from '@/features/onboarding/types';
+
+import { brand, formatMoney } from './brand';
 
 const cap = (value: string): string => value.charAt(0).toUpperCase() + value.slice(1);
 
@@ -163,7 +165,7 @@ export const content = {
       { id: 'support', label: 'Lack of support', symbol: 'medal.fill' },
       { id: 'schedule', label: 'Busy schedule', symbol: 'calendar' },
       { id: 'socialPressure', label: 'Social pressure', symbol: 'person.2.fill' },
-    ] satisfies { id: Obstacle; label: string; symbol: string }[],
+    ] satisfies { id: Obstacle; label: string; symbol: IconName }[],
   },
 
   potentialGraph: {
@@ -426,5 +428,11 @@ export const content = {
     deleteConfirmAction: 'Delete',
     deleteErrorTitle: 'Could not delete account',
     deleteErrorBody: 'Something went wrong. Please try again.',
+  },
+
+  errorBoundary: {
+    title: 'Something went wrong',
+    body: 'The app hit an unexpected error. Try again, and if it keeps happening, restart the app.',
+    retry: 'Try again',
   },
 } as const;

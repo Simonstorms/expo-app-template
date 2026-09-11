@@ -1,7 +1,8 @@
 import { formatMoney } from '@/constants/brand';
 import { content } from '@/constants/content';
 
-import { projectPlan, type Projection } from '../projection';
+import { projectPlan } from '../projection';
+import type { Projection } from '../projection';
 import { useOnboarding } from '../store';
 
 type Plan = {
@@ -30,7 +31,7 @@ export function usePlan(): Plan {
     quitDate,
     goalDate: `${content.birthdate.monthNames[quitDate.getMonth()]} ${quitDate.getDate()}`,
     dailyLimit: `${projection.dailyLimit}`,
-    moneySaved: formatMoney(projection.dailySpend),
+    moneySaved: formatMoney(projection.savedPerDay),
     projection,
   };
 }

@@ -20,11 +20,17 @@ export async function setLastKnownEntitlement(value: boolean): Promise<void> {
 
 export async function getLastKnownEntitlement(): Promise<boolean> {
   const stored = await AsyncStorage.getItem(LAST_KNOWN_ENTITLEMENT_KEY);
-  if (stored === null) return false;
+  if (stored === null) {
+    return false;
+  }
   const [value, timestampRaw] = stored.split('|');
-  if (value !== '1') return false;
+  if (value !== '1') {
+    return false;
+  }
   const timestamp = Number(timestampRaw);
-  if (!Number.isFinite(timestamp)) return false;
+  if (!Number.isFinite(timestamp)) {
+    return false;
+  }
   const age = Date.now() - timestamp;
   return age >= 0 && age < ENTITLEMENT_GRACE_MS;
 }

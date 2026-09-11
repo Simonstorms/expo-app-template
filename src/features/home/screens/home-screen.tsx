@@ -6,17 +6,17 @@ import Svg, { Circle } from 'react-native-svg';
 
 import { GlassGroup, GlassSurface } from '@/components/ui/glass';
 import { Icon } from '@/components/ui/icon';
+import type { IconName } from '@/components/ui/icon';
 import { PrimaryCTA } from '@/components/ui/primary-cta';
 import { ScreenBackground } from '@/components/ui/screen-background';
 import { content } from '@/constants/content';
 import { colors, withAlpha } from '@/constants/theme';
-import { loadCheckIns, type CheckIn } from '../api';
+import { captureEvent } from '@/lib/analytics';
 
-const accentOrange = '#DE9B6C';
-const accentRed = '#DC6868';
-const accentBlue = '#6996DA';
+import { loadCheckIns } from '../api';
+import type { CheckIn } from '../api';
 
-const rowTints = [accentRed, accentBlue, accentOrange];
+const rowTints = [colors.dangerText, colors.blue, colors.orange];
 
 const SHOWS_DEMO_DATA = __DEV__;
 
@@ -77,21 +77,21 @@ export default function HomeScreen() {
           <StatCard
             label={content.home.statAvoidedLabel}
             value={content.home.statAvoidedValue}
-            tint={accentRed}
+            tint={colors.dangerText}
             progress={0.72}
             symbol="capsule.portrait.fill"
           />
           <StatCard
             label={content.home.statSavedLabel}
             value={content.home.statSavedValue}
-            tint={accentOrange}
+            tint={colors.orange}
             progress={0.55}
             symbol="banknote.fill"
           />
           <StatCard
             label={content.home.statHealthLabel}
             value={content.home.statHealthValue}
-            tint={accentBlue}
+            tint={colors.blue}
             progress={0.92}
             symbol="heart.fill"
           />
@@ -112,7 +112,12 @@ export default function HomeScreen() {
         </GlassGroup>
 
         <View style={styles.cta}>
-          <PrimaryCTA title={content.home.cta} onPress={() => {}} />
+          <PrimaryCTA
+            title={content.home.cta}
+            onPress={() => {
+              captureEvent('home_cta_pressed');
+            }}
+          />
         </View>
       </ScrollView>
     </View>
@@ -156,9 +161,7 @@ function Ring({
           strokeLinecap="round"
           fill="none"
           strokeDasharray={[circumference * progress, circumference]}
-          originX={center}
-          originY={center}
-          rotation={-90}
+          transform={`rotate(-90 ${center} ${center})`}
         />
       </Svg>
       {children}
@@ -177,7 +180,7 @@ function StatCard({
   value: string;
   tint: string;
   progress: number;
-  symbol: string;
+  symbol: IconName;
 }) {
   return (
     <GlassSurface radius={16} tintColor={withAlpha(colors.white, 0.85)} style={styles.statCard}>
@@ -204,7 +207,7 @@ function CheckInRow({
   title: string;
   time: string;
   detail: string;
-  symbol: string;
+  symbol: IconName;
   tint: string;
 }) {
   return (

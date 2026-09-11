@@ -1,7 +1,8 @@
 import * as Device from 'expo-device';
 import { GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
 import type { ReactNode } from 'react';
-import { type StyleProp, StyleSheet, View, type ViewStyle } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import type { StyleProp, ViewStyle } from 'react-native';
 
 import { colors, withAlpha } from '@/constants/theme';
 

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { type LayoutChangeEvent, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+import type { LayoutChangeEvent } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -9,10 +10,11 @@ import Animated, {
 import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg';
 
 import { GlassGroup, GlassSurface } from '@/components/ui/glass';
-import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { TitleBlock } from '@/components/ui/title-block';
-import { colors, layout, withAlpha } from '@/constants/theme';
 import { content } from '@/constants/content';
+import { colors, layout, withAlpha } from '@/constants/theme';
+
+import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { useFlow } from '../hooks/use-flow';
 
 const CARD_HEIGHT = 358;
@@ -144,7 +146,7 @@ const styles = StyleSheet.create({
     height: CARD_HEIGHT,
     borderRadius: layout.cardRadius,
     overflow: 'hidden',
-    backgroundColor: '#F2F2F2',
+    backgroundColor: colors.surfaceMuted,
   },
   cardContent: {
     flex: 1,
@@ -175,7 +177,7 @@ const styles = StyleSheet.create({
   badge: {
     height: 52,
     borderRadius: 13,
-    backgroundColor: '#E4E4E4',
+    backgroundColor: colors.progressTrack,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -205,10 +207,10 @@ const styles = StyleSheet.create({
     marginTop: 30,
   },
   captionDark: {
-    color: '#5A5A5A',
+    color: colors.inkSoft,
   },
   captionLight: {
-    color: '#C6C6C6',
+    color: colors.ring,
   },
   cardBottomSpacer: {
     flex: 1,

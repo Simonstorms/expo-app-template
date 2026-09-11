@@ -40,24 +40,21 @@ const productionServiceConfigured: Record<ProductionService, boolean> = {
   posthog: hasPostHog,
 };
 
-const allProductionServices: readonly ProductionService[] = ['supabase', 'revenuecat', 'posthog'];
-
 const requiredProductionServices: readonly ProductionService[] = [];
 
 function unconfiguredLabels(services: readonly ProductionService[]): string[] {
-  return services
-    .filter((service) => !productionServiceConfigured[service])
-    .map((service) => productionServiceLabels[service]);
-}
-
-export function missingProductionServices(): string[] {
-  if (config.env !== 'production') return [];
-  return unconfiguredLabels(allProductionServices);
+  return services.flatMap((service) =>
+    productionServiceConfigured[service] ? [] : [productionServiceLabels[service]],
+  );
 }
 
 export function assertProductionServicesConfigured(): void {
-  if (config.env !== 'production' || requiredProductionServices.length === 0) return;
+  if (config.env !== 'production' || requiredProductionServices.length === 0) {
+    return;
+  }
   const missing = unconfiguredLabels(requiredProductionServices);
-  if (missing.length === 0) return;
+  if (missing.length === 0) {
+    return;
+  }
   throw new Error(`Production build is missing required service config: ${missing.join(', ')}`);
 }

@@ -2,9 +2,12 @@ import type { ReactNode } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { PrimaryCTA, type CtaVariant } from '@/components/ui/primary-cta';
-import { ScreenBackground, type BackgroundVariant } from '@/components/ui/screen-background';
+import { PrimaryCTA } from '@/components/ui/primary-cta';
+import type { CtaVariant } from '@/components/ui/primary-cta';
+import { ScreenBackground } from '@/components/ui/screen-background';
+import type { BackgroundVariant } from '@/components/ui/screen-background';
 import { colors, layout, withAlpha } from '@/constants/theme';
+
 import type { OnboardingFlow } from '../hooks/use-flow';
 import { BackChip, LanguagePill, ProgressBar, SkipLink } from './header';
 
@@ -53,30 +56,77 @@ export function OnboardingScaffold({
             )}
             <ProgressBar progress={flow.progress} />
             {showsLanguagePill ? <LanguagePill /> : null}
-            {onSkip && skipLabel ? (
-              <SkipLink onPress={onSkip} label={skipLabel} />
-            ) : showsLanguagePill ? null : (
-              <View style={styles.skipSpacer} />
-            )}
+            <HeaderTrailing
+              onSkip={onSkip}
+              skipLabel={skipLabel}
+              hasLanguagePill={showsLanguagePill}
+            />
           </View>
         )}
         <View style={styles.content}>{children}</View>
       </View>
-      {footer ? (
-        <View style={{ paddingBottom: insets.bottom }}>{footer}</View>
-      ) : ctaTitle ? (
-        <View style={[styles.ctaBar, { paddingBottom: insets.bottom + 8 }]}>
-          <View style={styles.hairline} />
-          <View style={styles.ctaInner}>
-            <PrimaryCTA
-              title={ctaTitle}
-              variant={ctaVariant}
-              enabled={ctaEnabled}
-              onPress={onContinue ?? flow.advance}
-            />
-          </View>
-        </View>
-      ) : null}
+      <ScaffoldFooter
+        footer={footer}
+        ctaTitle={ctaTitle}
+        ctaVariant={ctaVariant}
+        ctaEnabled={ctaEnabled}
+        onContinue={onContinue ?? flow.advance}
+        bottomInset={insets.bottom}
+      />
+    </View>
+  );
+}
+
+function HeaderTrailing({
+  onSkip,
+  skipLabel,
+  hasLanguagePill,
+}: {
+  onSkip?: () => void;
+  skipLabel?: string;
+  hasLanguagePill: boolean;
+}) {
+  if (onSkip && skipLabel) {
+    return <SkipLink onPress={onSkip} label={skipLabel} />;
+  }
+  if (hasLanguagePill) {
+    return null;
+  }
+  return <View style={styles.skipSpacer} />;
+}
+
+function ScaffoldFooter({
+  footer,
+  ctaTitle,
+  ctaVariant,
+  ctaEnabled,
+  onContinue,
+  bottomInset,
+}: {
+  footer?: ReactNode;
+  ctaTitle?: string | null;
+  ctaVariant: CtaVariant;
+  ctaEnabled: boolean;
+  onContinue: () => void;
+  bottomInset: number;
+}) {
+  if (footer) {
+    return <View style={{ paddingBottom: bottomInset }}>{footer}</View>;
+  }
+  if (!ctaTitle) {
+    return null;
+  }
+  return (
+    <View style={[styles.ctaBar, { paddingBottom: bottomInset + 8 }]}>
+      <View style={styles.hairline} />
+      <View style={styles.ctaInner}>
+        <PrimaryCTA
+          title={ctaTitle}
+          variant={ctaVariant}
+          enabled={ctaEnabled}
+          onPress={onContinue}
+        />
+      </View>
     </View>
   );
 }

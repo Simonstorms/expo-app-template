@@ -7,8 +7,18 @@ import { PrimaryCTA } from '@/components/ui/primary-cta';
 import { content } from '@/constants/content';
 import { colors, font, layout } from '@/constants/theme';
 import { captureEvent } from '@/lib/analytics';
+
 import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { useFlow } from '../hooks/use-flow';
+
+async function requestNotificationPermission(): Promise<boolean> {
+  try {
+    const { granted } = await Notifications.requestPermissionsAsync();
+    return granted;
+  } catch {
+    return false;
+  }
+}
 
 export default function NotificationsScreen() {
   const flow = useFlow('notifications');
@@ -16,14 +26,11 @@ export default function NotificationsScreen() {
   const [busy, setBusy] = useState(false);
 
   const requestPermission = async () => {
-    if (busy) return;
-    setBusy(true);
-    let granted = false;
-    try {
-      granted = (await Notifications.requestPermissionsAsync()).granted;
-    } catch {
-      granted = false;
+    if (busy) {
+      return;
     }
+    setBusy(true);
+    const granted = await requestNotificationPermission();
     captureEvent('permission_requested', {
       permission: 'notifications',
       result: granted ? 'granted' : 'denied',
@@ -34,7 +41,9 @@ export default function NotificationsScreen() {
   };
 
   const skip = () => {
-    if (busy) return;
+    if (busy) {
+      return;
+    }
     captureEvent('permission_requested', {
       permission: 'notifications',
       result: 'skipped',
@@ -59,7 +68,7 @@ export default function NotificationsScreen() {
         accessibilityLabel={content.notifications.dismiss}
         disabled={busy}
         onPress={skip}
-        style={({ pressed }) => [styles.skipButton, { opacity: pressed || busy ? 0.6 : 1 }]}
+        style={({ pressed }) => [styles.skipButton, pressed || busy ? styles.dimmed : null]}
       >
         <Text style={styles.skipLabel}>{content.notifications.dismiss}</Text>
       </Pressable>
@@ -139,6 +148,9 @@ const styles = StyleSheet.create({
   skipButton: {
     alignItems: 'center',
     paddingVertical: 6,
+  },
+  dimmed: {
+    opacity: 0.6,
   },
   skipLabel: {
     fontSize: 15,

@@ -14,7 +14,7 @@ export function TitleBlock({
   align?: 'left' | 'center';
 }) {
   return (
-    <View style={[styles.container, { alignItems: align === 'center' ? 'center' : 'flex-start' }]}>
+    <View style={[styles.container, align === 'center' ? styles.centered : styles.leading]}>
       <Text style={[text.title, { textAlign: align }]}>{renderTitle(title, highlight)}</Text>
       {subtitle ? <Text style={[styles.subtitle, { textAlign: align }]}>{subtitle}</Text> : null}
     </View>
@@ -42,6 +42,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: layout.margin,
     paddingTop: 16,
     gap: 19,
+  },
+  centered: {
+    alignItems: 'center',
+  },
+  leading: {
+    alignItems: 'flex-start',
   },
   subtitle: {
     fontSize: 17,

@@ -2,12 +2,13 @@ import { useRef } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { GlassSurface } from '@/components/ui/glass';
-import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { TitleBlock } from '@/components/ui/title-block';
-import { useOnboarding } from '../store';
-import { colors, layout, withAlpha } from '@/constants/theme';
 import { content } from '@/constants/content';
+import { colors, layout, withAlpha } from '@/constants/theme';
+
+import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { useFlow } from '../hooks/use-flow';
+import { useOnboarding } from '../store';
 
 export default function ReferralCodeScreen() {
   const referralCode = useOnboarding((state) => state.referralCode);
@@ -27,6 +28,7 @@ export default function ReferralCodeScreen() {
             style={styles.card}
           >
             <TextInput
+              accessibilityLabel="Text input field"
               ref={inputRef}
               value={referralCode}
               onChangeText={(value) => set('referralCode', value)}
@@ -38,7 +40,7 @@ export default function ReferralCodeScreen() {
               onSubmitEditing={() => inputRef.current?.blur()}
               style={styles.input}
             />
-            <Pressable onPress={() => inputRef.current?.blur()}>
+            <Pressable accessibilityRole="button" onPress={() => inputRef.current?.blur()}>
               <GlassSurface
                 radius={19}
                 tintColor={referralCode.length === 0 ? '#C0BFC6' : colors.ctaFill}

@@ -1,5 +1,4 @@
 import { LinearGradient } from 'expo-linear-gradient';
-import { memo } from 'react';
 import { StyleSheet } from 'react-native';
 
 import { accentGradient, backgroundGradient, frostGradient } from '@/constants/theme';
@@ -17,11 +16,7 @@ const gradients: Record<BackgroundVariant, Gradient> = {
   frost: frostGradient,
 };
 
-export const ScreenBackground = memo(function ScreenBackground({
-  variant = 'light',
-}: {
-  variant?: BackgroundVariant;
-}) {
+export function ScreenBackground({ variant = 'light' }: { variant?: BackgroundVariant }) {
   const gradient = gradients[variant];
   return (
     <LinearGradient
@@ -31,4 +26,4 @@ export const ScreenBackground = memo(function ScreenBackground({
       pointerEvents="none"
     />
   );
-});
+}

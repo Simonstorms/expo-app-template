@@ -1,13 +1,14 @@
 import { StyleSheet, View } from 'react-native';
 
 import { GlassGroup } from '@/components/ui/glass';
-import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { SelectionRow } from '@/components/ui/selection-row';
 import { TitleBlock } from '@/components/ui/title-block';
-import { useOnboarding } from '../store';
 import { content } from '@/constants/content';
 import { layout } from '@/constants/theme';
+
+import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { useFlow } from '../hooks/use-flow';
+import { useOnboarding } from '../store';
 
 export default function GoalScreen() {
   const goal = useOnboarding((state) => state.goal);

@@ -1,15 +1,15 @@
+import { Pressable } from 'react-native';
+import type { GestureResponderEvent, PressableProps, StyleProp, ViewStyle } from 'react-native';
 import {
-  type GestureResponderEvent,
-  Pressable,
-  type PressableProps,
-  type StyleProp,
-  type ViewStyle,
-} from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+  createAnimatedComponent,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 
 import { motion } from '@/constants/motion';
 
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+const AnimatedPressable = createAnimatedComponent(Pressable);
 
 export function PressableScale({
   scaleTo = 0.97,

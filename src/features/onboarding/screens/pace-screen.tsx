@@ -1,23 +1,24 @@
-import { useCallback } from 'react';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StyleSheet, Text, View } from 'react-native';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { GestureDetector, usePanGesture } from 'react-native-gesture-handler';
 import Animated, {
   Easing,
-  runOnJS,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
+import { scheduleOnRN } from 'react-native-worklets';
 
 import { GlassSurface } from '@/components/ui/glass';
 import { Icon } from '@/components/ui/icon';
-import { OnboardingScaffold } from '../components/onboarding-scaffold';
+import type { IconName } from '@/components/ui/icon';
 import { TitleBlock } from '@/components/ui/title-block';
-import { useOnboarding } from '../store';
 import { content } from '@/constants/content';
 import { colors, layout, text, withAlpha } from '@/constants/theme';
+
+import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { useFlow } from '../hooks/use-flow';
+import { useOnboarding } from '../store';
 
 function fractionForValue(value: number): number {
   'worklet';
@@ -30,12 +31,7 @@ function fractionForValue(value: number): number {
 function snappedValueForFraction(raw: number): number {
   'worklet';
   const clamped = Math.min(Math.max(raw, 0), 1);
-  let continuous: number;
-  if (clamped <= 0.5) {
-    continuous = 1 + clamped * 4;
-  } else {
-    continuous = 3 + (clamped - 0.5) * 8;
-  }
+  const continuous = clamped <= 0.5 ? 1 + clamped * 4 : 3 + (clamped - 0.5) * 8;
   return Math.min(Math.max(Math.round(continuous), 1), 7);
 }
 
@@ -50,13 +46,10 @@ export default function QuitPaceScreen() {
   const currentValue = useSharedValue(value);
   const pillOpacity = useSharedValue(value === 3 ? 1 : 0);
 
-  const commit = useCallback(
-    (next: number) => {
-      set('reducePerWeek', next);
-      selectHaptic();
-    },
-    [selectHaptic, set],
-  );
+  const commit = (next: number) => {
+    set('reducePerWeek', next);
+    selectHaptic();
+  };
 
   const applyDrag = (x: number) => {
     'worklet';
@@ -77,19 +70,20 @@ export default function QuitPaceScreen() {
       duration: 200,
       easing: Easing.inOut(Easing.ease),
     });
-    runOnJS(commit)(next);
+    scheduleOnRN(commit, next);
   };
 
-  const pan = Gesture.Pan()
-    .minDistance(0)
-    .onBegin((event) => {
+  const pan = usePanGesture({
+    minDistance: 0,
+    onBegin: (event) => {
       'worklet';
       applyDrag(event.x);
-    })
-    .onChange((event) => {
+    },
+    onUpdate: (event) => {
       'worklet';
       applyDrag(event.x);
-    });
+    },
+  });
 
   const fillStyle = useAnimatedStyle(() => ({
     width: Math.max(0, frac.value * trackWidth.value),
@@ -158,7 +152,7 @@ export default function QuitPaceScreen() {
   );
 }
 
-function Marker({ symbol, tint }: { symbol: string; tint: string }) {
+function Marker({ symbol, tint }: { symbol: IconName; tint: string }) {
   return (
     <View style={styles.marker}>
       <Icon name={symbol} size={24} color={tint} />
@@ -213,7 +207,7 @@ const styles = StyleSheet.create({
     top: 13,
     height: 4,
     borderRadius: 2,
-    backgroundColor: '#E6E6E8',
+    backgroundColor: colors.progressTrack,
   },
   fill: {
     position: 'absolute',
@@ -230,10 +224,7 @@ const styles = StyleSheet.create({
     height: 30,
     borderRadius: 15,
     backgroundColor: colors.white,
-    shadowColor: '#000000',
-    shadowOpacity: 0.14,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 4 },
+    boxShadow: `0px 4px 16px ${withAlpha(colors.ink, 0.14)}`,
   },
   knobGlass: {
     ...StyleSheet.absoluteFill,

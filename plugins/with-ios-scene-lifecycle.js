@@ -1,4 +1,4 @@
-const { withInfoPlist, withAppDelegate } = require('@expo/config-plugins');
+const { withInfoPlist, withAppDelegate } = require('expo/config-plugins');
 
 const SCENE_DELEGATE = `
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
@@ -31,6 +31,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 function withSceneManifest(config) {
   return withInfoPlist(config, (cfg) => {
     cfg.modResults.UIApplicationSceneManifest = {
+      ...cfg.modResults.UIApplicationSceneManifest,
       UIApplicationSupportsMultipleScenes: false,
       UISceneConfigurations: {
         UIWindowSceneSessionRoleApplication: [
@@ -50,17 +51,25 @@ function withSceneAppDelegate(config) {
     if (cfg.modResults.language !== 'swift') {
       return cfg;
     }
-    let contents = cfg.modResults.contents;
+    let { contents } = cfg.modResults;
 
-    if (!/^import UIKit$/m.test(contents)) {
-      contents = contents.replace(/^import React$/m, 'import React\nimport UIKit');
+    if (contents.includes('class SceneDelegate')) {
+      return cfg;
     }
 
-    contents = contents.replace(/\n[ \t]*#if os\(iOS\) \|\| os\(tvOS\)[\s\S]*?#endif\n/, '\n');
-
-    if (!contents.includes('class SceneDelegate')) {
-      contents = `${contents.trimEnd()}\n${SCENE_DELEGATE}`;
+    if (!/^import UIKit$/mu.test(contents)) {
+      contents = contents.replace(/^import React$/mu, 'import React\nimport UIKit');
     }
+
+    const legacyLifecycle = /\n[ \t]*#if os\(iOS\) \|\| os\(tvOS\)[\s\S]*?#endif\n/u;
+    if (!legacyLifecycle.test(contents)) {
+      throw new Error(
+        'with-ios-scene-lifecycle: expected an "#if os(iOS) || os(tvOS)" block in AppDelegate.swift and found none. The Expo template changed; re-verify this plugin against the current SDK.',
+      );
+    }
+
+    contents = contents.replace(legacyLifecycle, '\n');
+    contents = `${contents.trimEnd()}\n${SCENE_DELEGATE}`;
 
     cfg.modResults.contents = contents;
     return cfg;
@@ -68,7 +77,5 @@ function withSceneAppDelegate(config) {
 }
 
 module.exports = function withIosSceneLifecycle(config) {
-  config = withSceneManifest(config);
-  config = withSceneAppDelegate(config);
-  return config;
+  return withSceneAppDelegate(withSceneManifest(config));
 };

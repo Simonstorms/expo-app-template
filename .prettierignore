@@ -1,7 +1,0 @@
-node_modules
-ios
-android
-.expo
-dist
-bun.lock
-package-lock.json

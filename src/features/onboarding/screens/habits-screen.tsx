@@ -8,12 +8,13 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { GlassSurface } from '@/components/ui/glass';
-import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { TitleBlock } from '@/components/ui/title-block';
-import { useOnboarding } from '../store';
-import { colors, text } from '@/constants/theme';
 import { content } from '@/constants/content';
+import { colors, text, withAlpha } from '@/constants/theme';
+
+import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { useFlow } from '../hooks/use-flow';
+import { useOnboarding } from '../store';
 
 const wheelValues = Array.from({ length: 40 }, (_, index) => index + 1);
 
@@ -90,7 +91,13 @@ function TypeToggle({ isLoose, onToggle }: { isLoose: boolean; onToggle: () => v
   const borderStyle = useAnimatedStyle(() => ({ opacity: 1 - progress.value }));
 
   return (
-    <Pressable style={styles.toggle} onPress={onToggle}>
+    <Pressable
+      style={styles.toggle}
+      onPress={onToggle}
+      accessibilityRole="switch"
+      accessibilityLabel={`${content.habits.typePouches} / ${content.habits.typeLoose}`}
+      accessibilityState={{ checked: isLoose }}
+    >
       <Animated.Text style={[styles.toggleLabel, styles.pouchesLabel, pouchesStyle]}>
         {content.habits.typePouches}
       </Animated.Text>
@@ -149,16 +156,13 @@ const styles = StyleSheet.create({
     height: 27,
     borderRadius: 13.5,
     backgroundColor: colors.white,
-    shadowColor: '#000000',
-    shadowOpacity: 0.12,
-    shadowRadius: 3.5,
-    shadowOffset: { width: 0, height: 1 },
+    boxShadow: `0px 1px 7px ${withAlpha(colors.ink, 0.12)}`,
   },
   capsuleBorder: {
     ...StyleSheet.absoluteFill,
     borderRadius: 15.5,
     borderWidth: 0.5,
-    borderColor: '#D5D5D5',
+    borderColor: colors.ring,
   },
   headers: {
     flexDirection: 'row',
@@ -191,6 +195,6 @@ const styles = StyleSheet.create({
   pickerItem: {
     fontSize: 18,
     fontWeight: '500',
-    color: '#2E2E2E',
+    color: colors.inkSoft,
   },
 });

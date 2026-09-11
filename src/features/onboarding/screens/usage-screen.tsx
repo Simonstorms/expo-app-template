@@ -2,12 +2,13 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { useAnimatedStyle, useDerivedValue, withSpring } from 'react-native-reanimated';
 
 import { GlassGroup, GlassSurface } from '@/components/ui/glass';
-import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { TitleBlock } from '@/components/ui/title-block';
-import { useOnboarding } from '../store';
 import { content } from '@/constants/content';
 import { colors, layout, text, withAlpha } from '@/constants/theme';
+
+import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { useFlow } from '../hooks/use-flow';
+import { useOnboarding } from '../store';
 
 export default function UsageFrequencyScreen() {
   const usageLevel = useOnboarding((state) => state.usageLevel);
@@ -58,7 +59,12 @@ function UsageRow({
 
   return (
     <Animated.View style={animatedStyle}>
-      <Pressable onPress={onPress}>
+      <Pressable
+        onPress={onPress}
+        accessibilityRole="button"
+        accessibilityLabel={`${label}, ${caption}`}
+        accessibilityState={{ selected }}
+      >
         <GlassSurface
           radius={layout.cardRadius}
           tintColor={selected ? colors.ink : withAlpha(colors.cardFill, 0.85)}
@@ -107,8 +113,12 @@ function DotClusterIcon({ dots }: { dots: number }) {
 }
 
 function dotClusterConfig(dots: number): { rows: number[]; size: number; gap: number } {
-  if (dots === 1) return { rows: [1], size: 12.3, gap: 2.7 };
-  if (dots === 3) return { rows: [1, 2], size: 7, gap: 5 };
+  if (dots === 1) {
+    return { rows: [1], size: 12.3, gap: 2.7 };
+  }
+  if (dots === 3) {
+    return { rows: [1, 2], size: 7, gap: 5 };
+  }
   return { rows: [2, 2, 2], size: 3.3, gap: 2.7 };
 }
 

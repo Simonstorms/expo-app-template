@@ -1,5 +1,5 @@
 import * as AppleAuthentication from 'expo-apple-authentication';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Linking, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { GoogleLogo } from '@/components/ui/brand-logos';
@@ -12,6 +12,8 @@ import { colors, font, withAlpha } from '@/constants/theme';
 import { OnboardingScaffold } from '@/features/onboarding/components/onboarding-scaffold';
 import { useFlow } from '@/features/onboarding/hooks/use-flow';
 import { captureEvent } from '@/lib/analytics';
+import { runInBackground } from '@/lib/tasks';
+
 import { AuthCancelledError, signInWithApple, signInWithGoogle } from '../api';
 import { useSession } from '../hooks/use-session';
 
@@ -30,7 +32,7 @@ async function runSignIn(signIn: () => Promise<void>): Promise<SignInOutcome> {
 }
 
 function openUrl(url: string): void {
-  void Linking.openURL(url).catch(() => undefined);
+  void runInBackground(Linking.openURL(url));
 }
 
 export default function SignInScreen() {
@@ -41,31 +43,42 @@ export default function SignInScreen() {
   const [error, setError] = useState<string | null>(null);
   const advancedRef = useRef(false);
 
-  const advanceOnce = useCallback(() => {
-    if (advancedRef.current) return;
+  const advanceOnce = () => {
+    if (advancedRef.current) {
+      return;
+    }
     advancedRef.current = true;
     advance();
-  }, [advance]);
+  };
 
   useEffect(() => {
-    if (isSignedIn) advanceOnce();
-  }, [isSignedIn, advanceOnce]);
+    if (!isSignedIn || advancedRef.current) {
+      return;
+    }
+    advancedRef.current = true;
+    advance();
+  }, [isSignedIn, advance]);
 
-  const start = (signIn: () => Promise<void>, provider: string) => {
-    if (busy || advancedRef.current) return;
+  const start = async (signIn: () => Promise<void>, provider: string) => {
+    if (busy || advancedRef.current) {
+      return;
+    }
     setBusy(true);
     setError(null);
-    void runSignIn(signIn).then((outcome) => {
-      setBusy(false);
-      if (outcome === 'cancelled') return;
-      if (outcome === 'failed') {
-        setError(content.signIn.error);
-        captureEvent('sign_in_failed', { provider });
-        return;
-      }
-      captureEvent('sign_in_succeeded', { provider });
-      if (!hasSupabase) advanceOnce();
-    });
+    const outcome = await runSignIn(signIn);
+    setBusy(false);
+    if (outcome === 'cancelled') {
+      return;
+    }
+    if (outcome === 'failed') {
+      setError(content.signIn.error);
+      captureEvent('sign_in_failed', { provider });
+      return;
+    }
+    captureEvent('sign_in_succeeded', { provider });
+    if (!hasSupabase) {
+      advanceOnce();
+    }
   };
 
   return (
@@ -80,10 +93,17 @@ export default function SignInScreen() {
               buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
               cornerRadius={BUTTON_RADIUS}
               style={[styles.appleButton, busy ? styles.dimmed : null]}
-              onPress={() => start(signInWithApple, 'apple')}
+              onPress={() => {
+                void start(signInWithApple, 'apple');
+              }}
             />
           ) : null}
-          <GoogleButton disabled={busy} onPress={() => start(signInWithGoogle, 'google')} />
+          <GoogleButton
+            disabled={busy}
+            onPress={() => {
+              void start(signInWithGoogle, 'google');
+            }}
+          />
         </GlassGroup>
         {error ? <Text style={styles.error}>{error}</Text> : null}
         <Text style={styles.legal}>

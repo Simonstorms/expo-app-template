@@ -1,14 +1,16 @@
 import { LinearGradient } from 'expo-linear-gradient';
-import { type StyleProp, StyleSheet, Text, View, type ViewStyle } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+import type { StyleProp, ViewStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { GlassSurface } from '@/components/ui/glass';
 import { Icon } from '@/components/ui/icon';
-import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { PrimaryCTA } from '@/components/ui/primary-cta';
 import { TitleBlock } from '@/components/ui/title-block';
 import { content } from '@/constants/content';
 import { colors, layout, withAlpha } from '@/constants/theme';
+
+import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { useFlow } from '../hooks/use-flow';
 
 function StarRow({ size, spacing }: { size: number; spacing: number }) {
@@ -49,7 +51,7 @@ export default function RatingRequestScreen() {
       <View style={styles.container}>
         <View style={styles.column}>
           <TitleBlock title={content.rating.title} />
-          <View style={{ height: 18 }} />
+          <View style={styles.gapTitle} />
           <GlassSurface
             radius={20}
             tintColor={withAlpha(colors.white, 0.9)}
@@ -67,17 +69,17 @@ export default function RatingRequestScreen() {
               <Icon name="laurel.trailing" size={55} width={64} height={55} color={colors.orange} />
             </View>
           </GlassSurface>
-          <View style={{ height: 45 }} />
+          <View style={styles.gapLaurel} />
           <Text style={styles.madeFor}>{content.rating.madeFor}</Text>
-          <View style={{ height: 24 }} />
+          <View style={styles.gapMadeFor} />
           <View style={styles.avatarTrio}>
             <InitialAvatar letter="J" fill="#7C8B6F" />
             <InitialAvatar letter="S" fill="#6F7C8B" style={styles.avatarOverlap} />
             <InitialAvatar letter="M" fill="#8B6F7C" style={styles.avatarOverlap} />
           </View>
-          <View style={{ height: 12 }} />
+          <View style={styles.gapAvatars} />
           <Text style={styles.usersCount}>{content.rating.usersCount}</Text>
-          <View style={{ height: 40 }} />
+          <View style={styles.gapUsers} />
           <GlassSurface
             radius={20}
             tintColor={withAlpha(colors.cardFill, 0.85)}
@@ -95,7 +97,7 @@ export default function RatingRequestScreen() {
             </View>
             <Text style={styles.testimonialQuote}>{content.rating.testimonialQuote}</Text>
           </GlassSurface>
-          <View style={{ height: 12 }} />
+          <View style={styles.gapTestimonial} />
           <View style={styles.peekCard} />
         </View>
         <View pointerEvents="none" style={styles.scrim}>
@@ -124,6 +126,24 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     alignItems: 'center',
   },
+  gapTitle: {
+    height: 18,
+  },
+  gapLaurel: {
+    height: 45,
+  },
+  gapMadeFor: {
+    height: 24,
+  },
+  gapAvatars: {
+    height: 12,
+  },
+  gapUsers: {
+    height: 40,
+  },
+  gapTestimonial: {
+    height: 12,
+  },
   laurelCard: {
     alignSelf: 'stretch',
     marginHorizontal: layout.margin,
@@ -151,12 +171,12 @@ const styles = StyleSheet.create({
   laurelScore: {
     fontSize: 21,
     fontWeight: '700',
-    color: '#0E0E0E',
+    color: colors.ink,
   },
   laurelCaption: {
     fontSize: 19,
     fontWeight: '600',
-    color: '#8B8A8D',
+    color: colors.secondaryText,
   },
   starRow: {
     flexDirection: 'row',
@@ -219,7 +239,7 @@ const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: 19,
-    backgroundColor: '#6F7C8B',
+    backgroundColor: colors.slate,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -231,7 +251,7 @@ const styles = StyleSheet.create({
   testimonialName: {
     fontSize: 17,
     fontWeight: '700',
-    color: '#1C1B22',
+    color: colors.ctaFill,
   },
   flexSpacer: {
     flex: 1,
@@ -239,14 +259,14 @@ const styles = StyleSheet.create({
   testimonialQuote: {
     fontSize: 17,
     fontWeight: '400',
-    color: '#7D7C7F',
+    color: colors.secondaryText,
     marginTop: 12,
   },
   peekCard: {
     alignSelf: 'stretch',
     marginHorizontal: layout.margin,
     height: 110,
-    backgroundColor: '#EAE9EE',
+    backgroundColor: colors.progressTrack,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
   },

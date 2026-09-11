@@ -3,12 +3,14 @@ import Animated, { useAnimatedStyle, useDerivedValue, withSpring } from 'react-n
 
 import { GlassGroup, GlassSurface } from '@/components/ui/glass';
 import { Icon } from '@/components/ui/icon';
-import { OnboardingScaffold } from '../components/onboarding-scaffold';
+import type { IconName } from '@/components/ui/icon';
 import { TitleBlock } from '@/components/ui/title-block';
-import { useOnboarding } from '../store';
 import { content } from '@/constants/content';
 import { colors, text, withAlpha } from '@/constants/theme';
+
+import { OnboardingScaffold } from '../components/onboarding-scaffold';
 import { useFlow } from '../hooks/use-flow';
+import { useOnboarding } from '../store';
 
 export default function ObstaclesScreen() {
   const obstacle = useOnboarding((state) => state.obstacle);
@@ -45,7 +47,7 @@ function ObstacleRow({
   onPress,
 }: {
   label: string;
-  symbol: string;
+  symbol: IconName;
   selected: boolean;
   onPress: () => void;
 }) {
@@ -56,7 +58,12 @@ function ObstacleRow({
 
   return (
     <Animated.View style={animatedStyle}>
-      <Pressable onPress={onPress}>
+      <Pressable
+        onPress={onPress}
+        accessibilityRole="button"
+        accessibilityLabel={label}
+        accessibilityState={{ selected }}
+      >
         <GlassSurface
           radius={18}
           tintColor={selected ? colors.ink : withAlpha(colors.cardFill, 0.85)}
