@@ -285,9 +285,11 @@ const styles = StyleSheet.create({
     top: 20,
   },
   axisLabel: {
+    width: 96,
     fontSize: 15,
     fontWeight: '500',
     color: colors.ink,
+    textAlign: 'center',
   },
   trophyOuter: {
     width: 35,

@@ -29,6 +29,15 @@ export const colors = {
   transparent: 'transparent',
 } as const;
 
+export function withAlpha(hex: string, alpha: number): string {
+  'worklet';
+  const value = hex.replace('#', '');
+  const r = Number.parseInt(value.slice(0, 2), 16);
+  const g = Number.parseInt(value.slice(2, 4), 16);
+  const b = Number.parseInt(value.slice(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
 export const layout = {
   margin: 24,
   ctaMargin: 16,
@@ -103,12 +112,3 @@ export const shadow = {
     boxShadow: `0px 9px 36px ${withAlpha(colors.shadowInk, 0.22)}`,
   },
 } satisfies Record<string, ViewStyle>;
-
-export function withAlpha(hex: string, alpha: number): string {
-  'worklet';
-  const value = hex.replace('#', '');
-  const r = Number.parseInt(value.slice(0, 2), 16);
-  const g = Number.parseInt(value.slice(2, 4), 16);
-  const b = Number.parseInt(value.slice(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-}

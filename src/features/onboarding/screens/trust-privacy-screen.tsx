@@ -191,6 +191,7 @@ const styles = StyleSheet.create({
   badge: {
     width: 49,
     height: 49,
+    borderRadius: 24.5,
     boxShadow: `0px 2px 12px ${withAlpha(colors.ink, 0.08)}`,
   },
   badgeIconOuter: {
