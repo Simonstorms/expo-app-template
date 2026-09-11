@@ -44,6 +44,8 @@ jobs:
   edge-functions:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    env:
+      DENO_NO_PACKAGE_JSON: '1'
     steps:
       - uses: actions/checkout@v7
       - uses: denoland/setup-deno@v2
