@@ -48,3 +48,6 @@ yarn-error.*
 .claude/skills/
 skills-lock.json
 supabase/.temp/
+
+# editor
+.vscode/

@@ -160,8 +160,7 @@ Scripts:
 
 CI (`.github/workflows/ci.yml`) runs `bun run check` plus advisory `expo install --check` and
 `expo-doctor` steps. A lefthook pre-commit hook lint-fixes and formats staged files (installed by
-`bun install` through the `prepare` script), and `renovate.json` keeps dependencies moving: one
-weekly PR for minor and patch bumps, Expo SDK managed packages held inside their declared range.
+`bun install` through the `prepare` script).
 
 ## Enable the backend (Supabase)
 
@@ -422,6 +421,26 @@ or Google OAuth silently fails to return to the app.
 9. Replace the example-specific pieces: `src/features/onboarding/projection.ts` (the "quit" maths),
    the graph and savings screens that consume it, and `src/features/home/api.ts` (a stub returning an
    empty list).
+10. **Delete what the new app does not use.** Everything below exists for the template's own demo
+    or for optional tooling; a copy of it in an app that never touches it is dead weight:
+    - `supabase/`, `src/lib/supabase.ts` and `src/features/auth/` when there is no backend. With them
+      go `app.config.js`, `DEV_API_KEY` in `.env.example` and `hasDevApiKey` in
+      `src/constants/config.ts`: the dev secret only feeds the `secure-call` demo.
+    - `src/features/paywall/`, `src/lib/revenuecat*.ts` and `scripts/setup-revenuecat.sh` when there
+      is no subscription.
+    - `docs/perf-playbook.md`, `expo-atlas`, the `analyze` and `export:size` scripts and the
+      `ignoreDependencies` entry in `knip.json` unless you measure bundle size.
+    - `react-dom`, `react-native-web`, the `web` block in `app.json` and `favicon.png` unless the app
+      ships to the web.
+    - `expo-updates`, `runtimeVersion` and the `channel` fields in `eas.json` unless you publish OTA
+      updates (otherwise run `eas update:configure`, an installed but unconfigured `expo-updates`
+      does nothing).
+    - `scripts/setup-eas-env.sh` when a single `eas env:create` covers your variables.
+    - `requiredProductionServices` and `assertProductionServicesConfigured` in
+      `src/constants/config.ts` when the list stays empty.
+    - `src/constants/config.ts` and `src/lib/analytics.tsx` are knip entry files, so unused exports
+      in them are never reported. Trim them by hand, then drop both entries from `knip.json` so knip
+      checks them like every other file.
 
 Scheme checklist, all three must agree: `app.json` `scheme`, `supabase/config.toml`
 (`site_url` + `additional_redirect_urls`), Supabase dashboard redirect URLs.
