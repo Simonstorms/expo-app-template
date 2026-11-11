@@ -9,11 +9,9 @@ import { runInBackground } from '@/lib/tasks';
 
 type PersonProperties = Record<string, string | number | boolean | null>;
 
-type EmptyProperties = Record<never, never>;
-
 type EventArguments<E extends AnalyticsEventName> = AnalyticsEvents[E] extends undefined
   ? []
-  : EmptyProperties extends AnalyticsEvents[E]
+  : Partial<AnalyticsEvents[E]> extends AnalyticsEvents[E]
     ? [properties?: AnalyticsEvents[E]]
     : [properties: AnalyticsEvents[E]];
 

@@ -52,8 +52,7 @@
       ],
       "expo-localization",
       "./plugins/with-inhibit-pod-warnings",
-      "./plugins/with-disable-script-sandboxing",
-      "./plugins/with-ios-scene-lifecycle"
+      "./plugins/with-disable-script-sandboxing"
     ],
     "experiments": {
       "typedRoutes": true,

@@ -1,6 +1,6 @@
 # Performance and size playbook
 
-How to measure bundle size and startup cost on an Expo SDK 57 / RN 0.86 / Hermes app without
+How to measure bundle size and startup cost on an Expo SDK 58 / RN 0.88 / Hermes app without
 fooling yourself, and the findings that keep recurring on apps built from this template.
 
 This is a method, not a report. Every number you read anywhere (including here) is from some other

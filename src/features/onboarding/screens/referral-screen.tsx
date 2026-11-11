@@ -1,5 +1,6 @@
 import { useRef } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import type { TextInputInstance } from 'react-native';
 
 import { GlassSurface } from '@/components/ui/glass';
 import { TitleBlock } from '@/components/ui/title-block';
@@ -13,7 +14,7 @@ import { useOnboarding } from '../store';
 export default function ReferralCodeScreen() {
   const referralCode = useOnboarding((state) => state.referralCode);
   const set = useOnboarding((state) => state.set);
-  const inputRef = useRef<TextInput>(null);
+  const inputRef = useRef<TextInputInstance>(null);
   const flow = useFlow('referral');
 
   return (
